@@ -9,6 +9,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Machines } from './pages/Machines';
 import { Pipeline } from './pages/Pipeline';
 import { ClientsList } from './pages/ClientsList';
+import { Settings } from './pages/Settings';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -66,6 +67,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ClientsList />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />

@@ -5,6 +5,15 @@ export interface Tenant {
   id: number;
   name: string;
   slug?: string | null;
+  logo_url?: string | null;
+  created_at: string;
+}
+
+export interface Category {
+  id: number;
+  tenant_id: number;
+  name: string;
+  image_url: string;
   created_at: string;
 }
 
@@ -27,6 +36,9 @@ export interface Machine {
   price: number;
   image_url: string;
   status: 'disponivel' | 'vendido' | 'manutencao';
+  origin: string;
+  warranty: string;
+  payment_type: 'a_vista' | 'financiado';
   created_at: string;
 }
 
@@ -52,7 +64,14 @@ let dbConnectionError: string | null = null;
 
 // Initial Fallback / In-Memory Store
 const memoryTenants: Tenant[] = [
-  { id: 1, name: 'TexMachina Matriz', slug: 'matriz', created_at: new Date().toISOString() }
+  { id: 1, name: 'TexMachina Matriz', slug: 'matriz', logo_url: null, created_at: new Date().toISOString() }
+];
+
+const memoryCategories: Category[] = [
+  { id: 1, tenant_id: 1, name: 'Tear Circular', image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
+  { id: 2, tenant_id: 1, name: 'Tear Jato de Ar', image_url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
+  { id: 3, tenant_id: 1, name: 'Rama Industrial', image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
+  { id: 4, tenant_id: 1, name: 'Fiação', image_url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
 ];
 
 const memoryUsers: User[] = [
@@ -74,6 +93,7 @@ let nextTenantId = 2;
 let nextUserId = 2;
 let nextMachineId = 1;
 let nextLeadId = 1;
+let nextCategoryId = 5;
 
 export async function initDatabase(): Promise<void> {
   const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
@@ -113,7 +133,17 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(200) NOT NULL,
       slug VARCHAR(100) NULL UNIQUE,
+      logo_url VARCHAR(500) NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS categories (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tenant_id INT NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      image_url VARCHAR(500) NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (tenant_id)
     ) ENGINE=InnoDB;`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS users (
@@ -136,6 +166,9 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
       image_url VARCHAR(500) NULL,
       status ENUM('disponivel', 'vendido', 'manutencao') NOT NULL DEFAULT 'disponivel',
+      origin VARCHAR(150) NULL DEFAULT 'Brasil',
+      warranty VARCHAR(150) NULL DEFAULT '6 Meses',
+      payment_type ENUM('a_vista', 'financiado') NOT NULL DEFAULT 'a_vista',
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       INDEX (tenant_id)
     ) ENGINE=InnoDB;`);
@@ -175,9 +208,18 @@ export const tenantsRepo = {
   async create(name: string): Promise<Tenant> {
     if (isMySQLConnected && mysqlPool) {
       const [result]: any = await mysqlPool.query('INSERT INTO tenants (name) VALUES (?)', [name]);
-      return { id: result.insertId, name, created_at: new Date().toISOString() };
+      const newTenant = { id: result.insertId, name, logo_url: null, created_at: new Date().toISOString() };
+      
+      // Seed default categories for new tenant
+      await categoriesRepo.createBatch(newTenant.id, [
+        { name: 'Tear Circular', image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80' },
+        { name: 'Tear Jato de Ar', image_url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80' },
+        { name: 'Rama Industrial', image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80' }
+      ]);
+
+      return newTenant;
     }
-    const tenant: Tenant = { id: nextTenantId++, name, created_at: new Date().toISOString() };
+    const tenant: Tenant = { id: nextTenantId++, name, logo_url: null, created_at: new Date().toISOString() };
     memoryTenants.push(tenant);
     return tenant;
   },
@@ -187,6 +229,57 @@ export const tenantsRepo = {
       return rows[0] || null;
     }
     return memoryTenants.find(t => t.id === id) || null;
+  },
+  async update(id: number, data: Partial<Tenant>): Promise<Tenant | null> {
+    if (isMySQLConnected && mysqlPool) {
+      const fields = Object.keys(data).filter(k => k !== 'id' && k !== 'created_at').map(k => `${k} = ?`);
+      const values = Object.keys(data).filter(k => k !== 'id' && k !== 'created_at').map(k => (data as any)[k]);
+      if (fields.length === 0) return this.findById(id);
+      values.push(id);
+      await mysqlPool.query(`UPDATE tenants SET ${fields.join(', ')} WHERE id = ?`, values);
+      return this.findById(id);
+    }
+    const idx = memoryTenants.findIndex(t => t.id === id);
+    if (idx === -1) return null;
+    memoryTenants[idx] = { ...memoryTenants[idx], ...data };
+    return memoryTenants[idx];
+  }
+};
+
+export const categoriesRepo = {
+  async list(tenant_id: number): Promise<Category[]> {
+    if (isMySQLConnected && mysqlPool) {
+      const [rows]: any = await mysqlPool.query('SELECT * FROM categories WHERE tenant_id = ? ORDER BY name ASC', [tenant_id]);
+      return rows;
+    }
+    return memoryCategories.filter(c => c.tenant_id === tenant_id).sort((a, b) => a.name.localeCompare(b.name));
+  },
+  async create(data: Omit<Category, 'id' | 'created_at'>): Promise<Category> {
+    if (isMySQLConnected && mysqlPool) {
+      const [res]: any = await mysqlPool.query(
+        'INSERT INTO categories (tenant_id, name, image_url) VALUES (?, ?, ?)',
+        [data.tenant_id, data.name, data.image_url]
+      );
+      return { id: res.insertId, ...data, created_at: new Date().toISOString() };
+    }
+    const item: Category = { id: nextCategoryId++, ...data, created_at: new Date().toISOString() };
+    memoryCategories.push(item);
+    return item;
+  },
+  async createBatch(tenant_id: number, categories: { name: string, image_url: string }[]): Promise<void> {
+    for (const cat of categories) {
+      await this.create({ tenant_id, ...cat });
+    }
+  },
+  async delete(tenant_id: number, id: number): Promise<boolean> {
+    if (isMySQLConnected && mysqlPool) {
+      const [res]: any = await mysqlPool.query('DELETE FROM categories WHERE tenant_id = ? AND id = ?', [tenant_id, id]);
+      return res.affectedRows > 0;
+    }
+    const idx = memoryCategories.findIndex(c => c.tenant_id === tenant_id && c.id === id);
+    if (idx === -1) return false;
+    memoryCategories.splice(idx, 1);
+    return true;
   }
 };
 
@@ -257,8 +350,8 @@ export const machinesRepo = {
   async create(data: Omit<Machine, 'id' | 'created_at'>): Promise<Machine> {
     if (isMySQLConnected && mysqlPool) {
       const [res]: any = await mysqlPool.query(
-        'INSERT INTO machines (tenant_id, name, model, description, price, image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [data.tenant_id, data.name, data.model, data.description, data.price, data.image_url, data.status]
+        'INSERT INTO machines (tenant_id, name, model, description, price, image_url, status, origin, warranty, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [data.tenant_id, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista']
       );
       return { id: res.insertId, ...data, created_at: new Date().toISOString() };
     }

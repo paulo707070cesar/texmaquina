@@ -153,7 +153,8 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
         tenant_name: newTenant.name,
         name: newUser.name, 
         email: newUser.email, 
-        role: newUser.role 
+        role: newUser.role,
+        tenant_logo: newTenant.logo_url
       },
     });
   } catch (error: any) {
@@ -194,7 +195,8 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
         tenant_name: tenant?.name || 'Empresa',
         name: user.name, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        tenant_logo: tenant?.logo_url
       } 
     });
   } catch (error: any) {
@@ -214,7 +216,8 @@ app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res
         tenant_name: tenant?.name || 'Empresa',
         name: user.name, 
         email: user.email, 
-        role: user.role 
+        role: user.role,
+        tenant_logo: tenant?.logo_url
       } 
     });
   } catch (error: any) {
@@ -312,6 +315,58 @@ app.delete('/api/leads/:id', authenticateToken, async (req: AuthenticatedRequest
   }
 });
 
+// ----------------- SETTINGS & TENANT MGMT -----------------
+app.get('/api/settings', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const tenant = await tenantsRepo.findById(req.user!.tenant_id);
+    res.json(tenant);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar configurações.' });
+  }
+});
+
+app.put('/api/settings', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { name, logo_url } = req.body;
+    const updated = await tenantsRepo.update(req.user!.tenant_id, { name, logo_url });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao salvar configurações.' });
+  }
+});
+
+// ----------------- CATEGORIES ROUTES -----------------
+app.get('/api/categories', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const categories = await categoriesRepo.list(req.user!.tenant_id);
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar categorias.' });
+  }
+});
+
+app.post('/api/categories', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const category = await categoriesRepo.create({
+      ...req.body,
+      tenant_id: req.user!.tenant_id,
+    });
+    res.status(201).json(category);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao criar categoria.' });
+  }
+});
+
+app.delete('/api/categories/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const success = await categoriesRepo.delete(req.user!.tenant_id, parseInt(req.params.id));
+    if (!success) return res.status(404).json({ error: 'Categoria não encontrada.' });
+    res.json({ message: 'Categoria excluída.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir categoria.' });
+  }
+});
+
 // ----------------- DASHBOARD STATS (Tenant Restricted) -----------------
 app.get('/api/dashboard/stats', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -368,28 +423,7 @@ app.get('/api/system/schema-sql', (_req: Request, res: Response) => {
   }
 });
 
-app.get('/api/system/download-env', (_req: Request, res: Response) => {
-  const envContent = `# =====================================================================
-# TexMachina OS - Configuração Hostinger (Node.js + MySQL)
-# =====================================================================
 
-DB_HOST=localhost
-DB_USER=u940098558_texmaquina
-DB_PASSWORD==Eg*XWs:9r/5
-DB_NAME=u940098558_texmaquina
-DB_PORT=3306
-
-JWT_SECRET=texmachina_super_secure_jwt_secret_key_2025
-JWT_EXPIRES_IN=7d
-
-PORT=3000
-NODE_ENV=production
-APP_URL=https://seudominio.com.br
-`;
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename=".env"');
-  res.send(envContent);
-});
 
 // ----------------- STATIC FILES & PRODUCTION SPA ROUTING -----------------
 const prodDistPath = path.resolve(currentDir, 'dist');

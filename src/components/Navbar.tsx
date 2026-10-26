@@ -11,7 +11,8 @@ import {
   ShieldCheck, 
   UserCheck,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Settings
 } from 'lucide-react';
 
 import { PWAInstallButton } from './PWAInstallButton';
@@ -33,9 +34,13 @@ export const Navbar: React.FC = () => {
           {/* Brand Logo matching BizNext polygon icon style */}
           <div className="flex items-center gap-6">
             <NavLink to="/" className="flex items-center gap-3 group">
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white shadow-[0_0_20px_rgba(0,102,255,0.5)] group-hover:shadow-[0_0_28px_rgba(0,194,255,0.8)] transition-all">
-                <span className="material-symbols-outlined text-[20px]">precision_manufacturing</span>
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#00F0FF] animate-ping" />
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white shadow-[0_0_20px_rgba(0,102,255,0.5)] group-hover:shadow-[0_0_28px_rgba(0,194,255,0.8)] transition-all overflow-hidden">
+                {user?.tenant_logo ? (
+                  <img src={user.tenant_logo} alt="Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <span className="material-symbols-outlined text-[20px]">precision_manufacturing</span>
+                )}
+                {!user?.tenant_logo && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#00F0FF] animate-ping" />}
               </div>
 
               <div className="flex flex-col">
@@ -110,6 +115,20 @@ export const Navbar: React.FC = () => {
               >
                 <Users className="w-3.5 h-3.5" />
                 <span>Clientes & Leads</span>
+              </NavLink>
+
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
+                      : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
+                  }`
+                }
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Configurações</span>
               </NavLink>
             </nav>
           </div>

@@ -21,7 +21,17 @@ CREATE TABLE `tenants` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(200) NOT NULL,
   `slug` VARCHAR(100) NULL UNIQUE,
+  `logo_url` VARCHAR(500) NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `tenant_id` INT NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `image_url` VARCHAR(500) NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_categories_tenant` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
@@ -50,6 +60,9 @@ CREATE TABLE `machines` (
   `price` DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
   `image_url` VARCHAR(500) NULL,
   `status` ENUM('disponivel', 'vendido', 'manutencao') NOT NULL DEFAULT 'disponivel',
+  `origin` VARCHAR(150) NULL DEFAULT 'Brasil',
+  `warranty` VARCHAR(150) NULL DEFAULT '6 Meses',
+  `payment_type` ENUM('a_vista', 'financiado') NOT NULL DEFAULT 'a_vista',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_machines_tenant` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -14,42 +14,20 @@ import {
   X, 
   Image as ImageIcon, 
   Sparkles,
-  Download
+  Download,
+  Layout
 } from 'lucide-react';
 import { ShareFichaModal } from '../components/ShareFichaModal';
+import { categoriesApi, Category, systemApi } from '../services/api';
 
-const MACHINE_PRESET_IMAGES = [
-  {
-    name: 'Tear Circular Mayer & Cie',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    name: 'Tear Jato de Ar Toyota',
-    url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    name: 'Rama Industrial Monforts',
-    url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    name: 'Fiação Rieter Ring Spun',
-    url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    name: 'Tear Picanol Conectado',
-    url: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    name: 'Tear de Pinças Dornier',
-    url: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=900&q=80',
-  },
-];
+
 
 export const Machines: React.FC = () => {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('Todos');
 
   // Modal states
@@ -61,8 +39,11 @@ export const Machines: React.FC = () => {
     model: '',
     description: '',
     price: '',
-    image_url: MACHINE_PRESET_IMAGES[0].url,
+    image_url: '',
     status: 'disponivel' as 'disponivel' | 'vendido' | 'manutencao',
+    origin: 'Brasil',
+    warranty: '6 Meses',
+    payment_type: 'a_vista' as 'a_vista' | 'financiado',
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -79,7 +60,17 @@ export const Machines: React.FC = () => {
 
   useEffect(() => {
     loadMachines();
+    loadCategories();
   }, [search, statusFilter]);
+
+  const loadCategories = async () => {
+    try {
+      const data = await categoriesApi.list();
+      setCategories(data);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
+  };
 
   const loadMachines = async () => {
     try {
@@ -116,8 +107,11 @@ export const Machines: React.FC = () => {
       model: '',
       description: '',
       price: '',
-      image_url: MACHINE_PRESET_IMAGES[0].url,
+      image_url: categories[0]?.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
       status: 'disponivel',
+      origin: 'Brasil',
+      warranty: '6 Meses',
+      payment_type: 'a_vista',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -132,6 +126,9 @@ export const Machines: React.FC = () => {
       price: machine.price.toString(),
       image_url: machine.image_url,
       status: machine.status,
+      origin: machine.origin || 'Brasil',
+      warranty: machine.warranty || '6 Meses',
+      payment_type: machine.payment_type || 'a_vista',
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -162,6 +159,9 @@ export const Machines: React.FC = () => {
           price: parseFloat(formData.price),
           image_url: formData.image_url,
           status: formData.status,
+          origin: formData.origin,
+          warranty: formData.warranty,
+          payment_type: formData.payment_type,
         });
         showToast('Máquina têxtil atualizada com sucesso!');
       } else {
@@ -172,6 +172,9 @@ export const Machines: React.FC = () => {
           price: parseFloat(formData.price),
           image_url: formData.image_url,
           status: formData.status,
+          origin: formData.origin,
+          warranty: formData.warranty,
+          payment_type: formData.payment_type,
         });
         showToast('Nova máquina cadastrada no estoque!');
       }
@@ -421,11 +424,15 @@ export const Machines: React.FC = () => {
                       </div>
                       <div className="bg-white/[0.04] border border-white/5 p-2 rounded-xl flex flex-col">
                         <span className="text-[9px] text-gray-400 uppercase font-semibold">Origem</span>
-                        <span className="text-xs font-bold text-white truncate mt-0.5">Brasil (SC)</span>
+                        <span className="text-xs font-bold text-white truncate mt-0.5">
+                          {machine.origin || 'Brasil'}
+                        </span>
                       </div>
                       <div className="bg-white/[0.04] border border-white/5 p-2 rounded-xl flex flex-col">
                         <span className="text-[9px] text-gray-400 uppercase font-semibold">Garantia</span>
-                        <span className="text-xs font-bold text-white truncate mt-0.5">6 Meses</span>
+                        <span className="text-xs font-bold text-white truncate mt-0.5">
+                          {machine.warranty || '6 Meses'}
+                        </span>
                       </div>
                     </div>
 
@@ -440,7 +447,7 @@ export const Machines: React.FC = () => {
                     <div className="flex items-baseline justify-between mb-3">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">
-                          Investimento à vista / FINAME
+                          Investimento: {machine.payment_type === 'financiado' ? 'FINAME / BNDES' : 'À Vista'}
                         </span>
                         <span className="font-display font-extrabold text-xl text-white tracking-tight tabular-nums">
                           {formatCurrency(Number(machine.price))}
@@ -566,19 +573,63 @@ export const Machines: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1">
-                  Status no Pátio
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  className="w-full h-11 px-3 glass-input rounded-xl text-sm"
-                >
-                  <option value="disponivel" className="bg-[#0b1120]">Disponível em Estoque</option>
-                  <option value="manutencao" className="bg-[#0b1120]">Em Manutenção / Revisão Técnica</option>
-                  <option value="vendido" className="bg-[#0b1120]">Vendido / Liquidado</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    Status no Pátio
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  >
+                    <option value="disponivel" className="bg-[#0b1120]">Disponível em Estoque</option>
+                    <option value="manutencao" className="bg-[#0b1120]">Em Manutenção / Revisão Técnica</option>
+                    <option value="vendido" className="bg-[#0b1120]">Vendido / Liquidado</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    Tipo de Investimento
+                  </label>
+                  <select
+                    value={formData.payment_type}
+                    onChange={(e) => setFormData({ ...formData, payment_type: e.target.value as any })}
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  >
+                    <option value="a_vista" className="bg-[#0b1120]">À Vista</option>
+                    <option value="financiado" className="bg-[#0b1120]">Financiado (FINAME/BNDES)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    Origem do Equipamento
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.origin}
+                    onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
+                    placeholder="Ex: Brasil (SC)"
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    Garantia Oferecida
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.warranty}
+                    onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+                    placeholder="Ex: 6 Meses de fábrica"
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  />
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -645,22 +696,28 @@ export const Machines: React.FC = () => {
                 </div>
 
                 <div className="mt-2">
-                  <span className="text-[11px] text-gray-400 font-medium">Ou escolha uma sugestão:</span>
-                  <div className="grid grid-cols-3 gap-2 mt-1.5">
-                    {MACHINE_PRESET_IMAGES.map((preset, idx) => (
+                  <span className="text-[11px] text-gray-400 font-medium">Ou escolha uma categoria cadastrada:</span>
+                  <div className="grid grid-cols-3 gap-2 mt-1.5 overflow-y-auto max-h-[120px] pr-1 custom-scrollbar">
+                    {categories.map((cat) => (
                       <button
-                        key={idx}
+                        key={cat.id}
                         type="button"
-                        onClick={() => setFormData({ ...formData, image_url: preset.url })}
-                        className={`text-left p-2 rounded-xl text-[11px] truncate transition-all ${
-                          formData.image_url === preset.url
+                        onClick={() => setFormData({ ...formData, image_url: cat.image_url })}
+                        className={`text-left p-2 rounded-xl text-[11px] truncate transition-all flex items-center gap-2 ${
+                          formData.image_url === cat.image_url
                             ? 'border border-[#00C2FF] bg-[#0066FF]/20 text-[#00C2FF] font-bold shadow-[0_0_12px_rgba(0,194,255,0.3)]'
                             : 'border border-white/10 hover:bg-white/[0.05] text-gray-400'
                         }`}
                       >
-                        {preset.name}
+                        <img src={cat.image_url} alt={cat.name} className="w-5 h-5 rounded-md object-cover" />
+                        <span className="truncate">{cat.name}</span>
                       </button>
                     ))}
+                    {categories.length === 0 && (
+                      <p className="col-span-3 text-[10px] text-gray-600 text-center py-2">
+                        Vá em Configurações para cadastrar categorias base.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -670,10 +727,10 @@ export const Machines: React.FC = () => {
                   Descrição Técnica & Opcionais
                 </label>
                 <textarea
-                  rows={3}
+                  rows={6}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Detalhes de alimentadores, inversores, automação PLC, voltagem..."
+                  placeholder="Detalhes de alimentadores, inversores, automação PLC, voltagem, ano de fabricação, estado de conservação e opcionais inclusos..."
                   className="w-full p-3 glass-input rounded-xl text-sm"
                 />
               </div>
@@ -779,11 +836,24 @@ export const Machines: React.FC = () => {
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/5">
                   <span className="text-[10px] text-gray-400 uppercase font-bold">Investimento</span>
-                  <p className="text-sm font-bold text-[#00C2FF] mt-0.5">{formatCurrency(selectedMachineForSpecs.price)}</p>
+                  <p className="text-sm font-bold text-[#00C2FF] mt-0.5">
+                    {formatCurrency(selectedMachineForSpecs.price)}
+                    <span className="block text-[10px] font-normal text-gray-400">
+                      ({selectedMachineForSpecs.payment_type === 'financiado' ? 'FINAME / BNDES' : 'À Vista'})
+                    </span>
+                  </p>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/5">
                   <span className="text-[10px] text-gray-400 uppercase font-bold">Disponibilidade</span>
                   <p className="text-sm font-bold text-emerald-400 capitalize mt-0.5">{selectedMachineForSpecs.status}</p>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/5">
+                  <span className="text-[10px] text-gray-400 uppercase font-bold">Origem</span>
+                  <p className="text-sm font-bold text-white mt-0.5">{selectedMachineForSpecs.origin || 'Brasil'}</p>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/5">
+                  <span className="text-[10px] text-gray-400 uppercase font-bold">Garantia</span>
+                  <p className="text-sm font-bold text-white mt-0.5">{selectedMachineForSpecs.warranty || '6 Meses'}</p>
                 </div>
               </div>
 

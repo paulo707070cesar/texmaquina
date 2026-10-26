@@ -43,7 +43,22 @@ export interface User {
   name: string;
   email: string;
   role: 'admin' | 'vendedor';
+  tenant_logo?: string | null;
   created_at: string;
+}
+
+export interface Tenant {
+  id: number;
+  name: string;
+  slug?: string | null;
+  logo_url?: string | null;
+}
+
+export interface Category {
+  id: number;
+  tenant_id: number;
+  name: string;
+  image_url: string;
 }
 
 export interface Machine {
@@ -54,6 +69,9 @@ export interface Machine {
   price: number;
   image_url: string;
   status: 'disponivel' | 'vendido' | 'manutencao';
+  origin: string;
+  warranty: string;
+  payment_type: 'a_vista' | 'financiado';
   created_at: string;
 }
 
@@ -186,6 +204,32 @@ export const leadsApi = {
 export const dashboardApi = {
   getStats: async () => {
     const res = await api.get<DashboardStats>('/dashboard/stats');
+    return res.data;
+  },
+};
+
+export const settingsApi = {
+  get: async () => {
+    const res = await api.get<Tenant>('/settings');
+    return res.data;
+  },
+  update: async (data: { name: string; logo_url?: string | null }) => {
+    const res = await api.put<Tenant>('/settings', data);
+    return res.data;
+  },
+};
+
+export const categoriesApi = {
+  list: async () => {
+    const res = await api.get<Category[]>('/categories');
+    return res.data;
+  },
+  create: async (data: { name: string; image_url: string }) => {
+    const res = await api.post<Category>('/categories', data);
+    return res.data;
+  },
+  delete: async (id: number) => {
+    const res = await api.delete(`/categories/${id}`);
     return res.data;
   },
 };

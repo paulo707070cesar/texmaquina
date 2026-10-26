@@ -38,8 +38,10 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
       `⚙️ *Modelo/Bitola:* ${machine.model}\n` +
       `🏷️ *Série Industrial:* #TEX-0${machine.id}-2024\n` +
       `💰 *Valor de Venda:* ${formatCurrency(machine.price)}\n` +
-      `🛡️ *Status:* ${machine.status === 'disponivel' ? 'Disponível em Estoque' : 'Em Manutenção'}\n` +
-      `📄 *Condições:* FINAME / Financiamento Industrial / À Vista\n\n` +
+      `🛡️ *Status:* ${machine.status === 'disponivel' ? 'Disponível em Estoque' : machine.status === 'manutencao' ? 'Em Manutenção' : 'Vendido'}\n` +
+      `📍 *Origem:* ${machine.origin || 'Brasil'}\n` +
+      `🛡️ *Garantia:* ${machine.warranty || '6 Meses'}\n` +
+      `📄 *Condições:* ${machine.payment_type === 'financiado' ? 'FINAME / BNDES / Financiamento' : 'À Vista / Transferência'}\n\n` +
       `📋 *Especificações Técnicas:*\n${machine.description || 'Equipamento revisado com laudo mecânico e elétrico completo.'}\n\n` +
       `📸 *Foto do Equipamento:* ${machine.image_url}\n\n` +
       `_Enviado através do TexMachina OS - Sistema B2B de Máquinas Têxteis_`
