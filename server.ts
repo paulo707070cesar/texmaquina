@@ -469,6 +469,29 @@ app.get('/api/system/schema-sql', (_req: Request, res: Response) => {
   }
 });
 
+app.get('/api/system/download-env', (_req: Request, res: Response) => {
+  const envContent = `# =====================================================================
+# TexMachina OS - Configuração Hostinger (Node.js + MySQL)
+# =====================================================================
+
+DB_HOST=localhost
+DB_USER=u940098558_texmaquina
+DB_PASSWORD==Eg*XWs:9r/5
+DB_NAME=u940098558_texmaquina
+DB_PORT=3306
+
+JWT_SECRET=texmachina_super_secure_jwt_secret_key_2025
+JWT_EXPIRES_IN=7d
+
+PORT=3000
+NODE_ENV=production
+APP_URL=https://seudominio.com.br
+`;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename=".env"');
+  res.send(envContent);
+});
+
 // ----------------- PRODUCTION / VITE MIDDLEWARE -----------------
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';

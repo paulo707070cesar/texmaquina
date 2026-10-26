@@ -11,7 +11,8 @@ import {
   ShieldCheck, 
   UserCheck,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -114,6 +115,17 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & User Info */}
           <div className="flex items-center gap-3">
+            {/* Quick Download .env Button */}
+            <a
+              href="/api/system/download-env"
+              download=".env"
+              title="Baixar arquivo .env com credenciais da Hostinger"
+              className="px-3 py-1.5 rounded-xl bg-[#0066FF]/20 hover:bg-[#0066FF]/30 border border-[#00C2FF]/40 text-[#00C2FF] font-bold text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,194,255,0.2)] transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Baixar .env</span>
+            </a>
+
             {/* Notification Bell */}
             <div className="relative">
               <button
