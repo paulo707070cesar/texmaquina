@@ -21,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 // ----------------- JWT AUTHENTICATION MIDDLEWARE -----------------
-export interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
     name: string;
@@ -30,7 +30,7 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
 
@@ -488,49 +488,74 @@ APP_URL=https://seudominio.com.br
   res.send(envContent);
 });
 
-// ----------------- PRODUCTION / VITE MIDDLEWARE -----------------
-async function startServer() {
-  // Initialize Database (MySQL pool or fallback) inside async function (No top-level await)
-  try {
-    await initDatabase();
-  } catch (dbErr: any) {
-    console.warn('[Database] Initial startup warning:', dbErr.message);
-  }
+// ----------------- STATIC FILES & PRODUCTION SPA ROUTING -----------------
+const prodDistPath = path.resolve(currentDir, 'dist');
+const clientDistPath = path.resolve(currentDir, '../client/dist');
+const activeDist = fs.existsSync(prodDistPath) ? prodDistPath : fs.existsSync(clientDistPath) ? clientDistPath : null;
 
-  const isProd = process.env.NODE_ENV === 'production';
+if (activeDist) {
+  console.log(`[Hostinger Production] Serving static files from ${activeDist}`);
+  app.use(express.static(activeDist));
 
-  // Check both possible production build outputs
-  const prodDistPath = path.resolve(currentDir, 'dist');
-  const clientDistPath = path.resolve(currentDir, '../client/dist');
-  const activeDist = fs.existsSync(prodDistPath) ? prodDistPath : fs.existsSync(clientDistPath) ? clientDistPath : null;
-
-  if (isProd && activeDist) {
-    console.log(`[Hostinger Production] Serving static files from ${activeDist}`);
-    app.use(express.static(activeDist));
-
-    // Catch-all route to handle React Router client-side history navigation
-    app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.join(activeDist, 'index.html'));
-    });
-  } else {
-    // In development mode, mount Vite middlewares
-    console.log('[Dev Mode] Mounting Vite development server middlewares...');
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  }
-
-  app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`🚀 TexMachina Server running on http://0.0.0.0:${PORT}`);
-    console.log(`📊 API endpoints ready at http://localhost:${PORT}/api/*`);
+  // Catch-all route to handle React Router client-side history navigation
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    const indexFile = path.join(activeDist, 'index.html');
+    if (fs.existsSync(indexFile)) {
+      res.sendFile(indexFile);
+    } else {
+      res.status(404).send('TexMachina index.html not found. Run npm run build.');
+    }
   });
 }
 
-startServer().catch((err) => {
-  console.error('Fatal server startup failure:', err);
+// Start database connection in background (does not block server ready state)
+initDatabase().catch((dbErr: any) => {
+  console.warn('[Database] Initial startup warning:', dbErr?.message || dbErr);
 });
 
+// ----------------- STARTUP & LISTENING -----------------
+const startApp = () => {
+  const rawPort = process.env.PORT || 3000;
+  const numericPort = Number(rawPort);
+  const listenTarget = isNaN(numericPort) ? rawPort : numericPort;
+
+  // Mount Vite development server only if NOT in production and NO build exists
+  if (process.env.NODE_ENV !== 'production' && !activeDist) {
+    console.log('[Dev Mode] Mounting Vite development server...');
+    import('vite').then(({ createServer: createViteServer }) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      }).then((vite) => {
+        app.use(vite.middlewares);
+      }).catch((e) => console.warn('[Dev Mode] Vite error:', e.message));
+    });
+  }
+
+  app.listen(listenTarget, () => {
+    console.log(`🚀 TexMachina Server running on ${listenTarget}`);
+    if (process.env.LSWS_CHILD || process.env.LSNODE_PID) {
+      console.log('⚡ LiteSpeed environment detected.');
+    }
+  });
+};
+
+// Execute startup
+startApp();
+
+// Critical for LiteSpeed lsnode.js / cPanel / Phusion Passenger integration
+// We export the app directly as module.exports for CJS compatibility
+// @ts-ignore
+if (typeof module !== 'undefined' && module.exports) {
+  // @ts-ignore
+  module.exports = app;
+  // @ts-ignore
+  module.exports.default = app;
+}
+
 export default app;
+
+

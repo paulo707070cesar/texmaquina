@@ -214,6 +214,7 @@ export async function initDatabase(): Promise<void> {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
+        connectTimeout: 5000,
         ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
       });
 

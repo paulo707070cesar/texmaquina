@@ -29,21 +29,20 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // server.ts
 var server_exports = {};
 __export(server_exports, {
-  authenticateToken: () => authenticateToken,
   default: () => server_default
 });
 module.exports = __toCommonJS(server_exports);
-var import_express = __toESM(require("express"), 1);
-var import_cors = __toESM(require("cors"), 1);
-var import_jsonwebtoken = __toESM(require("jsonwebtoken"), 1);
-var import_bcryptjs2 = __toESM(require("bcryptjs"), 1);
-var import_path = __toESM(require("path"), 1);
-var import_fs = __toESM(require("fs"), 1);
-var import_dotenv = __toESM(require("dotenv"), 1);
+var import_express = __toESM(require("express"));
+var import_cors = __toESM(require("cors"));
+var import_jsonwebtoken = __toESM(require("jsonwebtoken"));
+var import_bcryptjs2 = __toESM(require("bcryptjs"));
+var import_path = __toESM(require("path"));
+var import_fs = __toESM(require("fs"));
+var import_dotenv = __toESM(require("dotenv"));
 
 // server/db.ts
-var import_promise = __toESM(require("mysql2/promise"), 1);
-var import_bcryptjs = __toESM(require("bcryptjs"), 1);
+var import_promise = __toESM(require("mysql2/promise"));
+var import_bcryptjs = __toESM(require("bcryptjs"));
 var mysqlPool = null;
 var isMySQLConnected = false;
 var dbConnectionError = null;
@@ -214,6 +213,7 @@ async function initDatabase() {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
+        connectTimeout: 5e3,
         ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : void 0
       });
       const connection = await pool.getConnection();
@@ -995,41 +995,52 @@ APP_URL=https://seudominio.com.br
   res.setHeader("Content-Disposition", 'attachment; filename=".env"');
   res.send(envContent);
 });
-async function startServer() {
-  try {
-    await initDatabase();
-  } catch (dbErr) {
-    console.warn("[Database] Initial startup warning:", dbErr.message);
-  }
-  const isProd = process.env.NODE_ENV === "production";
-  const prodDistPath = import_path.default.resolve(currentDir, "dist");
-  const clientDistPath = import_path.default.resolve(currentDir, "../client/dist");
-  const activeDist = import_fs.default.existsSync(prodDistPath) ? prodDistPath : import_fs.default.existsSync(clientDistPath) ? clientDistPath : null;
-  if (isProd && activeDist) {
-    console.log(`[Hostinger Production] Serving static files from ${activeDist}`);
-    app.use(import_express.default.static(activeDist));
-    app.get("*", (_req, res) => {
-      res.sendFile(import_path.default.join(activeDist, "index.html"));
-    });
-  } else {
-    console.log("[Dev Mode] Mounting Vite development server middlewares...");
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa"
-    });
-    app.use(vite.middlewares);
-  }
-  app.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`\u{1F680} TexMachina Server running on http://0.0.0.0:${PORT}`);
-    console.log(`\u{1F4CA} API endpoints ready at http://localhost:${PORT}/api/*`);
+var prodDistPath = import_path.default.resolve(currentDir, "dist");
+var clientDistPath = import_path.default.resolve(currentDir, "../client/dist");
+var activeDist = import_fs.default.existsSync(prodDistPath) ? prodDistPath : import_fs.default.existsSync(clientDistPath) ? clientDistPath : null;
+if (activeDist) {
+  console.log(`[Hostinger Production] Serving static files from ${activeDist}`);
+  app.use(import_express.default.static(activeDist));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    const indexFile = import_path.default.join(activeDist, "index.html");
+    if (import_fs.default.existsSync(indexFile)) {
+      res.sendFile(indexFile);
+    } else {
+      res.status(404).send("TexMachina index.html not found. Run npm run build.");
+    }
   });
 }
-startServer().catch((err) => {
-  console.error("Fatal server startup failure:", err);
+initDatabase().catch((dbErr) => {
+  console.warn("[Database] Initial startup warning:", dbErr?.message || dbErr);
 });
+var startApp = () => {
+  const rawPort = process.env.PORT || 3e3;
+  const numericPort = Number(rawPort);
+  const listenTarget = isNaN(numericPort) ? rawPort : numericPort;
+  if (process.env.NODE_ENV !== "production" && !activeDist) {
+    console.log("[Dev Mode] Mounting Vite development server...");
+    import("vite").then(({ createServer: createViteServer }) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa"
+      }).then((vite) => {
+        app.use(vite.middlewares);
+      }).catch((e) => console.warn("[Dev Mode] Vite error:", e.message));
+    });
+  }
+  app.listen(listenTarget, () => {
+    console.log(`\u{1F680} TexMachina Server running on ${listenTarget}`);
+    if (process.env.LSWS_CHILD || process.env.LSNODE_PID) {
+      console.log("\u26A1 LiteSpeed environment detected.");
+    }
+  });
+};
+startApp();
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = app;
+  module.exports.default = app;
+}
 var server_default = app;
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  authenticateToken
-});
