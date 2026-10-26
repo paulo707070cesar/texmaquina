@@ -14,6 +14,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+import { PWAInstallButton } from './PWAInstallButton';
+
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -114,6 +116,7 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & User Info */}
           <div className="flex items-center gap-3">
+            <PWAInstallButton />
 
             {/* Notification Bell */}
             <div className="relative">
