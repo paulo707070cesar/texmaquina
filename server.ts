@@ -10,8 +10,7 @@ import { initDatabase, getDatabaseStatus, usersRepo, machinesRepo, leadsRepo } f
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.resolve('.');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,9 +19,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'texmachina_super_secure_jwt_secret
 // Middlewares
 app.use(cors());
 app.use(express.json());
-
-// Initialize Database (MySQL pool or fallback)
-await initDatabase();
 
 // ----------------- JWT AUTHENTICATION MIDDLEWARE -----------------
 export interface AuthenticatedRequest extends Request {
@@ -460,7 +456,7 @@ app.get('/api/system/status', (_req: Request, res: Response) => {
 });
 
 app.get('/api/system/schema-sql', (_req: Request, res: Response) => {
-  const schemaPath = path.resolve(__dirname, 'schema.sql');
+  const schemaPath = path.resolve(currentDir, 'schema.sql');
   if (fs.existsSync(schemaPath)) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.sendFile(schemaPath);
@@ -494,11 +490,18 @@ APP_URL=https://seudominio.com.br
 
 // ----------------- PRODUCTION / VITE MIDDLEWARE -----------------
 async function startServer() {
+  // Initialize Database (MySQL pool or fallback) inside async function (No top-level await)
+  try {
+    await initDatabase();
+  } catch (dbErr: any) {
+    console.warn('[Database] Initial startup warning:', dbErr.message);
+  }
+
   const isProd = process.env.NODE_ENV === 'production';
 
   // Check both possible production build outputs
-  const prodDistPath = path.resolve(__dirname, 'dist');
-  const clientDistPath = path.resolve(__dirname, '../client/dist');
+  const prodDistPath = path.resolve(currentDir, 'dist');
+  const clientDistPath = path.resolve(currentDir, '../client/dist');
   const activeDist = fs.existsSync(prodDistPath) ? prodDistPath : fs.existsSync(clientDistPath) ? clientDistPath : null;
 
   if (isProd && activeDist) {
@@ -529,3 +532,5 @@ async function startServer() {
 startServer().catch((err) => {
   console.error('Fatal server startup failure:', err);
 });
+
+export default app;

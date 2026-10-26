@@ -1,16 +1,49 @@
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
 // server.ts
-import express from "express";
-import cors from "cors";
-import jwt from "jsonwebtoken";
-import bcrypt2 from "bcryptjs";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
-import dotenv from "dotenv";
+var server_exports = {};
+__export(server_exports, {
+  authenticateToken: () => authenticateToken,
+  default: () => server_default
+});
+module.exports = __toCommonJS(server_exports);
+var import_express = __toESM(require("express"), 1);
+var import_cors = __toESM(require("cors"), 1);
+var import_jsonwebtoken = __toESM(require("jsonwebtoken"), 1);
+var import_bcryptjs2 = __toESM(require("bcryptjs"), 1);
+var import_path = __toESM(require("path"), 1);
+var import_fs = __toESM(require("fs"), 1);
+var import_dotenv = __toESM(require("dotenv"), 1);
 
 // server/db.ts
-import mysql from "mysql2/promise";
-import bcrypt from "bcryptjs";
+var import_promise = __toESM(require("mysql2/promise"), 1);
+var import_bcryptjs = __toESM(require("bcryptjs"), 1);
 var mysqlPool = null;
 var isMySQLConnected = false;
 var dbConnectionError = null;
@@ -19,7 +52,7 @@ var memoryUsers = [
     id: 1,
     name: "Carlos Eduardo Menezes",
     email: "admin@texmachina.com.br",
-    password_hash: bcrypt.hashSync("admin123", 10),
+    password_hash: import_bcryptjs.default.hashSync("admin123", 10),
     role: "admin",
     created_at: new Date(Date.now() - 30 * 24 * 3600 * 1e3).toISOString()
   },
@@ -27,7 +60,7 @@ var memoryUsers = [
     id: 2,
     name: "Renata Silveira",
     email: "vendedor@texmachina.com.br",
-    password_hash: bcrypt.hashSync("vendedor123", 10),
+    password_hash: import_bcryptjs.default.hashSync("vendedor123", 10),
     role: "vendedor",
     created_at: new Date(Date.now() - 20 * 24 * 3600 * 1e3).toISOString()
   },
@@ -35,7 +68,7 @@ var memoryUsers = [
     id: 3,
     name: "Marcio Zanetti",
     email: "marcio.vendas@texmachina.com.br",
-    password_hash: bcrypt.hashSync("vendedor123", 10),
+    password_hash: import_bcryptjs.default.hashSync("vendedor123", 10),
     role: "vendedor",
     created_at: new Date(Date.now() - 10 * 24 * 3600 * 1e3).toISOString()
   }
@@ -172,7 +205,7 @@ async function initDatabase() {
   if (DB_HOST && DB_USER && DB_NAME) {
     try {
       console.log(`[Database] Attempting connection to MySQL at ${DB_HOST}:${DB_PORT || 3306}/${DB_NAME}...`);
-      const pool = mysql.createPool({
+      const pool = import_promise.default.createPool({
         host: DB_HOST,
         user: DB_USER,
         password: DB_PASSWORD || "",
@@ -582,15 +615,13 @@ var leadsRepo = {
 };
 
 // server.ts
-dotenv.config();
-var __filename = fileURLToPath(import.meta.url);
-var __dirname = path.dirname(__filename);
-var app = express();
+import_dotenv.default.config();
+var currentDir = typeof __dirname !== "undefined" ? __dirname : import_path.default.resolve(".");
+var app = (0, import_express.default)();
 var PORT = process.env.PORT || 3e3;
 var JWT_SECRET = process.env.JWT_SECRET || "texmachina_super_secure_jwt_secret_key_2025";
-app.use(cors());
-app.use(express.json());
-await initDatabase();
+app.use((0, import_cors.default)());
+app.use(import_express.default.json());
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -598,7 +629,7 @@ function authenticateToken(req, res, next) {
     res.status(401).json({ error: "Token de autentica\xE7\xE3o n\xE3o fornecido. Fa\xE7a login para continuar." });
     return;
   }
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  import_jsonwebtoken.default.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
       res.status(403).json({ error: "Sess\xE3o expirada ou token inv\xE1lido. Fa\xE7a login novamente." });
       return;
@@ -623,7 +654,7 @@ app.post("/api/auth/register", async (req, res) => {
       res.status(409).json({ error: "Este e-mail j\xE1 est\xE1 cadastrado no sistema." });
       return;
     }
-    const password_hash = await bcrypt2.hash(password, 10);
+    const password_hash = await import_bcryptjs2.default.hash(password, 10);
     const assignedRole = role === "admin" ? "admin" : "vendedor";
     const newUser = await usersRepo.create({
       name,
@@ -631,7 +662,7 @@ app.post("/api/auth/register", async (req, res) => {
       password_hash,
       role: assignedRole
     });
-    const token = jwt.sign(
+    const token = import_jsonwebtoken.default.sign(
       { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
       JWT_SECRET,
       { expiresIn: "7d" }
@@ -664,12 +695,12 @@ app.post("/api/auth/login", async (req, res) => {
       res.status(401).json({ error: "E-mail ou senha incorretos." });
       return;
     }
-    const match = await bcrypt2.compare(password, user.password_hash);
+    const match = await import_bcryptjs2.default.compare(password, user.password_hash);
     if (!match) {
       res.status(401).json({ error: "E-mail ou senha incorretos." });
       return;
     }
-    const token = jwt.sign(
+    const token = import_jsonwebtoken.default.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" }
@@ -934,8 +965,8 @@ app.get("/api/system/status", (_req, res) => {
   });
 });
 app.get("/api/system/schema-sql", (_req, res) => {
-  const schemaPath = path.resolve(__dirname, "schema.sql");
-  if (fs.existsSync(schemaPath)) {
+  const schemaPath = import_path.default.resolve(currentDir, "schema.sql");
+  if (import_fs.default.existsSync(schemaPath)) {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.sendFile(schemaPath);
   } else {
@@ -965,15 +996,20 @@ APP_URL=https://seudominio.com.br
   res.send(envContent);
 });
 async function startServer() {
+  try {
+    await initDatabase();
+  } catch (dbErr) {
+    console.warn("[Database] Initial startup warning:", dbErr.message);
+  }
   const isProd = process.env.NODE_ENV === "production";
-  const prodDistPath = path.resolve(__dirname, "dist");
-  const clientDistPath = path.resolve(__dirname, "../client/dist");
-  const activeDist = fs.existsSync(prodDistPath) ? prodDistPath : fs.existsSync(clientDistPath) ? clientDistPath : null;
+  const prodDistPath = import_path.default.resolve(currentDir, "dist");
+  const clientDistPath = import_path.default.resolve(currentDir, "../client/dist");
+  const activeDist = import_fs.default.existsSync(prodDistPath) ? prodDistPath : import_fs.default.existsSync(clientDistPath) ? clientDistPath : null;
   if (isProd && activeDist) {
     console.log(`[Hostinger Production] Serving static files from ${activeDist}`);
-    app.use(express.static(activeDist));
+    app.use(import_express.default.static(activeDist));
     app.get("*", (_req, res) => {
-      res.sendFile(path.join(activeDist, "index.html"));
+      res.sendFile(import_path.default.join(activeDist, "index.html"));
     });
   } else {
     console.log("[Dev Mode] Mounting Vite development server middlewares...");
@@ -992,6 +1028,8 @@ async function startServer() {
 startServer().catch((err) => {
   console.error("Fatal server startup failure:", err);
 });
-export {
+var server_default = app;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
   authenticateToken
-};
+});
