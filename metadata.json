@@ -1,0 +1,6 @@
+{
+  "name": "TexMachina - B2B Textile Machinery Sales CRM",
+  "description": "Full-stack B2B SaaS platform for managing industrial textile machinery inventory, leads pipeline (Kanban), and sales operations with MySQL backend.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
