@@ -63,6 +63,7 @@ var memoryUsers = [
 ];
 var memoryMachines = [];
 var memoryLeads = [];
+var nextTenantId = 2;
 var nextUserId = 2;
 var nextMachineId = 1;
 var nextLeadId = 1;
@@ -152,6 +153,24 @@ function getDatabaseStatus() {
     }
   };
 }
+var tenantsRepo = {
+  async create(name) {
+    if (isMySQLConnected && mysqlPool) {
+      const [result] = await mysqlPool.query("INSERT INTO tenants (name) VALUES (?)", [name]);
+      return { id: result.insertId, name, created_at: (/* @__PURE__ */ new Date()).toISOString() };
+    }
+    const tenant = { id: nextTenantId++, name, created_at: (/* @__PURE__ */ new Date()).toISOString() };
+    memoryTenants.push(tenant);
+    return tenant;
+  },
+  async findById(id) {
+    if (isMySQLConnected && mysqlPool) {
+      const [rows] = await mysqlPool.query("SELECT * FROM tenants WHERE id = ?", [id]);
+      return rows[0] || null;
+    }
+    return memoryTenants.find((t) => t.id === id) || null;
+  }
+};
 var usersRepo = {
   async findByEmail(email) {
     const cleanEmail = email.trim().toLowerCase();
