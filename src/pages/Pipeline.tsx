@@ -160,11 +160,13 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onEdit, onDelete, isOverlay }
         </div>
       )}
 
-      {/* Notes */}
+      {/* Notes / Description - Increased visibility and field size */}
       {lead.notes && (
-        <p className="mt-2 text-xs text-gray-300 line-clamp-2 bg-white/[0.02] p-2 rounded-lg border border-white/5">
-          {lead.notes}
-        </p>
+        <div className="mt-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 shadow-inner">
+          <p className="text-[12px] leading-relaxed text-gray-200 line-clamp-5 whitespace-pre-wrap">
+            {lead.notes}
+          </p>
+        </div>
       )}
 
       {/* Footer Details: Phone, Date & WhatsApp */}
@@ -647,11 +649,11 @@ export const Pipeline: React.FC = () => {
                   Anotações da Negociação / Dados Técnicos
                 </label>
                 <textarea
-                  rows={3}
+                  rows={6}
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   placeholder="Ex: Solicitou dados de rotação máxima e condições FINAME."
-                  className="w-full p-3 glass-input rounded-xl text-sm"
+                  className="w-full p-3 glass-input rounded-xl text-sm min-h-[120px]"
                 />
               </div>
 
