@@ -634,7 +634,7 @@ export const Machines: React.FC = () => {
                         <ImageIcon className="w-4 h-4" />
                       </div>
                       <input
-                        type="url"
+                        type="text"
                         value={formData.image_url}
                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                         placeholder="Ou cole o link da imagem aqui..."

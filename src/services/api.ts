@@ -38,6 +38,8 @@ api.interceptors.response.use(
 
 export interface User {
   id: number;
+  tenant_id: number;
+  tenant_name: string;
   name: string;
   email: string;
   role: 'admin' | 'vendedor';
@@ -116,7 +118,7 @@ export const authApi = {
     const res = await api.post<{ token: string; user: User; message: string }>('/auth/login', credentials);
     return res.data;
   },
-  register: async (data: { name: string; email: string; password: string; role?: 'admin' | 'vendedor' }) => {
+  register: async (data: { name: string; email: string; password: string; company_name: string }) => {
     const res = await api.post<{ token: string; user: User; message: string }>('/auth/register', data);
     return res.data;
   },

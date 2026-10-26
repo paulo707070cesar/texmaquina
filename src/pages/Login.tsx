@@ -8,7 +8,7 @@ export const Login: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'vendedor'>('vendedor');
+  const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -25,7 +25,10 @@ export const Login: React.FC = () => {
 
     try {
       if (isRegister) {
-        await register(name, email, password, role);
+        if (!companyName.trim()) {
+          throw new Error('Informe o nome da sua empresa.');
+        }
+        await register(name, email, password, companyName);
       } else {
         await login(email, password);
       }
@@ -176,16 +179,21 @@ export const Login: React.FC = () => {
             {isRegister && (
               <div>
                 <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-                  Cargo / Função
+                  Nome da sua Empresa / Agência
                 </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as 'admin' | 'vendedor')}
-                  className="w-full h-11 px-3 glass-input rounded-xl text-sm"
-                >
-                  <option value="vendedor" className="bg-[#0b1120]">Representante Comercial (Vendedor)</option>
-                  <option value="admin" className="bg-[#0b1120]">Diretoria Industrial (Administrador)</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500">
+                    <span className="material-symbols-outlined text-sm">corporate_fare</span>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Ex: TexMachina Sul Ltda"
+                    className="w-full h-11 pl-10 pr-4 glass-input rounded-xl text-sm placeholder-gray-500"
+                  />
+                </div>
               </div>
             )}
 

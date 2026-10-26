@@ -166,17 +166,8 @@ export const Navbar: React.FC = () => {
                     {user.name}
                   </span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#00C2FF]">
-                    {user.role === 'admin' ? (
-                      <>
-                        <ShieldCheck className="w-3 h-3 text-[#00C2FF]" />
-                        <span>Diretoria</span>
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck className="w-3 h-3 text-emerald-400" />
-                        <span>Representante</span>
-                      </>
-                    )}
+                    <span className="material-symbols-outlined text-[10px]">corporate_fare</span>
+                    <span>{user.tenant_name}</span>
                   </span>
                 </div>
 

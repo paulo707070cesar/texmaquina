@@ -77,6 +77,7 @@ app.post('/api/upload', (req, res) => {
 interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
+    tenant_id: number;
     name: string;
     email: string;
     role: 'admin' | 'vendedor';
@@ -85,16 +86,16 @@ interface AuthenticatedRequest extends Request {
 
 function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    res.status(401).json({ error: 'Token de autenticação não fornecido. Faça login para continuar.' });
+    res.status(401).json({ error: 'Faça login para continuar.' });
     return;
   }
 
   jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
     if (err) {
-      res.status(403).json({ error: 'Sessão expirada ou token inválido. Faça login novamente.' });
+      res.status(403).json({ error: 'Sessão expirada. Faça login novamente.' });
       return;
     }
     req.user = decoded;
@@ -103,397 +104,246 @@ function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextF
 }
 
 // ----------------- AUTH ROUTES -----------------
-// POST /api/auth/register
 app.post('/api/auth/register', async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, company_name } = req.body;
 
     if (!name || !email || !password) {
       res.status(400).json({ error: 'Nome, e-mail e senha são obrigatórios.' });
       return;
     }
 
-    if (password.length < 6) {
-      res.status(400).json({ error: 'A senha deve conter no mínimo 6 caracteres.' });
-      return;
-    }
-
     const existing = await usersRepo.findByEmail(email);
     if (existing) {
-      res.status(409).json({ error: 'Este e-mail já está cadastrado no sistema.' });
+      res.status(409).json({ error: 'E-mail já cadastrado.' });
       return;
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
-    const assignedRole = role === 'admin' ? 'admin' : 'vendedor';
+    // 1. Create a NEW TENANT for this specific account
+    const newTenant = await tenantsRepo.create(company_name || `Empresa de ${name}`);
 
+    const password_hash = await bcrypt.hash(password, 10);
     const newUser = await usersRepo.create({
+      tenant_id: newTenant.id,
       name,
       email,
       password_hash,
-      role: assignedRole,
+      role: 'admin', // First user is always admin of their tenant
     });
 
     const token = jwt.sign(
-      { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
+      { 
+        id: newUser.id, 
+        tenant_id: newUser.tenant_id, 
+        tenant_name: newTenant.name,
+        name: newUser.name, 
+        email: newUser.email, 
+        role: newUser.role 
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
     res.status(201).json({
-      message: 'Usuário registrado com sucesso.',
+      message: 'Conta e empresa criadas com sucesso.',
       token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        created_at: newUser.created_at,
+      user: { 
+        id: newUser.id, 
+        tenant_id: newUser.tenant_id,
+        tenant_name: newTenant.name,
+        name: newUser.name, 
+        email: newUser.email, 
+        role: newUser.role 
       },
     });
   } catch (error: any) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Erro interno ao cadastrar usuário.' });
+    console.error('Reg error:', error);
+    res.status(500).json({ error: 'Erro ao cadastrar.' });
   }
 });
 
-// POST /api/auth/login
 app.post('/api/auth/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      res.status(400).json({ error: 'Informe e-mail e senha.' });
-      return;
-    }
-
     const user = await usersRepo.findByEmail(email);
-    if (!user) {
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       res.status(401).json({ error: 'E-mail ou senha incorretos.' });
       return;
     }
 
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) {
-      res.status(401).json({ error: 'E-mail ou senha incorretos.' });
-      return;
-    }
+    const tenant = await tenantsRepo.findById(user.tenant_id);
 
     const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email, role: user.role },
+      { 
+        id: user.id, 
+        tenant_id: user.tenant_id, 
+        tenant_name: tenant?.name || 'Empresa',
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    res.json({
-      message: 'Login realizado com sucesso.',
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        created_at: user.created_at,
-      },
+    res.json({ 
+      token, 
+      user: { 
+        id: user.id, 
+        tenant_id: user.tenant_id,
+        tenant_name: tenant?.name || 'Empresa',
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
     });
   } catch (error: any) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Erro interno ao realizar autenticação.' });
+    res.status(500).json({ error: 'Erro no login.' });
   }
 });
 
-// GET /api/auth/me
 app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const user = await usersRepo.findById(req.user!.id);
-    if (!user) {
-      res.status(404).json({ error: 'Usuário não encontrado.' });
-      return;
-    }
-    res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        created_at: user.created_at,
-      },
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado.' });
+    const tenant = await tenantsRepo.findById(user.tenant_id);
+    res.json({ 
+      user: { 
+        id: user.id, 
+        tenant_id: user.tenant_id,
+        tenant_name: tenant?.name || 'Empresa',
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Erro ao obter dados do usuário.' });
+    res.status(500).json({ error: 'Erro ao obter dados.' });
   }
 });
 
-// ----------------- MACHINES CRUD ROUTES -----------------
-// GET /api/machines
-app.get('/api/machines', authenticateToken, async (req: Request, res: Response) => {
+// ----------------- MACHINES CRUD ROUTES (Tenant Restricted) -----------------
+app.get('/api/machines', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { search, status } = req.query;
-    const machines = await machinesRepo.list({
+    const machines = await machinesRepo.list(req.user!.tenant_id, {
       search: typeof search === 'string' ? search : undefined,
       status: typeof status === 'string' ? status : undefined,
     });
     res.json(machines);
   } catch (error: any) {
-    console.error('Error fetching machines:', error);
-    res.status(500).json({ error: 'Erro ao buscar catálogo de máquinas.' });
+    res.status(500).json({ error: 'Erro ao buscar máquinas.' });
   }
 });
 
-// POST /api/machines
-app.post('/api/machines', authenticateToken, async (req: Request, res: Response) => {
+app.post('/api/machines', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, model, description, price, image_url, status } = req.body;
-
-    if (!name || !model || price === undefined) {
-      res.status(400).json({ error: 'Nome da máquina, modelo e preço são obrigatórios.' });
-      return;
-    }
-
-    const validStatus = ['disponivel', 'vendido', 'manutencao'].includes(status) ? status : 'disponivel';
-    const parsedPrice = parseFloat(price);
-
-    if (isNaN(parsedPrice) || parsedPrice < 0) {
-      res.status(400).json({ error: 'Preço inválido.' });
-      return;
-    }
-
     const machine = await machinesRepo.create({
-      name,
-      model,
-      description: description || '',
-      price: parsedPrice,
-      image_url: image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
-      status: validStatus,
+      ...req.body,
+      tenant_id: req.user!.tenant_id,
+      price: parseFloat(req.body.price) || 0,
     });
-
     res.status(201).json(machine);
   } catch (error: any) {
-    console.error('Error creating machine:', error);
-    res.status(500).json({ error: 'Erro ao cadastrar máquina.' });
+    res.status(500).json({ error: 'Erro ao cadastrar.' });
   }
 });
 
-// PUT /api/machines/:id
-app.put('/api/machines/:id', authenticateToken, async (req: Request, res: Response) => {
+app.put('/api/machines/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: 'ID inválido.' });
-      return;
-    }
-
-    const { name, model, description, price, image_url, status } = req.body;
-
-    const existing = await machinesRepo.findById(id);
-    if (!existing) {
-      res.status(404).json({ error: 'Máquina não encontrada.' });
-      return;
-    }
-
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (model !== undefined) updateData.model = model;
-    if (description !== undefined) updateData.description = description;
-    if (price !== undefined) updateData.price = parseFloat(price);
-    if (image_url !== undefined) updateData.image_url = image_url;
-    if (status !== undefined) {
-      if (!['disponivel', 'vendido', 'manutencao'].includes(status)) {
-        res.status(400).json({ error: 'Status de máquina inválido.' });
-        return;
-      }
-      updateData.status = status;
-    }
-
-    const updated = await machinesRepo.update(id, updateData);
+    const updated = await machinesRepo.update(req.user!.tenant_id, parseInt(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ error: 'Não encontrada.' });
     res.json(updated);
   } catch (error: any) {
-    console.error('Error updating machine:', error);
-    res.status(500).json({ error: 'Erro ao atualizar máquina.' });
+    res.status(500).json({ error: 'Erro ao atualizar.' });
   }
 });
 
-// DELETE /api/machines/:id
-app.delete('/api/machines/:id', authenticateToken, async (req: Request, res: Response) => {
+app.delete('/api/machines/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: 'ID inválido.' });
-      return;
-    }
-
-    const success = await machinesRepo.delete(id);
-    if (!success) {
-      res.status(404).json({ error: 'Máquina não encontrada para exclusão.' });
-      return;
-    }
-
-    res.json({ message: 'Máquina excluída com sucesso.', id });
+    const success = await machinesRepo.delete(req.user!.tenant_id, parseInt(req.params.id));
+    if (!success) return res.status(404).json({ error: 'Não encontrada.' });
+    res.json({ message: 'Excluída.', id: req.params.id });
   } catch (error: any) {
-    console.error('Error deleting machine:', error);
-    res.status(500).json({ error: 'Erro ao excluir máquina.' });
+    res.status(500).json({ error: 'Erro ao excluir.' });
   }
 });
 
-// ----------------- LEADS CRUD ROUTES -----------------
-// GET /api/leads
-app.get('/api/leads', authenticateToken, async (_req: Request, res: Response) => {
+// ----------------- LEADS CRUD ROUTES (Tenant Restricted) -----------------
+app.get('/api/leads', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const leads = await leadsRepo.list();
+    const leads = await leadsRepo.list(req.user!.tenant_id);
     res.json(leads);
   } catch (error: any) {
-    console.error('Error fetching leads:', error);
-    res.status(500).json({ error: 'Erro ao buscar leads e pipeline.' });
+    res.status(500).json({ error: 'Erro ao buscar leads.' });
   }
 });
 
-// POST /api/leads
-app.post('/api/leads', authenticateToken, async (req: Request, res: Response) => {
+app.post('/api/leads', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { client_name, client_phone, machine_id, status, notes, follow_up_date } = req.body;
-
-    if (!client_name || !client_phone) {
-      res.status(400).json({ error: 'Nome do cliente e telefone de contato são obrigatórios.' });
-      return;
-    }
-
-    const validStatus = ['novo', 'orcamento', 'negociacao', 'fechado'].includes(status) ? status : 'novo';
-
     const lead = await leadsRepo.create({
-      client_name,
-      client_phone,
-      machine_id: machine_id ? parseInt(machine_id, 10) : null,
-      status: validStatus,
-      notes: notes || '',
-      follow_up_date: follow_up_date || null,
+      ...req.body,
+      tenant_id: req.user!.tenant_id,
+      machine_id: req.body.machine_id ? parseInt(req.body.machine_id) : null,
     });
-
     res.status(201).json(lead);
   } catch (error: any) {
-    console.error('Error creating lead:', error);
-    res.status(500).json({ error: 'Erro ao criar lead de vendas.' });
+    res.status(500).json({ error: 'Erro ao criar lead.' });
   }
 });
 
-// PUT /api/leads/:id (Crucial for Kanban drag and drop)
-app.put('/api/leads/:id', authenticateToken, async (req: Request, res: Response) => {
+app.put('/api/leads/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: 'ID inválido.' });
-      return;
-    }
-
-    const { client_name, client_phone, machine_id, status, notes, follow_up_date } = req.body;
-
-    const existing = await leadsRepo.findById(id);
-    if (!existing) {
-      res.status(404).json({ error: 'Lead não encontrado.' });
-      return;
-    }
-
-    const updateData: any = {};
-    if (client_name !== undefined) updateData.client_name = client_name;
-    if (client_phone !== undefined) updateData.client_phone = client_phone;
-    if (machine_id !== undefined) updateData.machine_id = machine_id ? parseInt(machine_id, 10) : null;
-    if (notes !== undefined) updateData.notes = notes;
-    if (follow_up_date !== undefined) updateData.follow_up_date = follow_up_date;
-    if (status !== undefined) {
-      if (!['novo', 'orcamento', 'negociacao', 'fechado'].includes(status)) {
-        res.status(400).json({ error: 'Status de funil inválido.' });
-        return;
-      }
-      updateData.status = status;
-    }
-
-    const updated = await leadsRepo.update(id, updateData);
+    const updated = await leadsRepo.update(req.user!.tenant_id, parseInt(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ error: 'Lead não encontrado.' });
     res.json(updated);
   } catch (error: any) {
-    console.error('Error updating lead:', error);
-    res.status(500).json({ error: 'Erro ao atualizar lead.' });
+    res.status(500).json({ error: 'Erro ao atualizar.' });
   }
 });
 
-// DELETE /api/leads/:id
-app.delete('/api/leads/:id', authenticateToken, async (req: Request, res: Response) => {
+app.delete('/api/leads/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: 'ID inválido.' });
-      return;
-    }
-
-    const success = await leadsRepo.delete(id);
-    if (!success) {
-      res.status(404).json({ error: 'Lead não encontrado.' });
-      return;
-    }
-
-    res.json({ message: 'Lead removido com sucesso.', id });
+    const success = await leadsRepo.delete(req.user!.tenant_id, parseInt(req.params.id));
+    if (!success) return res.status(404).json({ error: 'Lead não encontrado.' });
+    res.json({ message: 'Lead removido.', id: req.params.id });
   } catch (error: any) {
-    console.error('Error deleting lead:', error);
     res.status(500).json({ error: 'Erro ao remover lead.' });
   }
 });
 
-// ----------------- DASHBOARD STATS -----------------
-// GET /api/dashboard/stats
-app.get('/api/dashboard/stats', authenticateToken, async (_req: Request, res: Response) => {
+// ----------------- DASHBOARD STATS (Tenant Restricted) -----------------
+app.get('/api/dashboard/stats', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const machines = await machinesRepo.list();
-    const leads = await leadsRepo.list();
+    const tenant_id = req.user!.tenant_id;
+    const [machines, leads] = await Promise.all([
+      machinesRepo.list(tenant_id),
+      leadsRepo.list(tenant_id),
+    ]);
 
     const totalMachines = machines.length;
-    const availableMachines = machines.filter((m) => m.status === 'disponivel').length;
-    const soldMachines = machines.filter((m) => m.status === 'vendido').length;
-    const maintenanceMachines = machines.filter((m) => m.status === 'manutencao').length;
-
+    const availableMachines = machines.filter(m => m.status === 'disponivel').length;
     const totalInventoryValue = machines.reduce((sum, m) => sum + (Number(m.price) || 0), 0);
-    const availableInventoryValue = machines
-      .filter((m) => m.status === 'disponivel')
-      .reduce((sum, m) => sum + (Number(m.price) || 0), 0);
-
-    const activeLeads = leads.filter((l) => l.status !== 'fechado').length;
-    const closedLeads = leads.filter((l) => l.status === 'fechado').length;
-
-    // Pipeline value
-    const pipelineValue = leads
-      .filter((l) => l.status !== 'fechado')
-      .reduce((sum, l) => sum + (Number(l.machine_price) || 0), 0);
-
-    const closedRevenue = leads
-      .filter((l) => l.status === 'fechado')
-      .reduce((sum, l) => sum + (Number(l.machine_price) || 0), 0);
-
-    // Group leads by status
-    const leadsByStatus = {
-      novo: leads.filter((l) => l.status === 'novo').length,
-      orcamento: leads.filter((l) => l.status === 'orcamento').length,
-      negociacao: leads.filter((l) => l.status === 'negociacao').length,
-      fechado: closedLeads,
-    };
-
-    // Recent leads
-    const recentLeads = leads.slice(0, 5);
+    const activeLeads = leads.filter(l => l.status !== 'fechado').length;
+    const pipelineValue = leads.filter(l => l.status !== 'fechado').reduce((sum, l) => sum + (Number(l.machine_price) || 0), 0);
 
     res.json({
       totalMachines,
       availableMachines,
-      soldMachines,
-      maintenanceMachines,
       totalInventoryValue,
-      availableInventoryValue,
       totalLeads: leads.length,
       activeLeads,
-      closedLeads,
       pipelineValue,
-      closedRevenue,
-      leadsByStatus,
-      recentLeads,
+      leadsByStatus: {
+        novo: leads.filter(l => l.status === 'novo').length,
+        orcamento: leads.filter(l => l.status === 'orcamento').length,
+        negociacao: leads.filter(l => l.status === 'negociacao').length,
+        fechado: leads.filter(l => l.status === 'fechado').length,
+      },
+      recentLeads: leads.slice(0, 5),
     });
   } catch (error: any) {
-    console.error('Error computing dashboard stats:', error);
-    res.status(500).json({ error: 'Erro ao calcular estatísticas do painel.' });
+    res.status(500).json({ error: 'Erro ao calcular estatísticas.' });
   }
 });
 

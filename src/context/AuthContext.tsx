@@ -7,7 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role?: 'admin' | 'vendedor') => Promise<void>;
+  register: (name: string, email: string, password: string, company_name: string) => Promise<void>;
   quickLogin: (type: 'admin' | 'vendedor') => Promise<void>;
   logout: () => void;
   error: string | null;
@@ -63,16 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: 'admin' | 'vendedor' = 'vendedor') => {
+  const register = async (name: string, email: string, password: string, company_name: string) => {
     setError(null);
     try {
-      const data = await authApi.register({ name, email, password, role });
+      const data = await authApi.register({ name, email, password, company_name });
       setToken(data.token);
       setUser(data.user);
       localStorage.setItem('texmachina_token', data.token);
       localStorage.setItem('texmachina_user', JSON.stringify(data.user));
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Erro ao cadastrar usuário.';
+      const msg = err.response?.data?.error || 'Erro ao cadastrar empresa.';
       setError(msg);
       throw new Error(msg);
     }

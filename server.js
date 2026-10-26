@@ -47,164 +47,29 @@ var import_bcryptjs = __toESM(require("bcryptjs"));
 var mysqlPool = null;
 var isMySQLConnected = false;
 var dbConnectionError = null;
+var memoryTenants = [
+  { id: 1, name: "TexMachina Matriz", slug: "matriz", created_at: (/* @__PURE__ */ new Date()).toISOString() }
+];
 var memoryUsers = [
   {
     id: 1,
+    tenant_id: 1,
     name: "Carlos Eduardo Menezes",
     email: "admin@texmachina.com.br",
     password_hash: import_bcryptjs.default.hashSync("admin123", 10),
     role: "admin",
-    created_at: new Date(Date.now() - 30 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 2,
-    name: "Renata Silveira",
-    email: "vendedor@texmachina.com.br",
-    password_hash: import_bcryptjs.default.hashSync("vendedor123", 10),
-    role: "vendedor",
-    created_at: new Date(Date.now() - 20 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 3,
-    name: "Marcio Zanetti",
-    email: "marcio.vendas@texmachina.com.br",
-    password_hash: import_bcryptjs.default.hashSync("vendedor123", 10),
-    role: "vendedor",
-    created_at: new Date(Date.now() - 10 * 24 * 3600 * 1e3).toISOString()
+    created_at: (/* @__PURE__ */ new Date()).toISOString()
   }
 ];
-var memoryMachines = [
-  {
-    id: 1,
-    name: "Mayer & Cie Relanit 3.2 II",
-    model: "Single Jersey E28",
-    description: "Tear circular de alta rota\xE7\xE3o para malharia refinada. Di\xE2metro 34 polegadas, 96 alimentadores com alimentadores Memminger MPF, inversor de frequ\xEAncia e painel digital com controle de tens\xE3o.",
-    price: 42e4,
-    image_url: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80",
-    status: "disponivel",
-    created_at: new Date(Date.now() - 15 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 2,
-    name: "Toyota JAT810 Air Jet Loom",
-    model: "JAT810-190 Dobby",
-    description: "Tear plano a jato de ar de alt\xEDssima produtividade. Largura \xFAtil de 190 cm, maquineta eletr\xF4nica Staubli, velocidade operacional de at\xE9 1.250 RPM. Ideal para tecidos planos leves e m\xE9dios.",
-    price: 34e4,
-    image_url: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80",
-    status: "disponivel",
-    created_at: new Date(Date.now() - 12 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 3,
-    name: "Monforts Montex 6500 Stenter Frame",
-    model: "Montex 6500 Gas 5C",
-    description: "Rama industrial para termofixa\xE7\xE3o, secagem e acabamento cont\xEDnuo de tecidos. 5 c\xE2maras a g\xE1s GLP, largura operacional \xFAtil de 2.400 mm, automa\xE7\xE3o completa Qualitex PLC.",
-    price: 128e4,
-    image_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80",
-    status: "manutencao",
-    created_at: new Date(Date.now() - 25 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 4,
-    name: "Rieter G36 Spun Yarn Ring Frame",
-    model: "G36 1200 Spindles",
-    description: "Fia\xE7\xE3o de anel cont\xEDnua para fios finos e cardados. 1.200 fusos, anel de 42 mm, sistema autom\xE1tico SERVOgrip de doffing e controle eletr\xF4nico de estiragem.",
-    price: 89e4,
-    image_url: "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80",
-    status: "disponivel",
-    created_at: new Date(Date.now() - 18 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 5,
-    name: "Picanol OmniPlus-i TC Connect 220",
-    model: "OmniPlus-i 220cm",
-    description: "Tear a jato de ar de \xFAltima gera\xE7\xE3o com interface digital BlueTouch, 4 cores smart, monitoramento de consumo de ar comprimido por sensor t\xE9rmico.",
-    price: 51e4,
-    image_url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=900&q=80",
-    status: "vendido",
-    created_at: new Date(Date.now() - 40 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 6,
-    name: "Dornier P2 Rapier Weaving Machine",
-    model: "P2 Type TFN",
-    description: "Tear de pin\xE7as r\xEDgidas para tecidos t\xE9cnicos, fibras sint\xE9ticas e aramidas. Largura \xFAtil 260 cm com cala limpa para m\xE1xima precis\xE3o de trama.",
-    price: 75e4,
-    image_url: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=900&q=80",
-    status: "disponivel",
-    created_at: new Date(Date.now() - 5 * 24 * 3600 * 1e3).toISOString()
-  }
-];
-var nextMachineId = 7;
-var nextLeadId = 7;
-var nextUserId = 4;
-var memoryLeads = [
-  {
-    id: 1,
-    client_name: "Malharia Santa Catarina Ltda (Sr. Roberto)",
-    client_phone: "+55 (47) 99881-2244",
-    machine_id: 1,
-    status: "novo",
-    notes: "Cliente solicitou cat\xE1logo t\xE9cnico com tabela de rendimento de malha em poli\xE9ster/elastano. Agendar liga\xE7\xE3o preliminar.",
-    follow_up_date: new Date(Date.now() + 2 * 24 * 3600 * 1e3).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 3 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 2,
-    client_name: "T\xEAxtil Vale do Itaja\xED S/A (Dra. Juliana)",
-    client_phone: "+55 (47) 99123-4567",
-    machine_id: 2,
-    status: "orcamento",
-    notes: "Enviada proposta formal com desconto de 5% \xE0 vista ou financiamento FINAME em 36 parcelas. Aguardando parecer da diretoria.",
-    follow_up_date: new Date(Date.now() + 4 * 24 * 3600 * 1e3).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 5 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 3,
-    client_name: "Fia\xE7\xE3o & Tecelagem Paulista (Eng. Hamilton)",
-    client_phone: "+55 (19) 98765-4321",
-    machine_id: 4,
-    status: "negociacao",
-    notes: "Visita t\xE9cnica realizada no parque fabril em Americana/SP. Em negocia\xE7\xE3o final sobre frete industrial e comissionamento no local.",
-    follow_up_date: new Date(Date.now() + 1 * 24 * 3600 * 1e3).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 7 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 4,
-    client_name: "Coteminas Ind\xFAstria T\xEAxtil (Marcos Bastos)",
-    client_phone: "+55 (38) 99712-3300",
-    machine_id: 5,
-    status: "fechado",
-    notes: "Contrato assinado via DocuSign. Pagamento do sinal de 40% confirmado, envio da m\xE1quina agendado para transportadora especializada.",
-    follow_up_date: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 10 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 5,
-    client_name: "Tecidos Nobres do Nordeste (Felipe Arcoverde)",
-    client_phone: "+55 (81) 98442-1199",
-    machine_id: 6,
-    status: "novo",
-    notes: "Demonstrou interesse na m\xE1quina Dornier P2 para produ\xE7\xE3o de tecidos industriais de seguran\xE7a.",
-    follow_up_date: new Date(Date.now() + 3 * 24 * 3600 * 1e3).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 1 * 24 * 3600 * 1e3).toISOString()
-  },
-  {
-    id: 6,
-    client_name: "Tinturaria & Acabamento Rio Claro (Alberto)",
-    client_phone: "+55 (19) 97100-8822",
-    machine_id: 3,
-    status: "negociacao",
-    notes: "Aguardando libera\xE7\xE3o de vistoria preventiva da c\xE2mara de aquecimento da rama Montex 6500.",
-    follow_up_date: new Date(Date.now() + 5 * 24 * 3600 * 1e3).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 4 * 24 * 3600 * 1e3).toISOString()
-  }
-];
+var memoryMachines = [];
+var memoryLeads = [];
+var nextUserId = 2;
+var nextMachineId = 1;
+var nextLeadId = 1;
 async function initDatabase() {
   const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
   if (DB_HOST && DB_USER && DB_NAME) {
     try {
-      console.log(`[Database] Attempting connection to MySQL at ${DB_HOST}:${DB_PORT || 3306}/${DB_NAME}...`);
       const pool = import_promise.default.createPool({
         host: DB_HOST,
         user: DB_USER,
@@ -218,78 +83,72 @@ async function initDatabase() {
         ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : void 0
       });
       const connection = await pool.getConnection();
-      console.log("[Database] MySQL connection established successfully!");
+      console.log("[Database] MySQL connection established (Multi-Tenant).");
       isMySQLConnected = true;
       mysqlPool = pool;
       connection.release();
       await ensureTablesCreated(pool);
     } catch (err) {
-      console.warn("[Database] MySQL connection failed. Error:", err.message);
+      console.warn("[Database] MySQL connection failed:", err.message);
       dbConnectionError = err.message;
       isMySQLConnected = false;
-      console.log("[Database] Operating with fallback In-Memory persistence (Full CRUD active).");
     }
-  } else {
-    console.log("[Database] No MySQL DB_HOST/DB_NAME environment variables specified.");
-    console.log("[Database] Operating with fallback In-Memory persistence (Hostinger ready with schema.sql).");
   }
 }
 async function ensureTablesCreated(pool) {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(150) NOT NULL,
-        email VARCHAR(191) NOT NULL UNIQUE,
-        password_hash VARCHAR(255) NOT NULL,
-        role ENUM('admin', 'vendedor') NOT NULL DEFAULT 'vendedor',
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS machines (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        model VARCHAR(150) NOT NULL,
-        description TEXT NULL,
-        price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
-        image_url VARCHAR(500) NULL,
-        status ENUM('disponivel', 'vendido', 'manutencao') NOT NULL DEFAULT 'disponivel',
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS leads (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        client_name VARCHAR(200) NOT NULL,
-        client_phone VARCHAR(50) NOT NULL,
-        machine_id INT NULL,
-        status ENUM('novo', 'orcamento', 'negociacao', 'fechado') NOT NULL DEFAULT 'novo',
-        notes TEXT NULL,
-        follow_up_date DATE NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_machine (machine_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    console.log("[Database] Verified MySQL tables structure.");
+    await pool.query(`CREATE TABLE IF NOT EXISTS tenants (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(200) NOT NULL,
+      slug VARCHAR(100) NULL UNIQUE,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB;`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tenant_id INT NOT NULL,
+      name VARCHAR(150) NOT NULL,
+      email VARCHAR(191) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      role ENUM('admin', 'vendedor') NOT NULL DEFAULT 'vendedor',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (tenant_id)
+    ) ENGINE=InnoDB;`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS machines (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tenant_id INT NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      model VARCHAR(150) NOT NULL,
+      description TEXT NULL,
+      price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+      image_url VARCHAR(500) NULL,
+      status ENUM('disponivel', 'vendido', 'manutencao') NOT NULL DEFAULT 'disponivel',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (tenant_id)
+    ) ENGINE=InnoDB;`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS leads (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      tenant_id INT NOT NULL,
+      client_name VARCHAR(200) NOT NULL,
+      client_phone VARCHAR(50) NOT NULL,
+      machine_id INT NULL,
+      status ENUM('novo', 'orcamento', 'negociacao', 'fechado') NOT NULL DEFAULT 'novo',
+      notes TEXT NULL,
+      follow_up_date DATE NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX (tenant_id)
+    ) ENGINE=InnoDB;`);
   } catch (err) {
-    console.error("[Database] Failed to verify tables:", err.message);
+    console.error("[Database] Table verification failed:", err.message);
   }
 }
 function getDatabaseStatus() {
   return {
     isMySQL: isMySQLConnected,
-    mode: isMySQLConnected ? "MySQL Connection Pool" : "In-Memory Enterprise Store (Hostinger Ready)",
+    mode: isMySQLConnected ? "Multi-Tenant MySQL" : "Multi-Tenant In-Memory",
     error: dbConnectionError,
-    config: {
-      host: process.env.DB_HOST || "Not configured (using memory store)",
-      database: process.env.DB_NAME || "texmachina_db",
-      user: process.env.DB_USER || "root"
-    },
     counts: {
-      users: isMySQLConnected ? "MySQL" : memoryUsers.length,
-      machines: isMySQLConnected ? "MySQL" : memoryMachines.length,
-      leads: isMySQLConnected ? "MySQL" : memoryLeads.length
+      tenants: isMySQLConnected ? "MySQL" : memoryTenants.length,
+      users: isMySQLConnected ? "MySQL" : memoryUsers.length
     }
   };
 }
@@ -297,320 +156,152 @@ var usersRepo = {
   async findByEmail(email) {
     const cleanEmail = email.trim().toLowerCase();
     if (isMySQLConnected && mysqlPool) {
-      const [rows] = await mysqlPool.query(
-        "SELECT * FROM users WHERE LOWER(email) = ? LIMIT 1",
-        [cleanEmail]
-      );
-      if (rows.length > 0) return rows[0];
-      return null;
+      const [rows] = await mysqlPool.query("SELECT * FROM users WHERE LOWER(email) = ?", [cleanEmail]);
+      return rows[0] || null;
     }
-    const found = memoryUsers.find((u) => u.email.toLowerCase() === cleanEmail);
-    return found || null;
+    return memoryUsers.find((u) => u.email.toLowerCase() === cleanEmail) || null;
   },
   async findById(id) {
     if (isMySQLConnected && mysqlPool) {
-      const [rows] = await mysqlPool.query(
-        "SELECT id, name, email, role, created_at FROM users WHERE id = ? LIMIT 1",
-        [id]
-      );
-      if (rows.length > 0) return rows[0];
-      return null;
+      const [rows] = await mysqlPool.query("SELECT * FROM users WHERE id = ?", [id]);
+      return rows[0] || null;
     }
-    const found = memoryUsers.find((u) => u.id === id);
-    return found ? { ...found } : null;
+    return memoryUsers.find((u) => u.id === id) || null;
   },
   async create(user) {
     if (isMySQLConnected && mysqlPool) {
       const [result] = await mysqlPool.query(
-        "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
-        [user.name, user.email.toLowerCase(), user.password_hash, user.role]
+        "INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+        [user.tenant_id, user.name, user.email.toLowerCase(), user.password_hash, user.role]
       );
-      return {
-        id: result.insertId,
-        name: user.name,
-        email: user.email.toLowerCase(),
-        password_hash: user.password_hash,
-        role: user.role,
-        created_at: (/* @__PURE__ */ new Date()).toISOString()
-      };
+      return { id: result.insertId, ...user, created_at: (/* @__PURE__ */ new Date()).toISOString() };
     }
-    const newUser = {
-      id: nextUserId++,
-      name: user.name,
-      email: user.email.toLowerCase(),
-      password_hash: user.password_hash,
-      role: user.role,
-      created_at: (/* @__PURE__ */ new Date()).toISOString()
-    };
+    const newUser = { id: nextUserId++, ...user, created_at: (/* @__PURE__ */ new Date()).toISOString() };
     memoryUsers.push(newUser);
     return newUser;
   }
 };
 var machinesRepo = {
-  async list(filters) {
+  async list(tenant_id, filters) {
     if (isMySQLConnected && mysqlPool) {
-      let query = "SELECT * FROM machines WHERE 1=1";
-      const params = [];
+      let sql = "SELECT * FROM machines WHERE tenant_id = ?";
+      const params = [tenant_id];
       if (filters?.search) {
-        query += " AND (name LIKE ? OR model LIKE ? OR description LIKE ?)";
-        const searchPattern = `%${filters.search}%`;
-        params.push(searchPattern, searchPattern, searchPattern);
+        sql += " AND (name LIKE ? OR model LIKE ?)";
+        params.push(`%${filters.search}%`, `%${filters.search}%`);
       }
       if (filters?.status && filters.status !== "all") {
-        query += " AND status = ?";
+        sql += " AND status = ?";
         params.push(filters.status);
       }
-      query += " ORDER BY id DESC";
-      const [rows] = await mysqlPool.query(query, params);
+      sql += " ORDER BY id DESC";
+      const [rows] = await mysqlPool.query(sql, params);
       return rows;
     }
-    let items = [...memoryMachines];
+    let items = memoryMachines.filter((m) => m.tenant_id === tenant_id);
     if (filters?.search) {
       const q = filters.search.toLowerCase();
-      items = items.filter(
-        (m) => m.name.toLowerCase().includes(q) || m.model.toLowerCase().includes(q) || m.description.toLowerCase().includes(q)
-      );
+      items = items.filter((m) => m.name.toLowerCase().includes(q) || m.model.toLowerCase().includes(q));
     }
     if (filters?.status && filters.status !== "all") {
       items = items.filter((m) => m.status === filters.status);
     }
     return items.sort((a, b) => b.id - a.id);
   },
-  async findById(id) {
+  async findById(tenant_id, id) {
     if (isMySQLConnected && mysqlPool) {
-      const [rows] = await mysqlPool.query(
-        "SELECT * FROM machines WHERE id = ? LIMIT 1",
-        [id]
-      );
-      return rows.length > 0 ? rows[0] : null;
+      const [rows] = await mysqlPool.query("SELECT * FROM machines WHERE tenant_id = ? AND id = ?", [tenant_id, id]);
+      return rows[0] || null;
     }
-    const found = memoryMachines.find((m) => m.id === id);
-    return found ? { ...found } : null;
+    return memoryMachines.find((m) => m.tenant_id === tenant_id && m.id === id) || null;
   },
   async create(data) {
     if (isMySQLConnected && mysqlPool) {
-      const [result] = await mysqlPool.query(
-        "INSERT INTO machines (name, model, description, price, image_url, status) VALUES (?, ?, ?, ?, ?, ?)",
-        [data.name, data.model, data.description, data.price, data.image_url, data.status]
+      const [res] = await mysqlPool.query(
+        "INSERT INTO machines (tenant_id, name, model, description, price, image_url, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [data.tenant_id, data.name, data.model, data.description, data.price, data.image_url, data.status]
       );
-      return {
-        id: result.insertId,
-        ...data,
-        created_at: (/* @__PURE__ */ new Date()).toISOString()
-      };
+      return { id: res.insertId, ...data, created_at: (/* @__PURE__ */ new Date()).toISOString() };
     }
-    const item = {
-      id: nextMachineId++,
-      name: data.name,
-      model: data.model,
-      description: data.description,
-      price: Number(data.price),
-      image_url: data.image_url,
-      status: data.status,
-      created_at: (/* @__PURE__ */ new Date()).toISOString()
-    };
+    const item = { id: nextMachineId++, ...data, created_at: (/* @__PURE__ */ new Date()).toISOString() };
     memoryMachines.unshift(item);
     return item;
   },
-  async update(id, data) {
+  async update(tenant_id, id, data) {
     if (isMySQLConnected && mysqlPool) {
-      const fields = [];
-      const values = [];
-      if (data.name !== void 0) {
-        fields.push("name = ?");
-        values.push(data.name);
-      }
-      if (data.model !== void 0) {
-        fields.push("model = ?");
-        values.push(data.model);
-      }
-      if (data.description !== void 0) {
-        fields.push("description = ?");
-        values.push(data.description);
-      }
-      if (data.price !== void 0) {
-        fields.push("price = ?");
-        values.push(data.price);
-      }
-      if (data.image_url !== void 0) {
-        fields.push("image_url = ?");
-        values.push(data.image_url);
-      }
-      if (data.status !== void 0) {
-        fields.push("status = ?");
-        values.push(data.status);
-      }
-      if (fields.length === 0) return this.findById(id);
-      values.push(id);
-      await mysqlPool.query(`UPDATE machines SET ${fields.join(", ")} WHERE id = ?`, values);
-      return this.findById(id);
+      const fields = Object.keys(data).filter((k) => k !== "id" && k !== "tenant_id" && k !== "created_at").map((k) => `${k} = ?`);
+      const values = Object.keys(data).filter((k) => k !== "id" && k !== "tenant_id" && k !== "created_at").map((k) => data[k]);
+      if (fields.length === 0) return this.findById(tenant_id, id);
+      values.push(tenant_id, id);
+      await mysqlPool.query(`UPDATE machines SET ${fields.join(", ")} WHERE tenant_id = ? AND id = ?`, values);
+      return this.findById(tenant_id, id);
     }
-    const index = memoryMachines.findIndex((m) => m.id === id);
-    if (index === -1) return null;
-    memoryMachines[index] = {
-      ...memoryMachines[index],
-      ...data,
-      price: data.price !== void 0 ? Number(data.price) : memoryMachines[index].price
-    };
-    return memoryMachines[index];
+    const idx = memoryMachines.findIndex((m) => m.tenant_id === tenant_id && m.id === id);
+    if (idx === -1) return null;
+    memoryMachines[idx] = { ...memoryMachines[idx], ...data };
+    return memoryMachines[idx];
   },
-  async delete(id) {
+  async delete(tenant_id, id) {
     if (isMySQLConnected && mysqlPool) {
-      const [result] = await mysqlPool.query("DELETE FROM machines WHERE id = ?", [id]);
-      return result.affectedRows > 0;
+      const [res] = await mysqlPool.query("DELETE FROM machines WHERE tenant_id = ? AND id = ?", [tenant_id, id]);
+      return res.affectedRows > 0;
     }
-    const index = memoryMachines.findIndex((m) => m.id === id);
-    if (index === -1) return false;
-    memoryMachines.splice(index, 1);
-    memoryLeads.forEach((lead) => {
-      if (lead.machine_id === id) {
-        lead.machine_id = null;
-      }
-    });
+    const idx = memoryMachines.findIndex((m) => m.tenant_id === tenant_id && m.id === id);
+    if (idx === -1) return false;
+    memoryMachines.splice(idx, 1);
     return true;
   }
 };
 var leadsRepo = {
-  async list() {
+  async list(tenant_id) {
     if (isMySQLConnected && mysqlPool) {
       const [rows] = await mysqlPool.query(`
-        SELECT 
-          l.id,
-          l.client_name,
-          l.client_phone,
-          l.machine_id,
-          l.status,
-          l.notes,
-          DATE_FORMAT(l.follow_up_date, '%Y-%m-%d') as follow_up_date,
-          l.created_at,
-          m.name AS machine_name,
-          m.model AS machine_model,
-          m.price AS machine_price,
-          m.image_url AS machine_image
-        FROM leads l
-        LEFT JOIN machines m ON l.machine_id = m.id
-        ORDER BY l.id DESC
-      `);
+        SELECT l.*, m.name as machine_name, m.model as machine_model, m.price as machine_price, m.image_url as machine_image
+        FROM leads l LEFT JOIN machines m ON l.machine_id = m.id
+        WHERE l.tenant_id = ? ORDER BY l.id DESC
+      `, [tenant_id]);
       return rows;
     }
-    return memoryLeads.map((lead) => {
-      const machine = lead.machine_id ? memoryMachines.find((m) => m.id === lead.machine_id) : null;
-      return {
-        ...lead,
-        machine_name: machine ? machine.name : null,
-        machine_model: machine ? machine.model : null,
-        machine_price: machine ? machine.price : null,
-        machine_image: machine ? machine.image_url : null
-      };
+    return memoryLeads.filter((l) => l.tenant_id === tenant_id).map((l) => {
+      const m = l.machine_id ? memoryMachines.find((mx) => mx.id === l.machine_id) : null;
+      return { ...l, machine_name: m?.name, machine_model: m?.model, machine_price: m?.price, machine_image: m?.image_url };
     }).sort((a, b) => b.id - a.id);
   },
-  async findById(id) {
-    if (isMySQLConnected && mysqlPool) {
-      const [rows] = await mysqlPool.query(
-        `SELECT 
-          l.*,
-          m.name AS machine_name,
-          m.model AS machine_model,
-          m.price AS machine_price,
-          m.image_url AS machine_image
-        FROM leads l
-        LEFT JOIN machines m ON l.machine_id = m.id
-        WHERE l.id = ? LIMIT 1`,
-        [id]
-      );
-      return rows.length > 0 ? rows[0] : null;
-    }
-    const lead = memoryLeads.find((l) => l.id === id);
-    if (!lead) return null;
-    const machine = lead.machine_id ? memoryMachines.find((m) => m.id === lead.machine_id) : null;
-    return {
-      ...lead,
-      machine_name: machine ? machine.name : null,
-      machine_model: machine ? machine.model : null,
-      machine_price: machine ? machine.price : null,
-      machine_image: machine ? machine.image_url : null
-    };
-  },
   async create(data) {
-    const machineId = data.machine_id ? Number(data.machine_id) : null;
     if (isMySQLConnected && mysqlPool) {
-      const [result] = await mysqlPool.query(
-        "INSERT INTO leads (client_name, client_phone, machine_id, status, notes, follow_up_date) VALUES (?, ?, ?, ?, ?, ?)",
-        [data.client_name, data.client_phone, machineId, data.status, data.notes, data.follow_up_date || null]
+      const [res] = await mysqlPool.query(
+        "INSERT INTO leads (tenant_id, client_name, client_phone, machine_id, status, notes, follow_up_date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [data.tenant_id, data.client_name, data.client_phone, data.machine_id, data.status, data.notes, data.follow_up_date]
       );
-      const inserted = await this.findById(result.insertId);
-      return inserted;
+      const [rows] = await mysqlPool.query("SELECT * FROM leads WHERE id = ?", [res.insertId]);
+      return rows[0];
     }
-    const newLead = {
-      id: nextLeadId++,
-      client_name: data.client_name,
-      client_phone: data.client_phone,
-      machine_id: machineId,
-      status: data.status,
-      notes: data.notes || "",
-      follow_up_date: data.follow_up_date || null,
-      created_at: (/* @__PURE__ */ new Date()).toISOString()
-    };
-    memoryLeads.unshift(newLead);
-    const machine = machineId ? memoryMachines.find((m) => m.id === machineId) : null;
-    return {
-      ...newLead,
-      machine_name: machine ? machine.name : null,
-      machine_model: machine ? machine.model : null,
-      machine_price: machine ? machine.price : null,
-      machine_image: machine ? machine.image_url : null
-    };
+    const item = { id: nextLeadId++, ...data, created_at: (/* @__PURE__ */ new Date()).toISOString() };
+    memoryLeads.unshift(item);
+    return item;
   },
-  async update(id, data) {
+  async update(tenant_id, id, data) {
     if (isMySQLConnected && mysqlPool) {
-      const fields = [];
-      const values = [];
-      if (data.client_name !== void 0) {
-        fields.push("client_name = ?");
-        values.push(data.client_name);
-      }
-      if (data.client_phone !== void 0) {
-        fields.push("client_phone = ?");
-        values.push(data.client_phone);
-      }
-      if (data.machine_id !== void 0) {
-        fields.push("machine_id = ?");
-        values.push(data.machine_id ? Number(data.machine_id) : null);
-      }
-      if (data.status !== void 0) {
-        fields.push("status = ?");
-        values.push(data.status);
-      }
-      if (data.notes !== void 0) {
-        fields.push("notes = ?");
-        values.push(data.notes);
-      }
-      if (data.follow_up_date !== void 0) {
-        fields.push("follow_up_date = ?");
-        values.push(data.follow_up_date || null);
-      }
-      if (fields.length === 0) return this.findById(id);
-      values.push(id);
-      await mysqlPool.query(`UPDATE leads SET ${fields.join(", ")} WHERE id = ?`, values);
-      return this.findById(id);
+      const fields = Object.keys(data).filter((k) => k !== "id" && k !== "tenant_id" && k !== "created_at").map((k) => `${k} = ?`);
+      const values = Object.keys(data).filter((k) => k !== "id" && k !== "tenant_id" && k !== "created_at").map((k) => data[k]);
+      values.push(tenant_id, id);
+      await mysqlPool.query(`UPDATE leads SET ${fields.join(", ")} WHERE tenant_id = ? AND id = ?`, values);
+      const [rows] = await mysqlPool.query("SELECT * FROM leads WHERE id = ?", [id]);
+      return rows[0];
     }
-    const index = memoryLeads.findIndex((l) => l.id === id);
-    if (index === -1) return null;
-    memoryLeads[index] = {
-      ...memoryLeads[index],
-      ...data,
-      machine_id: data.machine_id !== void 0 ? data.machine_id ? Number(data.machine_id) : null : memoryLeads[index].machine_id
-    };
-    return this.findById(id);
+    const idx = memoryLeads.findIndex((l) => l.tenant_id === tenant_id && l.id === id);
+    if (idx === -1) return null;
+    memoryLeads[idx] = { ...memoryLeads[idx], ...data };
+    return memoryLeads[idx];
   },
-  async delete(id) {
+  async delete(tenant_id, id) {
     if (isMySQLConnected && mysqlPool) {
-      const [result] = await mysqlPool.query("DELETE FROM leads WHERE id = ?", [id]);
-      return result.affectedRows > 0;
+      const [res] = await mysqlPool.query("DELETE FROM leads WHERE tenant_id = ? AND id = ?", [tenant_id, id]);
+      return res.affectedRows > 0;
     }
-    const index = memoryLeads.findIndex((l) => l.id === id);
-    if (index === -1) return false;
-    memoryLeads.splice(index, 1);
+    const idx = memoryLeads.findIndex((l) => l.tenant_id === tenant_id && l.id === id);
+    if (idx === -1) return false;
+    memoryLeads.splice(idx, 1);
     return true;
   }
 };
@@ -670,12 +361,12 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) {
-    res.status(401).json({ error: "Token de autentica\xE7\xE3o n\xE3o fornecido. Fa\xE7a login para continuar." });
+    res.status(401).json({ error: "Fa\xE7a login para continuar." });
     return;
   }
   import_jsonwebtoken.default.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      res.status(403).json({ error: "Sess\xE3o expirada ou token inv\xE1lido. Fa\xE7a login novamente." });
+      res.status(403).json({ error: "Sess\xE3o expirada. Fa\xE7a login novamente." });
       return;
     }
     req.user = decoded;
@@ -684,319 +375,219 @@ function authenticateToken(req, res, next) {
 }
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, company_name } = req.body;
     if (!name || !email || !password) {
       res.status(400).json({ error: "Nome, e-mail e senha s\xE3o obrigat\xF3rios." });
       return;
     }
-    if (password.length < 6) {
-      res.status(400).json({ error: "A senha deve conter no m\xEDnimo 6 caracteres." });
-      return;
-    }
     const existing = await usersRepo.findByEmail(email);
     if (existing) {
-      res.status(409).json({ error: "Este e-mail j\xE1 est\xE1 cadastrado no sistema." });
+      res.status(409).json({ error: "E-mail j\xE1 cadastrado." });
       return;
     }
+    const newTenant = await tenantsRepo.create(company_name || `Empresa de ${name}`);
     const password_hash = await import_bcryptjs2.default.hash(password, 10);
-    const assignedRole = role === "admin" ? "admin" : "vendedor";
     const newUser = await usersRepo.create({
+      tenant_id: newTenant.id,
       name,
       email,
       password_hash,
-      role: assignedRole
+      role: "admin"
+      // First user is always admin of their tenant
     });
     const token = import_jsonwebtoken.default.sign(
-      { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role },
+      {
+        id: newUser.id,
+        tenant_id: newUser.tenant_id,
+        tenant_name: newTenant.name,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
     res.status(201).json({
-      message: "Usu\xE1rio registrado com sucesso.",
+      message: "Conta e empresa criadas com sucesso.",
       token,
       user: {
         id: newUser.id,
+        tenant_id: newUser.tenant_id,
+        tenant_name: newTenant.name,
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role,
-        created_at: newUser.created_at
+        role: newUser.role
       }
     });
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ error: "Erro interno ao cadastrar usu\xE1rio." });
+    console.error("Reg error:", error);
+    res.status(500).json({ error: "Erro ao cadastrar." });
   }
 });
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      res.status(400).json({ error: "Informe e-mail e senha." });
-      return;
-    }
     const user = await usersRepo.findByEmail(email);
-    if (!user) {
+    if (!user || !await import_bcryptjs2.default.compare(password, user.password_hash)) {
       res.status(401).json({ error: "E-mail ou senha incorretos." });
       return;
     }
-    const match = await import_bcryptjs2.default.compare(password, user.password_hash);
-    if (!match) {
-      res.status(401).json({ error: "E-mail ou senha incorretos." });
-      return;
-    }
+    const tenant = await tenantsRepo.findById(user.tenant_id);
     const token = import_jsonwebtoken.default.sign(
-      { id: user.id, name: user.name, email: user.email, role: user.role },
+      {
+        id: user.id,
+        tenant_id: user.tenant_id,
+        tenant_name: tenant?.name || "Empresa",
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
     res.json({
-      message: "Login realizado com sucesso.",
       token,
       user: {
         id: user.id,
+        tenant_id: user.tenant_id,
+        tenant_name: tenant?.name || "Empresa",
         name: user.name,
         email: user.email,
-        role: user.role,
-        created_at: user.created_at
+        role: user.role
       }
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Erro interno ao realizar autentica\xE7\xE3o." });
+    res.status(500).json({ error: "Erro no login." });
   }
 });
 app.get("/api/auth/me", authenticateToken, async (req, res) => {
   try {
     const user = await usersRepo.findById(req.user.id);
-    if (!user) {
-      res.status(404).json({ error: "Usu\xE1rio n\xE3o encontrado." });
-      return;
-    }
+    if (!user) return res.status(404).json({ error: "Usu\xE1rio n\xE3o encontrado." });
+    const tenant = await tenantsRepo.findById(user.tenant_id);
     res.json({
       user: {
         id: user.id,
+        tenant_id: user.tenant_id,
+        tenant_name: tenant?.name || "Empresa",
         name: user.name,
         email: user.email,
-        role: user.role,
-        created_at: user.created_at
+        role: user.role
       }
     });
   } catch (error) {
-    res.status(500).json({ error: "Erro ao obter dados do usu\xE1rio." });
+    res.status(500).json({ error: "Erro ao obter dados." });
   }
 });
 app.get("/api/machines", authenticateToken, async (req, res) => {
   try {
     const { search, status } = req.query;
-    const machines = await machinesRepo.list({
+    const machines = await machinesRepo.list(req.user.tenant_id, {
       search: typeof search === "string" ? search : void 0,
       status: typeof status === "string" ? status : void 0
     });
     res.json(machines);
   } catch (error) {
-    console.error("Error fetching machines:", error);
-    res.status(500).json({ error: "Erro ao buscar cat\xE1logo de m\xE1quinas." });
+    res.status(500).json({ error: "Erro ao buscar m\xE1quinas." });
   }
 });
 app.post("/api/machines", authenticateToken, async (req, res) => {
   try {
-    const { name, model, description, price, image_url, status } = req.body;
-    if (!name || !model || price === void 0) {
-      res.status(400).json({ error: "Nome da m\xE1quina, modelo e pre\xE7o s\xE3o obrigat\xF3rios." });
-      return;
-    }
-    const validStatus = ["disponivel", "vendido", "manutencao"].includes(status) ? status : "disponivel";
-    const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice) || parsedPrice < 0) {
-      res.status(400).json({ error: "Pre\xE7o inv\xE1lido." });
-      return;
-    }
     const machine = await machinesRepo.create({
-      name,
-      model,
-      description: description || "",
-      price: parsedPrice,
-      image_url: image_url || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80",
-      status: validStatus
+      ...req.body,
+      tenant_id: req.user.tenant_id,
+      price: parseFloat(req.body.price) || 0
     });
     res.status(201).json(machine);
   } catch (error) {
-    console.error("Error creating machine:", error);
-    res.status(500).json({ error: "Erro ao cadastrar m\xE1quina." });
+    res.status(500).json({ error: "Erro ao cadastrar." });
   }
 });
 app.put("/api/machines/:id", authenticateToken, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "ID inv\xE1lido." });
-      return;
-    }
-    const { name, model, description, price, image_url, status } = req.body;
-    const existing = await machinesRepo.findById(id);
-    if (!existing) {
-      res.status(404).json({ error: "M\xE1quina n\xE3o encontrada." });
-      return;
-    }
-    const updateData = {};
-    if (name !== void 0) updateData.name = name;
-    if (model !== void 0) updateData.model = model;
-    if (description !== void 0) updateData.description = description;
-    if (price !== void 0) updateData.price = parseFloat(price);
-    if (image_url !== void 0) updateData.image_url = image_url;
-    if (status !== void 0) {
-      if (!["disponivel", "vendido", "manutencao"].includes(status)) {
-        res.status(400).json({ error: "Status de m\xE1quina inv\xE1lido." });
-        return;
-      }
-      updateData.status = status;
-    }
-    const updated = await machinesRepo.update(id, updateData);
+    const updated = await machinesRepo.update(req.user.tenant_id, parseInt(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ error: "N\xE3o encontrada." });
     res.json(updated);
   } catch (error) {
-    console.error("Error updating machine:", error);
-    res.status(500).json({ error: "Erro ao atualizar m\xE1quina." });
+    res.status(500).json({ error: "Erro ao atualizar." });
   }
 });
 app.delete("/api/machines/:id", authenticateToken, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "ID inv\xE1lido." });
-      return;
-    }
-    const success = await machinesRepo.delete(id);
-    if (!success) {
-      res.status(404).json({ error: "M\xE1quina n\xE3o encontrada para exclus\xE3o." });
-      return;
-    }
-    res.json({ message: "M\xE1quina exclu\xEDda com sucesso.", id });
+    const success = await machinesRepo.delete(req.user.tenant_id, parseInt(req.params.id));
+    if (!success) return res.status(404).json({ error: "N\xE3o encontrada." });
+    res.json({ message: "Exclu\xEDda.", id: req.params.id });
   } catch (error) {
-    console.error("Error deleting machine:", error);
-    res.status(500).json({ error: "Erro ao excluir m\xE1quina." });
+    res.status(500).json({ error: "Erro ao excluir." });
   }
 });
-app.get("/api/leads", authenticateToken, async (_req, res) => {
+app.get("/api/leads", authenticateToken, async (req, res) => {
   try {
-    const leads = await leadsRepo.list();
+    const leads = await leadsRepo.list(req.user.tenant_id);
     res.json(leads);
   } catch (error) {
-    console.error("Error fetching leads:", error);
-    res.status(500).json({ error: "Erro ao buscar leads e pipeline." });
+    res.status(500).json({ error: "Erro ao buscar leads." });
   }
 });
 app.post("/api/leads", authenticateToken, async (req, res) => {
   try {
-    const { client_name, client_phone, machine_id, status, notes, follow_up_date } = req.body;
-    if (!client_name || !client_phone) {
-      res.status(400).json({ error: "Nome do cliente e telefone de contato s\xE3o obrigat\xF3rios." });
-      return;
-    }
-    const validStatus = ["novo", "orcamento", "negociacao", "fechado"].includes(status) ? status : "novo";
     const lead = await leadsRepo.create({
-      client_name,
-      client_phone,
-      machine_id: machine_id ? parseInt(machine_id, 10) : null,
-      status: validStatus,
-      notes: notes || "",
-      follow_up_date: follow_up_date || null
+      ...req.body,
+      tenant_id: req.user.tenant_id,
+      machine_id: req.body.machine_id ? parseInt(req.body.machine_id) : null
     });
     res.status(201).json(lead);
   } catch (error) {
-    console.error("Error creating lead:", error);
-    res.status(500).json({ error: "Erro ao criar lead de vendas." });
+    res.status(500).json({ error: "Erro ao criar lead." });
   }
 });
 app.put("/api/leads/:id", authenticateToken, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "ID inv\xE1lido." });
-      return;
-    }
-    const { client_name, client_phone, machine_id, status, notes, follow_up_date } = req.body;
-    const existing = await leadsRepo.findById(id);
-    if (!existing) {
-      res.status(404).json({ error: "Lead n\xE3o encontrado." });
-      return;
-    }
-    const updateData = {};
-    if (client_name !== void 0) updateData.client_name = client_name;
-    if (client_phone !== void 0) updateData.client_phone = client_phone;
-    if (machine_id !== void 0) updateData.machine_id = machine_id ? parseInt(machine_id, 10) : null;
-    if (notes !== void 0) updateData.notes = notes;
-    if (follow_up_date !== void 0) updateData.follow_up_date = follow_up_date;
-    if (status !== void 0) {
-      if (!["novo", "orcamento", "negociacao", "fechado"].includes(status)) {
-        res.status(400).json({ error: "Status de funil inv\xE1lido." });
-        return;
-      }
-      updateData.status = status;
-    }
-    const updated = await leadsRepo.update(id, updateData);
+    const updated = await leadsRepo.update(req.user.tenant_id, parseInt(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ error: "Lead n\xE3o encontrado." });
     res.json(updated);
   } catch (error) {
-    console.error("Error updating lead:", error);
-    res.status(500).json({ error: "Erro ao atualizar lead." });
+    res.status(500).json({ error: "Erro ao atualizar." });
   }
 });
 app.delete("/api/leads/:id", authenticateToken, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      res.status(400).json({ error: "ID inv\xE1lido." });
-      return;
-    }
-    const success = await leadsRepo.delete(id);
-    if (!success) {
-      res.status(404).json({ error: "Lead n\xE3o encontrado." });
-      return;
-    }
-    res.json({ message: "Lead removido com sucesso.", id });
+    const success = await leadsRepo.delete(req.user.tenant_id, parseInt(req.params.id));
+    if (!success) return res.status(404).json({ error: "Lead n\xE3o encontrado." });
+    res.json({ message: "Lead removido.", id: req.params.id });
   } catch (error) {
-    console.error("Error deleting lead:", error);
     res.status(500).json({ error: "Erro ao remover lead." });
   }
 });
-app.get("/api/dashboard/stats", authenticateToken, async (_req, res) => {
+app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
   try {
-    const machines = await machinesRepo.list();
-    const leads = await leadsRepo.list();
+    const tenant_id = req.user.tenant_id;
+    const [machines, leads] = await Promise.all([
+      machinesRepo.list(tenant_id),
+      leadsRepo.list(tenant_id)
+    ]);
     const totalMachines = machines.length;
     const availableMachines = machines.filter((m) => m.status === "disponivel").length;
-    const soldMachines = machines.filter((m) => m.status === "vendido").length;
-    const maintenanceMachines = machines.filter((m) => m.status === "manutencao").length;
     const totalInventoryValue = machines.reduce((sum, m) => sum + (Number(m.price) || 0), 0);
-    const availableInventoryValue = machines.filter((m) => m.status === "disponivel").reduce((sum, m) => sum + (Number(m.price) || 0), 0);
     const activeLeads = leads.filter((l) => l.status !== "fechado").length;
-    const closedLeads = leads.filter((l) => l.status === "fechado").length;
     const pipelineValue = leads.filter((l) => l.status !== "fechado").reduce((sum, l) => sum + (Number(l.machine_price) || 0), 0);
-    const closedRevenue = leads.filter((l) => l.status === "fechado").reduce((sum, l) => sum + (Number(l.machine_price) || 0), 0);
-    const leadsByStatus = {
-      novo: leads.filter((l) => l.status === "novo").length,
-      orcamento: leads.filter((l) => l.status === "orcamento").length,
-      negociacao: leads.filter((l) => l.status === "negociacao").length,
-      fechado: closedLeads
-    };
-    const recentLeads = leads.slice(0, 5);
     res.json({
       totalMachines,
       availableMachines,
-      soldMachines,
-      maintenanceMachines,
       totalInventoryValue,
-      availableInventoryValue,
       totalLeads: leads.length,
       activeLeads,
-      closedLeads,
       pipelineValue,
-      closedRevenue,
-      leadsByStatus,
-      recentLeads
+      leadsByStatus: {
+        novo: leads.filter((l) => l.status === "novo").length,
+        orcamento: leads.filter((l) => l.status === "orcamento").length,
+        negociacao: leads.filter((l) => l.status === "negociacao").length,
+        fechado: leads.filter((l) => l.status === "fechado").length
+      },
+      recentLeads: leads.slice(0, 5)
     });
   } catch (error) {
-    console.error("Error computing dashboard stats:", error);
-    res.status(500).json({ error: "Erro ao calcular estat\xEDsticas do painel." });
+    res.status(500).json({ error: "Erro ao calcular estat\xEDsticas." });
   }
 });
 app.get("/api/system/status", (_req, res) => {
