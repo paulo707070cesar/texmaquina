@@ -7,7 +7,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import multer from 'multer';
-import { initDatabase, getDatabaseStatus, usersRepo, machinesRepo, leadsRepo, tenantsRepo } from './server/db.js';
+import { initDatabase, getDatabaseStatus, usersRepo, machinesRepo, leadsRepo, tenantsRepo, categoriesRepo } from './server/db.js';
 
 dotenv.config();
 
