@@ -581,19 +581,71 @@ export const Machines: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="space-y-3">
                 <label className="block text-xs font-semibold text-gray-300 mb-1">
-                  Foto da Máquina (URL)
+                  Foto da Máquina *
                 </label>
-                <input
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full h-11 px-3 glass-input rounded-xl text-sm"
-                />
+                
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Current Image Preview */}
+                  <div className="w-full sm:w-32 h-32 rounded-2xl overflow-hidden bg-[#0c1424] border border-white/10 flex-shrink-0">
+                    <img 
+                      src={formData.image_url} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80';
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex-1 space-y-3">
+                    {/* Upload Area */}
+                    <div className="relative group">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            setSubmitting(true);
+                            const { systemApi } = await import('../services/api');
+                            const { url } = await systemApi.uploadImage(file);
+                            setFormData({ ...formData, image_url: url });
+                            showToast('Imagem carregada com sucesso!');
+                          } catch (err: any) {
+                            showToast(err.response?.data?.error || 'Erro ao fazer upload da imagem.');
+                          } finally {
+                            setSubmitting(false);
+                          }
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="h-11 px-4 border-2 border-dashed border-white/10 group-hover:border-[#00C2FF]/40 rounded-xl flex items-center justify-center gap-2 bg-white/[0.02] transition-all">
+                        <ImageIcon className="w-4 h-4 text-[#00C2FF]" />
+                        <span className="text-xs font-bold text-gray-300">Fazer Upload de Foto</span>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <ImageIcon className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="url"
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="Ou cole o link da imagem aqui..."
+                        className="w-full h-11 pl-10 pr-3 glass-input rounded-xl text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mt-2">
-                  <span className="text-[11px] text-gray-400 font-medium">Fotos de referência:</span>
+                  <span className="text-[11px] text-gray-400 font-medium">Ou escolha uma sugestão:</span>
                   <div className="grid grid-cols-3 gap-2 mt-1.5">
                     {MACHINE_PRESET_IMAGES.map((preset, idx) => (
                       <button

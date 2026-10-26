@@ -39,6 +39,7 @@ var import_bcryptjs2 = __toESM(require("bcryptjs"));
 var import_path = __toESM(require("path"));
 var import_fs = __toESM(require("fs"));
 var import_dotenv = __toESM(require("dotenv"));
+var import_multer = __toESM(require("multer"));
 
 // server/db.ts
 var import_promise = __toESM(require("mysql2/promise"));
@@ -617,11 +618,54 @@ var leadsRepo = {
 // server.ts
 import_dotenv.default.config();
 var currentDir = typeof __dirname !== "undefined" ? __dirname : import_path.default.resolve(".");
+var uploadDir = import_path.default.join(currentDir, "uploads");
+if (!import_fs.default.existsSync(uploadDir)) {
+  import_fs.default.mkdirSync(uploadDir, { recursive: true });
+}
+var storage = import_multer.default.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = import_path.default.extname(file.originalname);
+    cb(null, `machine-${uniqueSuffix}${ext}`);
+  }
+});
+var upload = (0, import_multer.default)({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const ext = import_path.default.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype;
+    if (allowedTypes.test(ext) && allowedTypes.test(mime)) {
+      return cb(null, true);
+    }
+    cb(new Error("Apenas imagens (jpeg, jpg, png, webp) s\xE3o permitidas."));
+  }
+});
 var app = (0, import_express.default)();
 var PORT = process.env.PORT || 3e3;
 var JWT_SECRET = process.env.JWT_SECRET || "texmachina_super_secure_jwt_secret_key_2025";
 app.use((0, import_cors.default)());
 app.use(import_express.default.json());
+app.use("/uploads", import_express.default.static(uploadDir));
+app.post("/api/upload", (req, res) => {
+  upload.single("image")(req, res, (err) => {
+    if (err instanceof import_multer.default.MulterError) {
+      return res.status(400).json({ error: `Erro no upload: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "Nenhuma imagem enviada." });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: fileUrl });
+  });
+});
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];

@@ -6,11 +6,44 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import { initDatabase, getDatabaseStatus, usersRepo, machinesRepo, leadsRepo } from './server/db.js';
 
 dotenv.config();
 
 const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.resolve('.');
+
+// Ensure upload directory exists
+const uploadDir = path.join(currentDir, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer Config
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `machine-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype;
+    if (allowedTypes.test(ext) && allowedTypes.test(mime)) {
+      return cb(null, true);
+    }
+    cb(new Error('Apenas imagens (jpeg, jpg, png, webp) são permitidas.'));
+  }
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +52,26 @@ const JWT_SECRET = process.env.JWT_SECRET || 'texmachina_super_secure_jwt_secret
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(uploadDir));
+
+// ----------------- UPLOAD ROUTE -----------------
+app.post('/api/upload', (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ error: `Erro no upload: ${err.message}` });
+    } else if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhuma imagem enviada.' });
+    }
+
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: fileUrl });
+  });
+});
+
 
 // ----------------- JWT AUTHENTICATION MIDDLEWARE -----------------
 interface AuthenticatedRequest extends Request {

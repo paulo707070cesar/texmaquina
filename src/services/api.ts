@@ -197,6 +197,16 @@ export const systemApi = {
     const res = await api.get<string>('/system/schema-sql', { responseType: 'text' });
     return res.data;
   },
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await api.post<{ url: string }>('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
 };
 
 export default api;
