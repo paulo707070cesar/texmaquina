@@ -170,8 +170,8 @@ export const Machines: React.FC = () => {
         : await machinesApi.create(payload);
 
       // Only close the popup after the API confirms the image URL was saved.
-      if (!savedMachine?.image_url || savedMachine.image_url !== payload.image_url) {
-        throw new Error('A máquina foi enviada, mas o servidor não confirmou a gravação da imagem. Tente novamente.');
+      if (!savedMachine?.id || !savedMachine?.image_url) {
+        throw new Error('O servidor não confirmou o cadastro e a imagem. Os dados foram mantidos no formulário; tente novamente.');
       }
 
       await loadMachines();
