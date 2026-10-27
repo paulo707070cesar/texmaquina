@@ -108,7 +108,7 @@ export const Machines: React.FC = () => {
       model: '',
       description: '',
       price: '',
-      image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
+      image_url: '',
       status: 'disponivel',
       origin: 'Brasil',
       warranty: '6 Meses',
@@ -148,41 +148,39 @@ export const Machines: React.FC = () => {
 
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (submitting || !validateForm()) return;
 
     setSubmitting(true);
     try {
-      if (editingMachine) {
-        await machinesApi.update(editingMachine.id, {
-          name: formData.name,
-          model: formData.model,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          image_url: formData.image_url,
-          status: formData.status,
-          origin: formData.origin,
-          warranty: formData.warranty,
-          payment_type: formData.payment_type,
-        });
-        showToast('Máquina têxtil atualizada com sucesso!');
-      } else {
-        await machinesApi.create({
-          name: formData.name,
-          model: formData.model,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          image_url: formData.image_url,
-          status: formData.status,
-          origin: formData.origin,
-          warranty: formData.warranty,
-          payment_type: formData.payment_type,
-        });
-        showToast('Nova máquina cadastrada no estoque!');
+      const payload = {
+        name: formData.name.trim(),
+        model: formData.model.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price),
+        // Persist the exact URL returned by the upload endpoint.
+        image_url: formData.image_url.trim(),
+        status: formData.status,
+        origin: formData.origin,
+        warranty: formData.warranty,
+        payment_type: formData.payment_type,
+      };
+
+      const savedMachine = editingMachine
+        ? await machinesApi.update(editingMachine.id, payload)
+        : await machinesApi.create(payload);
+
+      // Only close the popup after the API confirms the image URL was saved.
+      if (!savedMachine?.image_url || savedMachine.image_url !== payload.image_url) {
+        throw new Error('A máquina foi enviada, mas o servidor não confirmou a gravação da imagem. Tente novamente.');
       }
+
+      await loadMachines();
       setIsModalOpen(false);
-      loadMachines();
+      setEditingMachine(null);
+      setFormErrors({});
+      showToast(editingMachine ? 'Máquina atualizada com sucesso!' : 'Máquina cadastrada com foto!');
     } catch (err: any) {
-      showToast(err.response?.data?.error || 'Erro ao salvar máquina.');
+      showToast(err.response?.data?.error || err.message || 'Erro ao salvar máquina.');
     } finally {
       setSubmitting(false);
     }
@@ -642,7 +640,7 @@ export const Machines: React.FC = () => {
                   {/* Current Image Preview */}
                   <div className="w-full sm:w-32 h-32 rounded-2xl overflow-hidden bg-[#0c1424] border border-white/10 flex-shrink-0">
                     <img 
-                      src={formData.image_url} 
+                      src={formData.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80'} 
                       alt="Preview" 
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -672,6 +670,8 @@ export const Machines: React.FC = () => {
                             showToast(err.response?.data?.error || 'Erro ao fazer upload da imagem.');
                           } finally {
                             setSubmitting(false);
+                            // Allow selecting the same file again if a retry is needed.
+                            if (fileInputRef.current) fileInputRef.current.value = '';
                           }
                         }}
                       />
