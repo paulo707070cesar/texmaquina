@@ -107,7 +107,7 @@ export const Machines: React.FC = () => {
       model: '',
       description: '',
       price: '',
-      image_url: categories[0]?.image_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
+      image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80',
       status: 'disponivel',
       origin: 'Brasil',
       warranty: '6 Meses',
@@ -695,31 +695,7 @@ export const Machines: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mt-2">
-                  <span className="text-[11px] text-gray-400 font-medium">Ou escolha uma categoria cadastrada:</span>
-                  <div className="grid grid-cols-3 gap-2 mt-1.5 overflow-y-auto max-h-[120px] pr-1 custom-scrollbar">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, image_url: cat.image_url })}
-                        className={`text-left p-2 rounded-xl text-[11px] truncate transition-all flex items-center gap-2 ${
-                          formData.image_url === cat.image_url
-                            ? 'border border-[#00C2FF] bg-[#0066FF]/20 text-[#00C2FF] font-bold shadow-[0_0_12px_rgba(0,194,255,0.3)]'
-                            : 'border border-white/10 hover:bg-white/[0.05] text-gray-400'
-                        }`}
-                      >
-                        <img src={cat.image_url} alt={cat.name} className="w-5 h-5 rounded-md object-cover" />
-                        <span className="truncate">{cat.name}</span>
-                      </button>
-                    ))}
-                    {categories.length === 0 && (
-                      <p className="col-span-3 text-[10px] text-gray-600 text-center py-2">
-                        Vá em Configurações para cadastrar categorias base.
-                      </p>
-                    )}
-                  </div>
-                </div>
+
               </div>
 
               <div>

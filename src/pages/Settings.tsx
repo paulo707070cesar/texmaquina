@@ -25,7 +25,6 @@ export const Settings: React.FC = () => {
 
   // Category form
   const [newCatName, setNewCatName] = useState('');
-  const [newCatImage, setNewCatImage] = useState('');
 
   useEffect(() => {
     loadData();
@@ -78,16 +77,15 @@ export const Settings: React.FC = () => {
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCatName.trim() || !newCatImage.trim()) {
-      showToast('Preencha o nome e a imagem da categoria.', 'error');
+    if (!newCatName.trim()) {
+      showToast('Preencha o nome da categoria.', 'error');
       return;
     }
     setSavingCategory(true);
     try {
-      await categoriesApi.create({ name: newCatName, image_url: newCatImage });
+      await categoriesApi.create({ name: newCatName, image_url: '' });
       showToast('Categoria adicionada!');
       setNewCatName('');
-      setNewCatImage('');
       const data = await categoriesApi.list();
       setCategories(data);
     } catch (err) {
@@ -123,20 +121,7 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handleUploadCatImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      setSavingCategory(true);
-      const { url } = await systemApi.uploadImage(file);
-      setNewCatImage(url);
-      showToast('Imagem de categoria carregada!');
-    } catch (err) {
-      showToast('Erro no upload.', 'error');
-    } finally {
-      setSavingCategory(false);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -252,26 +237,6 @@ export const Settings: React.FC = () => {
                 placeholder="Nome da categoria (ex: Tear Circular)"
                 className="w-full h-11 px-4 glass-input rounded-xl text-sm"
               />
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={newCatImage}
-                  onChange={(e) => setNewCatImage(e.target.value)}
-                  placeholder="URL ou Upload de foto base"
-                  className="flex-1 h-11 px-4 glass-input rounded-xl text-sm"
-                />
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUploadCatImage}
-                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="w-11 h-11 border border-white/10 hover:border-[#00C2FF] rounded-xl flex items-center justify-center bg-white/[0.02] transition-all">
-                    <ImageIcon className="w-4 h-4 text-[#00C2FF]" />
-                  </div>
-                </div>
-              </div>
             </div>
             <button
               type="submit"
@@ -290,7 +255,9 @@ export const Settings: React.FC = () => {
               categories.map((cat) => (
                 <div key={cat.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5 group">
                   <div className="flex items-center gap-3">
-                    <img src={cat.image_url} alt={cat.name} className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                    <span className="w-8 h-8 rounded-lg bg-white/[0.05] flex items-center justify-center border border-white/10 text-[#00C2FF]">
+                      <Plus className="w-4 h-4" />
+                    </span>
                     <span className="text-xs font-bold text-gray-300">{cat.name}</span>
                   </div>
                   <button

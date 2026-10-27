@@ -68,10 +68,10 @@ const memoryTenants: Tenant[] = [
 ];
 
 const memoryCategories: Category[] = [
-  { id: 1, tenant_id: 1, name: 'Tear Circular', image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
-  { id: 2, tenant_id: 1, name: 'Tear Jato de Ar', image_url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
-  { id: 3, tenant_id: 1, name: 'Rama Industrial', image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
-  { id: 4, tenant_id: 1, name: 'Fiação', image_url: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=900&q=80', created_at: new Date().toISOString() },
+  { id: 1, tenant_id: 1, name: 'Tear Circular', image_url: '', created_at: new Date().toISOString() },
+  { id: 2, tenant_id: 1, name: 'Tear Jato de Ar', image_url: '', created_at: new Date().toISOString() },
+  { id: 3, tenant_id: 1, name: 'Rama Industrial', image_url: '', created_at: new Date().toISOString() },
+  { id: 4, tenant_id: 1, name: 'Fiação', image_url: '', created_at: new Date().toISOString() },
 ];
 
 const memoryUsers: User[] = [
@@ -212,9 +212,9 @@ export const tenantsRepo = {
       
       // Seed default categories for new tenant
       await categoriesRepo.createBatch(newTenant.id, [
-        { name: 'Tear Circular', image_url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80' },
-        { name: 'Tear Jato de Ar', image_url: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=900&q=80' },
-        { name: 'Rama Industrial', image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80' }
+        { name: 'Tear Circular', image_url: '' },
+        { name: 'Tear Jato de Ar', image_url: '' },
+        { name: 'Rama Industrial', image_url: '' }
       ]);
 
       return newTenant;
