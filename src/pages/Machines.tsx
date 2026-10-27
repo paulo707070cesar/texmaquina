@@ -46,6 +46,7 @@ export const Machines: React.FC = () => {
     payment_type: 'a_vista' as 'a_vista' | 'financiado',
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Delete modal
@@ -115,6 +116,7 @@ export const Machines: React.FC = () => {
       payment_type: 'a_vista',
     });
     setFormErrors({});
+    setSubmitError(null);
     setIsModalOpen(true);
   };
 
@@ -132,6 +134,7 @@ export const Machines: React.FC = () => {
       payment_type: machine.payment_type || 'a_vista',
     });
     setFormErrors({});
+    setSubmitError(null);
     setIsModalOpen(true);
   };
 
@@ -148,7 +151,12 @@ export const Machines: React.FC = () => {
 
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting || !validateForm()) return;
+    if (submitting) return;
+    setSubmitError(null);
+    if (!validateForm()) {
+      setSubmitError('Confira os campos obrigatórios destacados abaixo e tente novamente.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -180,7 +188,9 @@ export const Machines: React.FC = () => {
       setFormErrors({});
       showToast(editingMachine ? 'Máquina atualizada com sucesso!' : 'Máquina cadastrada com foto!');
     } catch (err: any) {
-      showToast(err.response?.data?.error || err.message || 'Erro ao salvar máquina.');
+      const message = err.response?.data?.error || err.message || 'Erro ao salvar máquina.';
+      setSubmitError(message);
+      console.error('[Machines] Falha ao salvar cadastro:', err);
     } finally {
       setSubmitting(false);
     }
@@ -526,6 +536,17 @@ export const Machines: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmitForm} className="p-6 overflow-y-auto space-y-4">
+              {submitError && (
+                <div role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  <div className="font-bold">Não foi possível salvar a máquina</div>
+                  <p className="mt-1">{submitError}</p>
+                </div>
+              )}
+              {Object.keys(formErrors).length > 0 && (
+                <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+                  Preencha o nome da máquina, o modelo/bitola, um preço maior que zero e envie uma foto.
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-gray-300 mb-1">
                   Nome da Máquina / Fabricante *
