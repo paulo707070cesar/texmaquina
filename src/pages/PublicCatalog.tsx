@@ -60,15 +60,17 @@ export const PublicCatalog: React.FC = () => {
   return <div className="min-h-screen bg-[#080C14] text-[#E2E8F0]">
     <style>{`
       @media print {
-        @page { size: A4; margin: 12mm; }
-        body { background: #fff !important; color: #111827 !important; }
+        @page { size: A4; margin: 8mm; }
+        body { background: #fff !important; color: #111827 !important; margin: 0 !important; }
+        /* Na versão PDF, imprimir somente os cards dos equipamentos. */
+        body > header, body > footer, nav, .catalog-header, .catalog-print > footer { display: none !important; }
         .catalog-print, .catalog-print * { color: #111827 !important; background-color: transparent !important; box-shadow: none !important; text-shadow: none !important; }
-        .catalog-print { max-width: none !important; padding: 0 !important; }
+        .catalog-print { max-width: none !important; padding: 0 !important; margin: 0 !important; }
         .catalog-card { border: 1px solid #d1d5db !important; break-inside: avoid; page-break-inside: avoid; }
         .catalog-card img { max-height: 55mm !important; object-fit: contain !important; }
         .no-print { display: none !important; }
-        .catalog-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8mm !important; }
-        .catalog-header { border-bottom: 2px solid #111827 !important; }
+        .catalog-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6mm !important; }
+        .catalog-print > .flex.items-center.justify-between { margin-bottom: 4mm !important; }
       }
     `}</style>
     <main className="catalog-print max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
