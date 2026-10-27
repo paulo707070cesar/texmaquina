@@ -254,7 +254,21 @@ export const Settings: React.FC = () => {
             <input type="checkbox" checked={catalogShowPrices} onChange={e => setCatalogShowPrices(e.target.checked)} className="mt-1 accent-[#00C2FF]" />
             <span><span className="block text-sm font-semibold text-white">Mostrar preços no catálogo público</span><span className="block text-xs text-gray-400 mt-1">Desmarcado: os equipamentos aparecem como “Preço sob consulta”. Salve as configurações para aplicar a alteração.</span></span>
           </label>
-          <p className="text-xs text-gray-500">As opções são salvas no botão “Salvar Alterações” da seção Identidade Visual.</p>
+          <button type="button" disabled={savingSettings} onClick={async () => {
+            setSavingSettings(true);
+            try {
+              const updated = await settingsApi.update({ catalog_public_enabled: catalogPublicEnabled, catalog_show_prices: catalogShowPrices });
+              setTenant(current => current ? { ...current, ...updated } : updated);
+              showToast('Configurações do catálogo salvas!');
+            } catch (err: any) {
+              showToast(err?.response?.data?.error || 'Erro ao salvar o catálogo.', 'error');
+            } finally {
+              setSavingSettings(false);
+            }
+          }} className="w-full h-11 btn-electric rounded-xl font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+            {savingSettings ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>Salvar configurações do catálogo</span>
+          </button>
         </section>
 
         <section className="glass-card rounded-3xl p-6 border border-white/10 space-y-6 flex flex-col h-full">
