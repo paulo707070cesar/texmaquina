@@ -30,6 +30,7 @@ export interface User {
 export interface Machine {
   id: number;
   tenant_id: number;
+  category_id: number | null;
   name: string;
   model: string;
   description: string;
@@ -160,6 +161,7 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
     await pool.query(`CREATE TABLE IF NOT EXISTS machines (
       id INT AUTO_INCREMENT PRIMARY KEY,
       tenant_id INT NOT NULL,
+      category_id INT NULL,
       name VARCHAR(255) NOT NULL,
       model VARCHAR(150) NOT NULL,
       description TEXT NULL,
@@ -172,6 +174,12 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       INDEX (tenant_id)
     ) ENGINE=InnoDB;`);
+
+    // Existing installations may have been created before categories were linked to machines.
+    const [categoryColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'category_id'");
+    if (categoryColumns.length === 0) {
+      await pool.query('ALTER TABLE machines ADD COLUMN category_id INT NULL AFTER tenant_id');
+    }
 
     await pool.query(`CREATE TABLE IF NOT EXISTS leads (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -350,8 +358,8 @@ export const machinesRepo = {
   async create(data: Omit<Machine, 'id' | 'created_at'>): Promise<Machine> {
     if (isMySQLConnected && mysqlPool) {
       const [res]: any = await mysqlPool.query(
-        'INSERT INTO machines (tenant_id, name, model, description, price, image_url, status, origin, warranty, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [data.tenant_id, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista']
+        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, status, origin, warranty, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista']
       );
       return { id: res.insertId, ...data, created_at: new Date().toISOString() };
     }
