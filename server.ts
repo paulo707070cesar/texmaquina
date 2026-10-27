@@ -247,7 +247,7 @@ app.get('/api/public/catalog/:tenantId', async (req: Request, res: Response) => 
     }));
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     res.json({
-      tenant: { id: tenant.id, name: tenant.name, logo_url: tenant.logo_url || null, catalog_public_enabled: Boolean(tenant.catalog_public_enabled), catalog_show_prices: Boolean(tenant.catalog_show_prices) },
+      tenant: { id: tenant.id, name: tenant.name, logo_url: tenant.logo_url || null, catalog_public_enabled: Number(tenant.catalog_public_enabled) === 1, catalog_show_prices: Number(tenant.catalog_show_prices) === 1 },
       machines,
     });
   } catch (error) {
