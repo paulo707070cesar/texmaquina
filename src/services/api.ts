@@ -63,6 +63,7 @@ export interface Category {
 
 export interface Machine {
   id: number;
+  category_id: number | null;
   name: string;
   model: string;
   description: string;
