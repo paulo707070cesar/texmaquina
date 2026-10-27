@@ -534,7 +534,7 @@ export const Machines: React.FC = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ex: Mayer & Cie Relanit 3.2 II"
                   className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                 />
@@ -549,7 +549,7 @@ export const Machines: React.FC = () => {
                   <input
                     type="text"
                     value={formData.model}
-                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
                     placeholder="Ex: Single Jersey E28 34 Pol"
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   />
@@ -565,7 +565,7 @@ export const Machines: React.FC = () => {
                     step="0.01"
                     min="0"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                     placeholder="Ex: 420000"
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   />
@@ -580,7 +580,7 @@ export const Machines: React.FC = () => {
                   </label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   >
                     <option value="disponivel" className="bg-[#0b1120]">Disponível em Estoque</option>
@@ -595,7 +595,7 @@ export const Machines: React.FC = () => {
                   </label>
                   <select
                     value={formData.payment_type}
-                    onChange={(e) => setFormData({ ...formData, payment_type: e.target.value as any })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, payment_type: e.target.value as any }))}
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   >
                     <option value="a_vista" className="bg-[#0b1120]">À Vista</option>
@@ -612,7 +612,7 @@ export const Machines: React.FC = () => {
                   <input
                     type="text"
                     value={formData.origin}
-                    onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, origin: e.target.value }))}
                     placeholder="Ex: Brasil (SC)"
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   />
@@ -625,7 +625,7 @@ export const Machines: React.FC = () => {
                   <input
                     type="text"
                     value={formData.warranty}
-                    onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, warranty: e.target.value }))}
                     placeholder="Ex: 6 Meses de fábrica"
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   />
@@ -664,7 +664,7 @@ export const Machines: React.FC = () => {
                             setSubmitting(true);
                             const { systemApi } = await import('../services/api');
                             const { url } = await systemApi.uploadImage(file);
-                            setFormData({ ...formData, image_url: url });
+                            setFormData(prev => ({ ...prev, image_url: url }));
                             showToast('Imagem carregada com sucesso!');
                           } catch (err: any) {
                             showToast(err.response?.data?.error || 'Erro ao fazer upload da imagem.');
@@ -687,7 +687,7 @@ export const Machines: React.FC = () => {
                       <input
                         type="text"
                         value={formData.image_url}
-                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                         placeholder="Ou cole o link da imagem aqui..."
                         className="w-full h-11 pl-10 pr-3 glass-input rounded-xl text-sm"
                       />
@@ -705,7 +705,7 @@ export const Machines: React.FC = () => {
                 <textarea
                   rows={6}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Detalhes de alimentadores, inversores, automação PLC, voltagem, ano de fabricação, estado de conservação e opcionais inclusos..."
                   className="w-full p-3 glass-input rounded-xl text-sm"
                 />

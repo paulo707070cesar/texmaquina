@@ -14,7 +14,7 @@ dotenv.config();
 const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.resolve('.');
 
 // Ensure upload directory exists
-const uploadDir = path.join(currentDir, 'uploads');
+const uploadDir = path.join(currentDir, 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
