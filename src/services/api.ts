@@ -246,7 +246,19 @@ export const systemApi = {
   uploadImage: async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    const res = await api.post<{ url: string }>('/upload', formData);
+
+    // The shared Axios instance defaults to application/json.
+    // Override it for FormData so the browser/Axios can add the multipart boundary.
+    const res = await api.post<{ url: string }>('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (!res.data?.url) {
+      throw new Error('O servidor não retornou o endereço da imagem.');
+    }
+
     return res.data;
   },
 };
