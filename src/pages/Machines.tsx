@@ -36,6 +36,7 @@ export const Machines: React.FC = () => {
   const [machineToShare, setMachineToShare] = useState<Machine | null>(null);
   const [formData, setFormData] = useState({
     name: '',
+    category_id: '',
     model: '',
     description: '',
     price: '',
@@ -106,6 +107,7 @@ export const Machines: React.FC = () => {
     setEditingMachine(null);
     setFormData({
       name: '',
+      category_id: '',
       model: '',
       description: '',
       price: '',
@@ -124,6 +126,7 @@ export const Machines: React.FC = () => {
     setEditingMachine(machine);
     setFormData({
       name: machine.name,
+      category_id: machine.category_id ? String(machine.category_id) : '',
       model: machine.model,
       description: machine.description,
       price: machine.price.toString(),
@@ -141,6 +144,7 @@ export const Machines: React.FC = () => {
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
     if (!formData.name.trim()) errors.name = 'Nome da máquina é obrigatório.';
+    if (!formData.category_id) errors.category_id = 'Selecione uma categoria.';
     if (!formData.model.trim()) errors.model = 'Modelo/bitola é obrigatório.';
     const numPrice = parseFloat(formData.price);
     if (isNaN(numPrice) || numPrice <= 0) errors.price = 'Informe um preço válido maior que zero.';
@@ -162,6 +166,7 @@ export const Machines: React.FC = () => {
     try {
       const payload = {
         name: formData.name.trim(),
+        category_id: Number(formData.category_id),
         model: formData.model.trim(),
         description: formData.description.trim(),
         price: parseFloat(formData.price),
@@ -544,7 +549,7 @@ export const Machines: React.FC = () => {
               )}
               {Object.keys(formErrors).length > 0 && (
                 <div role="alert" className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
-                  Preencha o nome da máquina, o modelo/bitola, um preço maior que zero e envie uma foto.
+                  Preencha o nome, selecione a categoria, informe modelo/bitola, preço maior que zero e envie uma foto.
                 </div>
               )}
               <div>
@@ -559,6 +564,21 @@ export const Machines: React.FC = () => {
                   className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                 />
                 {formErrors.name && <p className="text-xs text-red-400 mt-1">{formErrors.name}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">Categoria da Máquina *</label>
+                <select
+                  value={formData.category_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                  className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                >
+                  <option value="">Selecione uma categoria</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+                {formErrors.category_id && <p className="text-xs text-red-400 mt-1">{formErrors.category_id}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
