@@ -13,10 +13,30 @@ dotenv.config();
 
 const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.resolve('.');
 
-// Ensure upload directory exists
-const uploadDir = path.join(currentDir, 'public', 'uploads');
+// Uploads persist outside the deployed application directory so deployments do not erase user images.
+const legacyUploadDir = path.join(currentDir, 'public', 'uploads');
+const persistentBaseDir = process.env.HOME || currentDir;
+const uploadDir = process.env.UPLOAD_DIR
+  ? path.resolve(process.env.UPLOAD_DIR)
+  : path.join(persistentBaseDir, 'texmachina-uploads');
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Copy existing uploads to persistent storage without overwriting files already there.
+if (path.resolve(legacyUploadDir) !== path.resolve(uploadDir) && fs.existsSync(legacyUploadDir)) {
+  try {
+    for (const fileName of fs.readdirSync(legacyUploadDir)) {
+      const sourcePath = path.join(legacyUploadDir, fileName);
+      const targetPath = path.join(uploadDir, fileName);
+      if (fs.statSync(sourcePath).isFile() && !fs.existsSync(targetPath)) {
+        fs.copyFileSync(sourcePath, targetPath);
+      }
+    }
+  } catch (migrationError) {
+    console.error('[Uploads] Não foi possível copiar todos os arquivos antigos:', migrationError);
+  }
 }
 
 // Multer Config
