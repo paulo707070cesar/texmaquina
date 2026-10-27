@@ -680,18 +680,6 @@ export const Machines: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                        <ImageIcon className="w-4 h-4" />
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.image_url}
-                        onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                        placeholder="Ou cole o link da imagem aqui..."
-                        className="w-full h-11 pl-10 pr-3 glass-input rounded-xl text-sm"
-                      />
-                    </div>
                   </div>
                 </div>
 

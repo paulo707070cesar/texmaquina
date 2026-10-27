@@ -394,8 +394,8 @@ app.get('/api/dashboard/stats', authenticateToken, async (req: AuthenticatedRequ
         orcamento: leads.filter(l => l.status === 'orcamento').length,
         negociacao: leads.filter(l => l.status === 'negociacao').length,
         fechado: leads.filter(l => l.status === 'fechado').length,
-      },
-      recentLeads: leads.slice(0, 5),
+      } || { novo: 0, orcamento: 0, negociacao: 0, fechado: 0 },
+      recentLeads: leads.slice(0, 5) || [],
     });
   } catch (error: any) {
     res.status(500).json({ error: 'Erro ao calcular estatísticas.' });
