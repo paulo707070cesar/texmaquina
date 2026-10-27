@@ -63,7 +63,13 @@ export const PublicCatalog: React.FC = () => {
         @page { size: A4; margin: 8mm; }
         body { background: #fff !important; color: #111827 !important; margin: 0 !important; }
         /* Na versão PDF, imprimir somente os cards dos equipamentos. */
-        body > header, body > footer, nav, .catalog-header, .catalog-print > footer { display: none !important; }
+        body > header, body > footer, nav, .catalog-print > footer { display: none !important; }
+        .catalog-header { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 16px !important; padding-bottom: 20px !important; margin-bottom: 24px !important; border-bottom: 1px solid #d1d5db !important; }
+        .catalog-header h1 { color: #111827 !important; font-size: 24pt !important; }
+        .catalog-header p { color: #374151 !important; }
+        .catalog-header > div:first-child > div:first-child { width: 64px !important; height: 64px !important; background: #fff !important; }
+        .catalog-header img { max-height: 64px !important; max-width: 64px !important; object-fit: contain !important; }
+        .catalog-header .no-print { display: none !important; }
         .catalog-print, .catalog-print * { color: #111827 !important; background-color: transparent !important; box-shadow: none !important; text-shadow: none !important; }
         .catalog-print { max-width: none !important; padding: 0 !important; margin: 0 !important; }
         .catalog-card { border: 1px solid #d1d5db !important; break-inside: avoid; page-break-inside: avoid; }
