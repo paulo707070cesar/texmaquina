@@ -42,8 +42,8 @@ export const Settings: React.FC = () => {
       setTenant(tData);
       setTenantName(tData.name);
       setLogoUrl(tData.logo_url || '');
-      setCatalogPublicEnabled(Boolean(tData.catalog_public_enabled));
-      setCatalogShowPrices(Boolean(tData.catalog_show_prices));
+      setCatalogPublicEnabled(Number(tData.catalog_public_enabled) === 1);
+      setCatalogShowPrices(Number(tData.catalog_show_prices) === 1);
       setCategories(cData);
     } catch (err) {
       console.error('Error loading settings:', err);
