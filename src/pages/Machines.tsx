@@ -57,6 +57,7 @@ export const Machines: React.FC = () => {
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadMachines();
@@ -655,14 +656,15 @@ export const Machines: React.FC = () => {
                     <div className="relative group">
                       <input
                         type="file"
+                        ref={fileInputRef}
                         accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
                           try {
                             setSubmitting(true);
-                            const { systemApi } = await import('../services/api');
                             const { url } = await systemApi.uploadImage(file);
                             setFormData(prev => ({ ...prev, image_url: url }));
                             showToast('Imagem carregada com sucesso!');
@@ -672,9 +674,14 @@ export const Machines: React.FC = () => {
                             setSubmitting(false);
                           }
                         }}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className="h-11 px-4 border-2 border-dashed border-white/10 group-hover:border-[#00C2FF]/40 rounded-xl flex items-center justify-center gap-2 bg-white/[0.02] transition-all">
+                      <div 
+                        className="h-11 px-4 border-2 border-dashed border-white/10 hover:border-[#00C2FF]/40 rounded-xl flex items-center justify-center gap-2 bg-white/[0.02] transition-all cursor-pointer"
+                        onClick={() => {
+                          console.log('Div clicked, triggering ref', fileInputRef.current);
+                          fileInputRef.current?.click();
+                        }}
+                      >
                         <ImageIcon className="w-4 h-4 text-[#00C2FF]" />
                         <span className="text-xs font-bold text-gray-300">Fazer Upload de Foto</span>
                       </div>
