@@ -73,6 +73,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'texmachina_super_secure_jwt_secret
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(uploadDir));
+// Backward compatibility: serve files that may still exist in the original deployment folder.
+if (path.resolve(legacyUploadDir) !== path.resolve(uploadDir) && fs.existsSync(legacyUploadDir)) {
+  app.use('/uploads', express.static(legacyUploadDir));
+}
 
 // ----------------- UPLOAD ROUTE -----------------
 app.post('/api/upload', (req, res) => {
