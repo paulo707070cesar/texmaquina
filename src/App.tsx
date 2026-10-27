@@ -16,14 +16,15 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  const isPublicCatalog = location.pathname.startsWith('/catalogo/');
 
   return (
     <div className="min-h-screen bg-[#080C14] text-[#E2E8F0] bg-ambient-grid flex flex-col font-sans">
-      {isAuthenticated && !isLoginPage && <Navbar />}
-      <main className="flex-1 pb-20 md:pb-8">
+      {isAuthenticated && !isLoginPage && !isPublicCatalog && <Navbar />}
+      <main className={isPublicCatalog ? "flex-1" : "flex-1 pb-20 md:pb-8"}>
         {children}
       </main>
-      {isAuthenticated && !isLoginPage && <BottomNav />}
+      {isAuthenticated && !isLoginPage && !isPublicCatalog && <BottomNav />}
     </div>
   );
 };
