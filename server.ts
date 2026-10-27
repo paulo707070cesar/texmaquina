@@ -231,7 +231,7 @@ app.get('/api/public/catalog/:tenantId', async (req: Request, res: Response) => 
     const tenantId = Number.parseInt(req.params.tenantId, 10);
     if (!Number.isInteger(tenantId) || tenantId <= 0) return res.status(400).json({ error: 'Catálogo inválido.' });
     const tenant = await tenantsRepo.findById(tenantId);
-    if (!tenant || !tenant.catalog_public_enabled) return res.status(404).json({ error: 'Este catálogo ainda não está publicado.' });
+    if (!tenant || Number(tenant.catalog_public_enabled) !== 1) return res.status(404).json({ error: 'Este catálogo ainda não está publicado.' });
 
     const [allMachines, categories] = await Promise.all([
       machinesRepo.list(tenantId),
@@ -242,7 +242,7 @@ app.get('/api/public/catalog/:tenantId', async (req: Request, res: Response) => 
       id: machine.id, category_id: machine.category_id,
       category_name: machine.category_id ? categoryNames.get(machine.category_id) || null : null,
       name: machine.name, model: machine.model, description: machine.description,
-      price: machine.price, image_url: machine.image_url, status: machine.status,
+      price: Boolean(tenant.catalog_show_prices) ? machine.price : null, image_url: machine.image_url, status: machine.status,
       origin: machine.origin, warranty: machine.warranty, payment_type: machine.payment_type,
     }));
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
