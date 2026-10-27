@@ -6,6 +6,8 @@ export interface Tenant {
   name: string;
   slug?: string | null;
   logo_url?: string | null;
+  catalog_public_enabled?: boolean | number;
+  catalog_show_prices?: boolean | number;
   created_at: string;
 }
 
@@ -65,7 +67,7 @@ let dbConnectionError: string | null = null;
 
 // Initial Fallback / In-Memory Store
 const memoryTenants: Tenant[] = [
-  { id: 1, name: 'TexMachina Matriz', slug: 'matriz', logo_url: null, created_at: new Date().toISOString() }
+  { id: 1, name: 'TexMachina Matriz', slug: 'matriz', logo_url: null, catalog_public_enabled: 0, catalog_show_prices: 0, created_at: new Date().toISOString() }
 ];
 
 const memoryCategories: Category[] = [
@@ -135,8 +137,19 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       name VARCHAR(200) NOT NULL,
       slug VARCHAR(100) NULL UNIQUE,
       logo_url VARCHAR(500) NULL,
+      catalog_public_enabled TINYINT(1) NOT NULL DEFAULT 0,
+      catalog_show_prices TINYINT(1) NOT NULL DEFAULT 0,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;`);
+
+    const [catalogEnabledColumns]: any = await pool.query("SHOW COLUMNS FROM tenants LIKE 'catalog_public_enabled'");
+    if (catalogEnabledColumns.length === 0) {
+      await pool.query('ALTER TABLE tenants ADD COLUMN catalog_public_enabled TINYINT(1) NOT NULL DEFAULT 0');
+    }
+    const [catalogPriceColumns]: any = await pool.query("SHOW COLUMNS FROM tenants LIKE 'catalog_show_prices'");
+    if (catalogPriceColumns.length === 0) {
+      await pool.query('ALTER TABLE tenants ADD COLUMN catalog_show_prices TINYINT(1) NOT NULL DEFAULT 0');
+    }
 
     await pool.query(`CREATE TABLE IF NOT EXISTS categories (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -216,7 +229,7 @@ export const tenantsRepo = {
   async create(name: string): Promise<Tenant> {
     if (isMySQLConnected && mysqlPool) {
       const [result]: any = await mysqlPool.query('INSERT INTO tenants (name) VALUES (?)', [name]);
-      const newTenant = { id: result.insertId, name, logo_url: null, created_at: new Date().toISOString() };
+      const newTenant = { id: result.insertId, name, logo_url: null, catalog_public_enabled: 0, catalog_show_prices: 0, created_at: new Date().toISOString() };
       
       // Seed default categories for new tenant
       await categoriesRepo.createBatch(newTenant.id, [
@@ -227,7 +240,7 @@ export const tenantsRepo = {
 
       return newTenant;
     }
-    const tenant: Tenant = { id: nextTenantId++, name, logo_url: null, created_at: new Date().toISOString() };
+    const tenant: Tenant = { id: nextTenantId++, name, logo_url: null, catalog_public_enabled: 0, catalog_show_prices: 0, created_at: new Date().toISOString() };
     memoryTenants.push(tenant);
     return tenant;
   },
