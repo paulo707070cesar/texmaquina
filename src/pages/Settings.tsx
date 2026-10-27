@@ -22,6 +22,8 @@ export const Settings: React.FC = () => {
   // Settings form
   const [tenantName, setTenantName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [catalogPublicEnabled, setCatalogPublicEnabled] = useState(false);
+  const [catalogShowPrices, setCatalogShowPrices] = useState(false);
 
   // Category form
   const [newCatName, setNewCatName] = useState('');
@@ -40,6 +42,8 @@ export const Settings: React.FC = () => {
       setTenant(tData);
       setTenantName(tData.name);
       setLogoUrl(tData.logo_url || '');
+      setCatalogPublicEnabled(Boolean(tData.catalog_public_enabled));
+      setCatalogShowPrices(Boolean(tData.catalog_show_prices));
       setCategories(cData);
     } catch (err) {
       console.error('Error loading settings:', err);
@@ -57,7 +61,7 @@ export const Settings: React.FC = () => {
     e.preventDefault();
     setSavingSettings(true);
     try {
-      await settingsApi.update({ name: tenantName, logo_url: logoUrl || null });
+      await settingsApi.update({ name: tenantName, logo_url: logoUrl || null, catalog_public_enabled: catalogPublicEnabled, catalog_show_prices: catalogShowPrices });
       showToast('Configurações salvas com sucesso!');
       // Update local storage name if changed
       const savedUser = localStorage.getItem('texmachina_user');
@@ -222,6 +226,37 @@ export const Settings: React.FC = () => {
         </section>
 
         {/* Categories Section */}
+        <section className="glass-card rounded-3xl p-6 border border-white/10 space-y-5">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+            <Layout className="w-5 h-5 text-[#00C2FF]" />
+            <h2 className="font-display font-bold text-white">Catálogo comercial público</h2>
+          </div>
+          <p className="text-sm text-gray-400">Compartilhe um link fixo com os equipamentos disponíveis da sua empresa. Máquinas vendidas ou em manutenção não aparecem no catálogo.</p>
+          {tenant && (
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-gray-400 uppercase">Link público do catálogo</label>
+              <div className="flex flex-wrap gap-2">
+                <input readOnly value={window.location.origin + '/catalogo/' + tenant.id} className="min-w-0 flex-1 h-10 px-3 glass-input rounded-xl text-xs" />
+                <button type="button" onClick={async () => {
+                  const link = window.location.origin + '/catalogo/' + tenant.id;
+                  try { await navigator.clipboard.writeText(link); showToast('Link do catálogo copiado!'); }
+                  catch { showToast('Não foi possível copiar. Selecione e copie o link manualmente.', 'error'); }
+                }} className="px-3 rounded-xl border border-white/15 text-xs font-bold text-white hover:bg-white/5">Copiar</button>
+                <a href={'/catalogo/' + tenant.id} target="_blank" rel="noreferrer" className="px-3 rounded-xl border border-[#00C2FF]/40 text-xs font-bold text-[#00C2FF] flex items-center">Abrir</a>
+              </div>
+            </div>
+          )}
+          <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 cursor-pointer">
+            <input type="checkbox" checked={catalogPublicEnabled} onChange={e => setCatalogPublicEnabled(e.target.checked)} className="mt-1 accent-[#00C2FF]" />
+            <span><span className="block text-sm font-semibold text-white">Publicar catálogo</span><span className="block text-xs text-gray-400 mt-1">Quando desativado, o link não exibe informações comerciais publicamente.</span></span>
+          </label>
+          <label className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/10 cursor-pointer">
+            <input type="checkbox" checked={catalogShowPrices} onChange={e => setCatalogShowPrices(e.target.checked)} className="mt-1 accent-[#00C2FF]" />
+            <span><span className="block text-sm font-semibold text-white">Mostrar preços no catálogo público</span><span className="block text-xs text-gray-400 mt-1">Desmarcado: os equipamentos aparecem como “Preço sob consulta”. Salve as configurações para aplicar a alteração.</span></span>
+          </label>
+          <p className="text-xs text-gray-500">As opções são salvas no botão “Salvar Alterações” da seção Identidade Visual.</p>
+        </section>
+
         <section className="glass-card rounded-3xl p-6 border border-white/10 space-y-6 flex flex-col h-full">
           <div className="flex items-center gap-3 border-b border-white/10 pb-4">
             <Plus className="w-5 h-5 text-[#00C2FF]" />
