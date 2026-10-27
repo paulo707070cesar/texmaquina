@@ -225,6 +225,37 @@ app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res
   }
 });
 
+// ----------------- PUBLIC CATALOG (read-only, tenant-scoped) -----------------
+app.get('/api/public/catalog/:tenantId', async (req: Request, res: Response) => {
+  try {
+    const tenantId = Number.parseInt(req.params.tenantId, 10);
+    if (!Number.isInteger(tenantId) || tenantId <= 0) return res.status(400).json({ error: 'Catálogo inválido.' });
+    const tenant = await tenantsRepo.findById(tenantId);
+    if (!tenant || !tenant.catalog_public_enabled) return res.status(404).json({ error: 'Este catálogo ainda não está publicado.' });
+
+    const [allMachines, categories] = await Promise.all([
+      machinesRepo.list(tenantId),
+      categoriesRepo.list(tenantId),
+    ]);
+    const categoryNames = new Map(categories.map(category => [category.id, category.name]));
+    const machines = allMachines.filter(machine => machine.status === 'disponivel').map(machine => ({
+      id: machine.id, category_id: machine.category_id,
+      category_name: machine.category_id ? categoryNames.get(machine.category_id) || null : null,
+      name: machine.name, model: machine.model, description: machine.description,
+      price: machine.price, image_url: machine.image_url, status: machine.status,
+      origin: machine.origin, warranty: machine.warranty, payment_type: machine.payment_type,
+    }));
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.json({
+      tenant: { id: tenant.id, name: tenant.name, logo_url: tenant.logo_url || null, catalog_public_enabled: Boolean(tenant.catalog_public_enabled), catalog_show_prices: Boolean(tenant.catalog_show_prices) },
+      machines,
+    });
+  } catch (error) {
+    console.error('[PublicCatalog] Erro ao carregar catálogo:', error);
+    res.status(500).json({ error: 'Não foi possível carregar o catálogo agora.' });
+  }
+});
+
 // ----------------- MACHINES CRUD ROUTES (Tenant Restricted) -----------------
 app.get('/api/machines', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -340,8 +371,13 @@ app.get('/api/settings', authenticateToken, async (req: AuthenticatedRequest, re
 
 app.put('/api/settings', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, logo_url } = req.body;
-    const updated = await tenantsRepo.update(req.user!.tenant_id, { name, logo_url });
+    const { name, logo_url, catalog_public_enabled, catalog_show_prices } = req.body;
+    const updateData: { name?: string; logo_url?: string | null; catalog_public_enabled?: number; catalog_show_prices?: number } = {};
+    if (typeof name === 'string' && name.trim()) updateData.name = name.trim();
+    if (logo_url === null || typeof logo_url === 'string') updateData.logo_url = logo_url;
+    if (typeof catalog_public_enabled === 'boolean') updateData.catalog_public_enabled = catalog_public_enabled ? 1 : 0;
+    if (typeof catalog_show_prices === 'boolean') updateData.catalog_show_prices = catalog_show_prices ? 1 : 0;
+    const updated = await tenantsRepo.update(req.user!.tenant_id, updateData);
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao salvar configurações.' });
