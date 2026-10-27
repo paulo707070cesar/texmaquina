@@ -10,6 +10,7 @@ import { Machines } from './pages/Machines';
 import { Pipeline } from './pages/Pipeline';
 import { ClientsList } from './pages/ClientsList';
 import { Settings } from './pages/Settings';
+import { PublicCatalog } from './pages/PublicCatalog';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -34,6 +35,7 @@ export default function App() {
         <AppLayout>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/catalogo/:tenantId" element={<PublicCatalog />} />
             
             <Route
               path="/"
