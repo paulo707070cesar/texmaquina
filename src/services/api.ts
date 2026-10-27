@@ -52,6 +52,8 @@ export interface Tenant {
   name: string;
   slug?: string | null;
   logo_url?: string | null;
+  catalog_public_enabled?: boolean | number;
+  catalog_show_prices?: boolean | number;
 }
 
 export interface Category {
@@ -214,7 +216,7 @@ export const settingsApi = {
     const res = await api.get<Tenant>('/settings');
     return res.data;
   },
-  update: async (data: { name: string; logo_url?: string | null }) => {
+  update: async (data: { name?: string; logo_url?: string | null; catalog_public_enabled?: boolean; catalog_show_prices?: boolean }) => {
     const res = await api.put<Tenant>('/settings', data);
     return res.data;
   },
@@ -235,6 +237,19 @@ export const categoriesApi = {
   },
 };
 
+export interface PublicCatalogMachine extends Omit<Machine, 'created_at'> {
+  category_name?: string | null;
+}
+export interface PublicCatalogData {
+  tenant: { id: number; name: string; logo_url: string | null; catalog_public_enabled: boolean; catalog_show_prices: boolean };
+  machines: PublicCatalogMachine[];
+}
+export const catalogApi = {
+  getPublic: async (tenantId: number) => {
+    const res = await api.get<PublicCatalogData>(`/public/catalog/${tenantId}`);
+    return res.data;
+  },
+};
 export const systemApi = {
   getStatus: async () => {
     const res = await api.get<SystemStatus>('/system/status');
