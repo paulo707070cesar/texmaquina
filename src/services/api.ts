@@ -237,7 +237,8 @@ export const categoriesApi = {
   },
 };
 
-export interface PublicCatalogMachine extends Omit<Machine, 'created_at'> {
+export interface PublicCatalogMachine extends Omit<Machine, 'created_at' | 'price'> {
+  price: number | null;
   category_name?: string | null;
 }
 export interface PublicCatalogData {
