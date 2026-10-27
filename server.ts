@@ -241,14 +241,27 @@ app.get('/api/machines', authenticateToken, async (req: AuthenticatedRequest, re
 
 app.post('/api/machines', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const imageUrl = typeof req.body.image_url === 'string' ? req.body.image_url.trim() : '';
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'A foto não foi recebida. Envie a imagem novamente.' });
+    }
+
     const machine = await machinesRepo.create({
       ...req.body,
+      image_url: imageUrl,
       tenant_id: req.user!.tenant_id,
       price: parseFloat(req.body.price) || 0,
     });
+
+    if (!machine?.id || !machine?.image_url) {
+      console.error('[Machines] Cadastro retornou sem ID ou imagem:', { id: machine?.id, image_url: machine?.image_url });
+      return res.status(500).json({ error: 'O servidor não confirmou a gravação da máquina e da foto.' });
+    }
+
     res.status(201).json(machine);
   } catch (error: any) {
-    res.status(500).json({ error: 'Erro ao cadastrar.' });
+    console.error('[Machines] Erro ao cadastrar máquina:', error);
+    res.status(500).json({ error: 'Falha ao gravar a máquina no banco de dados. Verifique os logs do servidor.' });
   }
 });
 
