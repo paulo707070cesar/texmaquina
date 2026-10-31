@@ -225,6 +225,36 @@ export const Machines: React.FC = () => {
     }
   };
 
+  const handleImportPhoneContact = async () => {
+    try {
+      const contactsApi = (navigator as any).contacts;
+      if (!contactsApi?.select) {
+        showToast('A agenda não é compatível neste navegador. Use “Colar contato do WhatsApp”.');
+        return;
+      }
+      const contacts = await contactsApi.select(['name', 'tel'], { multiple: false });
+      const contact = contacts?.[0];
+      if (!contact) return;
+      const name = Array.isArray(contact.name) ? contact.name[0] : contact.name;
+      const tel = Array.isArray(contact.tel) ? contact.tel[0] : contact.tel;
+      setFormData(prev => ({ ...prev, seller_contact_name: String(name || prev.seller_contact_name || ''), seller_contact_phone: String(tel || prev.seller_contact_phone || '') }));
+      showToast('Contato importado. Confira os dados antes de salvar.');
+    } catch (err) {
+      console.error('[Machines] Não foi possível selecionar contato:', err);
+      showToast('Não foi possível importar. Tente colar os dados do contato.');
+    }
+  };
+
+  const handlePasteWhatsAppContact = () => {
+    const copied = window.prompt('Cole aqui o nome e/ou telefone copiado do WhatsApp:');
+    if (!copied?.trim()) return;
+    const phoneMatch = copied.match(/\+?\d[\d\s().-]{7,}\d/);
+    const phone = phoneMatch ? phoneMatch[0].trim() : '';
+    const name = copied.replace(phoneMatch?.[0] || '', '').replace(/[|,;\n\t]+/g, ' ').trim();
+    const digitsOnly = copied.match(/\d{8,}/)?.[0] || '';
+    setFormData(prev => ({ ...prev, seller_contact_name: name || prev.seller_contact_name, seller_contact_phone: phone || digitsOnly || prev.seller_contact_phone }));
+    showToast('Dados preenchidos. Confira nome e telefone antes de salvar.');
+  };
   const handleContactSeller = (machine: Machine) => {
     const phone = (machine.seller_contact_phone || '').replace(/\\D/g, '');
     if (!phone) {
@@ -707,6 +737,14 @@ export const Machines: React.FC = () => {
                 <div>
                   <p className="text-xs font-bold text-amber-200">Contato interno do vendedor (privado)</p>
                   <p className="text-[11px] text-gray-400 mt-1">Esses dados ficam apenas no sistema e não aparecem na ficha compartilhada.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button type="button" onClick={handleImportPhoneContact} className="h-10 px-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2">
+                    <Phone className="w-4 h-4" /> Importar contato da agenda
+                  </button>
+                  <button type="button" onClick={handlePasteWhatsAppContact} className="h-10 px-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-gray-200 text-xs font-bold flex items-center justify-center gap-2">
+                    <Download className="w-4 h-4" /> Colar contato do WhatsApp
+                  </button>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-300 mb-1">Nome do vendedor</label>
