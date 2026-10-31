@@ -32,22 +32,49 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const [copiedText, setCopiedText] = useState(false);
 
   const getProposalText = () => {
-    return (
-      `🏭 *TEXMACHINA - PROPOSTA & FICHA TÉCNICA*\n\n` +
-      `📌 *Equipamento:* ${machine.name}\n` +
-      `⚙️ *Modelo/Bitola:* ${machine.model}\n` +
-      `🏷️ *Série Industrial:* #TEX-0${machine.id}-2024\n` +
-      `💰 *Valor de Venda:* ${formatCurrency(machine.price)}\n` +
-      `🛡️ *Status:* ${machine.status === 'disponivel' ? 'Disponível em Estoque' : machine.status === 'manutencao' ? 'Em Manutenção' : 'Vendido'}\n` +
-      `📍 *Origem:* ${machine.origin || 'Brasil'}\n` +
-      `🛡️ *Garantia:* ${machine.warranty || '6 Meses'}\n` +
-      `📄 *Condições:* ${machine.payment_type === 'financiado' ? 'FINAME / BNDES' : machine.payment_type === 'conforme_analise' ? 'Financiamento conforme análise de crédito' : 'À Vista / Transferência'}\n\n` +
-      `📋 *Especificações Técnicas:*\n${machine.description || 'Equipamento revisado com laudo mecânico e elétrico completo.'}\n\n` +
-      `📸 *Foto principal:* ${machine.image_url}\n` +
-      (machine.image_urls?.length ? `🖼️ *Fotos adicionais:*\n${machine.image_urls.join('\n')}\n` : '') +
-      (machine.video_url ? `🎥 *Vídeo da máquina:* ${machine.video_url}\n` : '') + `\n` +
-      `_Enviado através do TexMachina OS - Sistema B2B de Máquinas Têxteis_`
-    );
+    const statusLabel =
+      machine.status === 'disponivel'
+        ? 'Disponível para negociação'
+        : machine.status === 'manutencao'
+          ? 'Em manutenção — consulte previsão de disponibilidade'
+          : 'Vendida — consulte outras opções';
+
+    const paymentLabel =
+      machine.payment_type === 'financiado'
+        ? 'Possibilidade de FINAME / BNDES — sujeito à confirmação'
+        : machine.payment_type === 'conforme_analise'
+          ? 'Financiamento sujeito à análise de crédito'
+          : 'À vista ou transferência — consulte condições';
+
+    const sections = [
+      '🏭 *TEXMACHINA | FICHA COMERCIAL DE MÁQUINA TÊXTIL*',
+      '',
+      `📌 *Equipamento:* ${machine.name}`,
+      `⚙️ *Modelo / bitola:* ${machine.model}`,
+      `🔎 *Referência do anúncio:* ${machine.id}`,
+      `📦 *Disponibilidade:* ${statusLabel}`,
+      `💰 *Valor anunciado:* ${formatCurrency(machine.price)}`,
+      `💳 *Condição comercial:* ${paymentLabel}`,
+      ...(machine.origin ? [`📍 *Origem:* ${machine.origin}`] : []),
+      ...(machine.warranty ? [`🛡️ *Garantia informada:* ${machine.warranty}`] : []),
+      '',
+      '*📋 DESCRIÇÃO E ESPECIFICAÇÕES*',
+      machine.description?.trim() || 'Consulte nossa equipe para obter mais informações técnicas sobre este equipamento.',
+      '',
+      '*📸 FOTOS E VÍDEO*',
+      ...(machine.image_url ? [`Foto principal: ${machine.image_url}`] : []),
+      ...(machine.image_urls?.length ? machine.image_urls.map((url, index) => `Foto adicional ${index + 1}: ${url}`) : []),
+      ...(machine.video_url ? [`Vídeo: ${machine.video_url}`] : []),
+      '',
+      '*📲 PRÓXIMO PASSO*',
+      'Fale conosco para confirmar disponibilidade, frete, condições de pagamento e agendar uma visita ou demonstração.',
+      ...(machine.seller_contact_name ? [`Contato: ${machine.seller_contact_name}`] : []),
+      ...(machine.seller_contact_phone ? [`WhatsApp: ${machine.seller_contact_phone}`] : []),
+      '',
+      '_TexMachina OS — soluções para o mercado de máquinas têxteis._',
+    ];
+
+    return sections.join('\\n');
   };
 
   const handleCopyImage = async () => {
