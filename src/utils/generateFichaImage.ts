@@ -42,11 +42,11 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 
   ctx.fillStyle = '#00C2FF';
   ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('TEXMACHINA ENTERPRISE • INDUSTRIAL TELEMETRY', 104, 96);
+  ctx.fillText('TEXMACHINA • MÁQUINAS TÊXTEIS', 104, 96);
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('Ficha Técnica Homologada', 104, 140);
+  ctx.fillText('Ficha Comercial do Equipamento', 104, 140);
 
   // Serial tag
   ctx.fillStyle = 'rgba(0, 194, 255, 0.15)';
@@ -60,7 +60,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillStyle = '#00C2FF';
   ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(`SÉRIE #TEX-0${machine.id}-2024`, width - 230, 112);
+  ctx.fillText(`REF. #${machine.id}`, width - 230, 112);
   ctx.textAlign = 'left';
 
   // 4. Draw Machine Photo Frame
@@ -115,7 +115,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
     ctx.fillRect(imgBoxX, imgBoxY, imgBoxW, imgBoxH);
     ctx.fillStyle = '#38BDF8';
     ctx.font = 'bold 32px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Equipamento Têxtil Homologado', imgBoxX + 60, imgBoxY + 300);
+    ctx.fillText('Máquina têxtil', imgBoxX + 60, imgBoxY + 300);
   }
 
   // Dark gradient at bottom of image
@@ -134,7 +134,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 22px "Plus Jakarta Sans", sans-serif';
   ctx.fillText(
-    machine.status === 'disponivel' ? 'DISPONÍVEL EM ESTOQUE' : 'EM REVISÃO / RESERVADO',
+    machine.status === 'disponivel' ? 'DISPONÍVEL PARA NEGOCIAÇÃO' : machine.status === 'manutencao' ? 'EM MANUTENÇÃO' : 'VENDIDA',
     imgBoxX + 60,
     imgBoxY + imgBoxH - 33
   );
@@ -193,11 +193,13 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 
   ctx.fillStyle = '#94A3B8';
   ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('FINANCIAMENTO', box2X + 25, currentY + 40);
+  ctx.fillText('CONDIÇÃO DE PAGAMENTO', box2X + 25, currentY + 40);
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('FINAME / À Vista', box2X + 25, currentY + 84);
+  ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
+  const paymentLabel = machine.payment_type === 'financiado' ? 'FINAME / BNDES*' : machine.payment_type === 'conforme_analise' ? 'Sob análise*' : 'À vista / transferência';
+  ctx.fillText(paymentLabel, box2X + 25, currentY + 84);
 
   // Box 3: Garantia
   const box3X = box2X + colW + 20;
@@ -210,11 +212,12 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 
   ctx.fillStyle = '#94A3B8';
   ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('GARANTIA TÉCNICA', box3X + 25, currentY + 40);
+  ctx.fillText('GARANTIA INFORMADA', box3X + 25, currentY + 40);
 
   ctx.fillStyle = '#10B981';
   ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('6 Meses Operacional', box3X + 25, currentY + 84);
+  ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
+  ctx.fillText(machine.warranty || 'Consulte condições', box3X + 25, currentY + 84);
 
   // 7. Technical Description Card
   currentY += boxH + 40;
@@ -235,7 +238,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.font = '400 20px "Plus Jakarta Sans", sans-serif';
 
   // Text wrap logic
-  const text = machine.description || 'Equipamento têxtil de alta rotação totalmente revisado com laudo mecânico e elétrico completo. Pronto para transporte industrial imediato.';
+  const text = machine.description || 'Entre em contato para receber as especificações técnicas deste equipamento.';
   const words = text.split(' ');
   let line = '';
   let lineY = currentY + 85;
