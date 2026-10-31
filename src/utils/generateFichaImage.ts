@@ -259,7 +259,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 
   // Text wrap logic
   const text = machine.description || 'Entre em contato para receber as especificações técnicas deste equipamento.';
-  const words = text.split(/\\s+/);
+  const words = text.trim().split(/\s+/);
   const lines: string[] = [];
   let line = '';
   const maxTextW = width - 220;
@@ -282,7 +282,13 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
     while (ctx.measureText(`${last}...`).width > maxTextW && last.length > 3) last = last.slice(0, -1);
     lines[lines.length - 1] = `${last.trimEnd()}...`;
   }
+  // Clip the description to its card so no text can escape the rounded box.
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(80, currentY, width - 160, descBoxH, 24);
+  ctx.clip();
   lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 32));
+  ctx.restore();
 
   // 8. Footer Bar
   currentY = height - 90;
