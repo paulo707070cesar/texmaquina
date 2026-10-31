@@ -62,6 +62,7 @@ export const Machines: React.FC = () => {
 
   // Ficha Técnica modal
   const [selectedMachineForSpecs, setSelectedMachineForSpecs] = useState<Machine | null>(null);
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -470,15 +471,21 @@ export const Machines: React.FC = () => {
                   )}
 
                   {machine.video_url && (
-                    <a
-                      href={machine.video_url}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
                       className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 hover:bg-emerald-400 text-white px-3 py-2 text-[11px] font-bold shadow-lg"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const rawUrl = machine.video_url!.trim();
+                        const videoUrl = /^https?:\/\//i.test(rawUrl)
+                          ? rawUrl
+                          : new URL(rawUrl.startsWith('/') ? rawUrl : '/' + rawUrl, window.location.origin).toString();
+                        setSelectedVideoUrl(videoUrl);
+                      }}
                     >
                       <Play className="w-3.5 h-3.5 fill-current" /> Assistir vídeo
-                    </a>
+                    </button>
                   )}
 
                   {/* Serial Number Tag */}
@@ -1117,6 +1124,31 @@ export const Machines: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Reprodutor de vídeo: mantém o usuário no sistema em vez de navegar para o dashboard. */}
+      {selectedVideoUrl && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-6"
+          onClick={() => setSelectedVideoUrl(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Reprodutor de vídeo da máquina"
+        >
+          <div className="w-full max-w-4xl rounded-2xl overflow-hidden border border-white/15 bg-[#0B1120] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10">
+              <div className="flex items-center gap-2 text-white font-bold text-sm">
+                <Play className="w-4 h-4 text-emerald-400" /> Vídeo da máquina
+              </div>
+              <button type="button" onClick={() => setSelectedVideoUrl(null)} className="rounded-lg p-2 text-gray-300 hover:bg-white/10 hover:text-white" aria-label="Fechar vídeo">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="bg-black aspect-video flex items-center justify-center">
+              <video key={selectedVideoUrl} src={selectedVideoUrl} controls autoPlay playsInline className="w-full h-full max-h-[75vh]" />
+            </div>
+            <div className="px-4 py-3 text-xs text-gray-400">Se o vídeo não iniciar, confira se o arquivo foi carregado corretamente e se o formato é MP4, MOV ou WebM.</div>
           </div>
         </div>
       )}
