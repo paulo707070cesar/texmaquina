@@ -68,6 +68,7 @@ export const Settings: React.FC = () => {
       if (savedUser) {
         const user = JSON.parse(savedUser);
         user.tenant_name = tenantName;
+        user.tenant_logo = logoUrl || null;
         localStorage.setItem('texmachina_user', JSON.stringify(user));
         // Refresh page to sync navbar
         window.location.reload();
