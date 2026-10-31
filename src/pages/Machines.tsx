@@ -15,7 +15,8 @@ import {
   Image as ImageIcon, 
   Sparkles,
   Download,
-  Layout
+  Layout,
+  Phone
 } from 'lucide-react';
 import { ShareFichaModal } from '../components/ShareFichaModal';
 import { categoriesApi, Category, systemApi } from '../services/api';
@@ -45,6 +46,8 @@ export const Machines: React.FC = () => {
     origin: 'Brasil',
     warranty: '6 Meses',
     payment_type: 'a_vista' as 'a_vista' | 'financiado',
+    seller_contact_name: '',
+    seller_contact_phone: '',
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -116,6 +119,8 @@ export const Machines: React.FC = () => {
       origin: 'Brasil',
       warranty: '6 Meses',
       payment_type: 'a_vista',
+      seller_contact_name: '',
+      seller_contact_phone: '',
     });
     setFormErrors({});
     setSubmitError(null);
@@ -135,6 +140,8 @@ export const Machines: React.FC = () => {
       origin: machine.origin || 'Brasil',
       warranty: machine.warranty || '6 Meses',
       payment_type: machine.payment_type || 'a_vista',
+      seller_contact_name: machine.seller_contact_name || '',
+      seller_contact_phone: machine.seller_contact_phone || '',
     });
     setFormErrors({});
     setSubmitError(null);
@@ -176,6 +183,8 @@ export const Machines: React.FC = () => {
         origin: formData.origin,
         warranty: formData.warranty,
         payment_type: formData.payment_type,
+        seller_contact_name: formData.seller_contact_name.trim(),
+        seller_contact_phone: formData.seller_contact_phone.trim(),
       };
 
       const savedMachine = editingMachine
@@ -214,6 +223,17 @@ export const Machines: React.FC = () => {
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleContactSeller = (machine: Machine) => {
+    const phone = (machine.seller_contact_phone || '').replace(/\\D/g, '');
+    if (!phone) {
+      showToast('Cadastre o telefone do vendedor ao editar esta máquina.');
+      return;
+    }
+    const whatsappPhone = phone.startsWith('55') ? phone : `55${phone}`;
+    const message = 'Entre em contato tenho comprador para essa maquina';
+    window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleShare = (machine: Machine) => {
@@ -474,7 +494,16 @@ export const Machines: React.FC = () => {
                     </div>
 
                     {/* Action Buttons Row */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleContactSeller(machine)}
+                        className="w-full h-10 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-colors"
+                      >
+                        <Phone className="w-4 h-4" />
+                        <span>Contatar vendedor</span>
+                      </button>
+                      <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedMachineForSpecs(machine)}
@@ -510,6 +539,7 @@ export const Machines: React.FC = () => {
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -667,6 +697,33 @@ export const Machines: React.FC = () => {
                     value={formData.warranty}
                     onChange={(e) => setFormData(prev => ({ ...prev, warranty: e.target.value }))}
                     placeholder="Ex: 6 Meses de fábrica"
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.04] p-4 space-y-3">
+                <div>
+                  <p className="text-xs font-bold text-amber-200">Contato interno do vendedor (privado)</p>
+                  <p className="text-[11px] text-gray-400 mt-1">Esses dados ficam apenas no sistema e não aparecem na ficha compartilhada.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">Nome do vendedor</label>
+                  <input
+                    type="text"
+                    value={formData.seller_contact_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, seller_contact_name: e.target.value }))}
+                    placeholder="Nome do contato"
+                    className="w-full h-11 px-3 glass-input rounded-xl text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">Telefone / WhatsApp do vendedor</label>
+                  <input
+                    type="tel"
+                    value={formData.seller_contact_phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, seller_contact_phone: e.target.value }))}
+                    placeholder="Ex.: (51) 99999-9999"
                     className="w-full h-11 px-3 glass-input rounded-xl text-sm"
                   />
                 </div>
