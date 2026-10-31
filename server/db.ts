@@ -380,7 +380,10 @@ export const machinesRepo = {
       }
       sql += ' ORDER BY id DESC';
       const [rows]: any = await mysqlPool.query(sql, params);
-      return rows;
+      return rows.map((row: any) => {
+        try { row.image_urls = row.image_urls ? JSON.parse(row.image_urls) : []; } catch { row.image_urls = []; }
+        return row;
+      });
     }
     let items = memoryMachines.filter(m => m.tenant_id === tenant_id);
     if (filters?.search) {
@@ -395,7 +398,9 @@ export const machinesRepo = {
   async findById(tenant_id: number, id: number): Promise<Machine | null> {
     if (isMySQLConnected && mysqlPool) {
       const [rows]: any = await mysqlPool.query('SELECT * FROM machines WHERE tenant_id = ? AND id = ?', [tenant_id, id]);
-      return rows[0] || null;
+      if (!rows[0]) return null;
+      try { rows[0].image_urls = rows[0].image_urls ? JSON.parse(rows[0].image_urls) : []; } catch { rows[0].image_urls = []; }
+      return rows[0];
     }
     return memoryMachines.find(m => m.tenant_id === tenant_id && m.id === id) || null;
   },
