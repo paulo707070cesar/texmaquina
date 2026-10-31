@@ -111,7 +111,7 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
         onToast('Imagem baixada em PNG para você anexar no WhatsApp!');
       }
     } catch (err) {
-      await downloadFichaCard(machine);
+      await downloadFichaCard(machine, getFichaBranding());
       onToast('Flyer em PNG baixado para envio no WhatsApp!');
     } finally {
       setCopyingImage(false);
@@ -121,7 +121,7 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const handleDownloadCard = async () => {
     setDownloading(true);
     try {
-      await downloadFichaCard(machine);
+      await downloadFichaCard(machine, getFichaBranding());
       onToast('Ficha Técnica em PNG baixada com sucesso!');
     } catch (err) {
       onToast('Erro ao gerar imagem para download.');
