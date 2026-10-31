@@ -43,6 +43,7 @@ export const Machines: React.FC = () => {
     description: '',
     price: '',
     image_url: '',
+    image_urls: [] as string[],
     video_url: '',
     status: 'disponivel' as 'disponivel' | 'vendido' | 'manutencao',
     origin: 'Brasil',
@@ -118,6 +119,7 @@ export const Machines: React.FC = () => {
       description: '',
       price: '',
       image_url: '',
+      image_urls: [],
       video_url: '',
       status: 'disponivel',
       origin: 'Brasil',
@@ -140,6 +142,7 @@ export const Machines: React.FC = () => {
       description: machine.description,
       price: machine.price.toString(),
       image_url: machine.image_url,
+      image_urls: Array.isArray(machine.image_urls) ? machine.image_urls : [],
       video_url: machine.video_url || '',
       status: machine.status,
       origin: machine.origin || 'Brasil',
@@ -184,6 +187,7 @@ export const Machines: React.FC = () => {
         price: parseFloat(formData.price),
         // Persist the exact URL returned by the upload endpoint.
         image_url: formData.image_url.trim(),
+        image_urls: formData.image_urls,
         video_url: formData.video_url.trim(),
         status: formData.status,
         origin: formData.origin,
@@ -853,6 +857,53 @@ export const Machines: React.FC = () => {
                     <p className="text-[11px] leading-relaxed text-gray-400">
                       No WhatsApp, salve ou baixe a foto do vendedor no celular. Depois toque aqui e selecione a imagem na Galeria ou em Arquivos.
                     </p>
+                    <div className="rounded-xl border border-white/10 p-3 space-y-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-200">Galeria de fotos da máquina</label>
+                        <p className="text-[11px] text-gray-400 mt-1">Adicione fotos extras de detalhes, painel, etiqueta e laterais. A foto principal continua sendo a capa.</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="block w-full text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-sky-500/15 file:px-3 file:py-2 file:text-sky-200"
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (!files.length) return;
+                          const tooLarge = files.find(file => file.size > 10 * 1024 * 1024);
+                          if (tooLarge) {
+                            showToast('Cada foto extra deve ter no máximo 10 MB.');
+                            e.target.value = '';
+                            return;
+                          }
+                          setSubmitting(true);
+                          try {
+                            const uploaded: string[] = [];
+                            for (const file of files) {
+                              const result = await systemApi.uploadImage(file);
+                              uploaded.push(result.url);
+                            }
+                            setFormData(prev => ({ ...prev, image_urls: [...prev.image_urls, ...uploaded] }));
+                            showToast(`${uploaded.length} foto(s) adicionada(s) à galeria.`);
+                          } catch (err: any) {
+                            showToast(err.response?.data?.error || 'Não foi possível enviar todas as fotos.');
+                          } finally {
+                            setSubmitting(false);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                      {formData.image_urls.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {formData.image_urls.map((url, index) => (
+                            <div key={url + index} className="relative aspect-square rounded-lg overflow-hidden border border-white/10">
+                              <img src={url} alt={`Foto extra ${index + 1}`} className="w-full h-full object-cover" />
+                              <button type="button" onClick={() => setFormData(prev => ({ ...prev, image_urls: prev.image_urls.filter((_, i) => i !== index) }))} className="absolute top-1 right-1 rounded-full bg-black/80 text-white w-7 h-7 text-sm" aria-label="Remover foto">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                     <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
                       <label className="block text-xs font-semibold text-gray-200">Vídeo da máquina (opcional)</label>
