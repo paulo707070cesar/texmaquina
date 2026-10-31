@@ -463,6 +463,12 @@ export const Machines: React.FC = () => {
                     )}
                   </div>
 
+                  {!!machine.image_urls?.length && (
+                    <div className="absolute bottom-3 left-3 z-10 rounded-full bg-black/75 border border-white/20 px-2.5 py-1 text-[10px] font-bold text-white flex items-center gap-1.5">
+                      <ImageIcon className="w-3 h-3" /> {machine.image_urls.length + 1} fotos
+                    </div>
+                  )}
+
                   {machine.video_url && (
                     <a
                       href={machine.video_url}
