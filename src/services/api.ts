@@ -71,6 +71,7 @@ export interface Machine {
   description: string;
   price: number;
   image_url: string;
+  video_url?: string | null;
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
   warranty: string;
@@ -260,6 +261,16 @@ export const systemApi = {
   },
   getSchemaSql: async () => {
     const res = await api.get<string>('/system/schema-sql', { responseType: 'text' });
+    return res.data;
+  },
+  uploadVideo: async (file: File) => {
+    const formData = new FormData();
+    formData.append('video', file);
+    const res = await api.post<{ url: string }>('/upload-video', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 180000,
+    });
+    if (!res.data?.url) throw new Error('O servidor não retornou o endereço do vídeo.');
     return res.data;
   },
   uploadImage: async (file: File) => {
