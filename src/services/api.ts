@@ -74,7 +74,7 @@ export interface Machine {
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
   warranty: string;
-  payment_type: 'a_vista' | 'financiado';
+  payment_type: 'a_vista' | 'financiado' | 'conforme_analise';
   seller_contact_name?: string | null;
   seller_contact_phone?: string | null;
   created_at: string;
