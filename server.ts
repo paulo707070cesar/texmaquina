@@ -69,8 +69,8 @@ const videoUpload = multer({
   storage,
   limits: { fileSize: 100 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowedExtensions = /\\.(mp4|mov|webm)$/i;
-    const allowedMimes = /^(video\\/(mp4|quicktime|webm))$/i;
+    const allowedExtensions = /\.(mp4|mov|webm)$/i;
+    const allowedMimes = /^(video\/(mp4|quicktime|webm))$/i;
     if (allowedExtensions.test(file.originalname) && allowedMimes.test(file.mimetype)) return cb(null, true);
     cb(new Error('Use um vídeo MP4, MOV ou WebM.'));
   }
