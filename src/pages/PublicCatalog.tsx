@@ -10,6 +10,8 @@ export const PublicCatalog: React.FC = () => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('Todas');
+  const [gallery, setGallery] = useState<{ machine: PublicCatalogMachine; index: number } | null>(null);
+  const [videoMachine, setVideoMachine] = useState<PublicCatalogMachine | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -101,7 +103,11 @@ export const PublicCatalog: React.FC = () => {
       {machines.length === 0 ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center"><Building2 className="w-10 h-10 mx-auto text-gray-500 mb-3" /><h3 className="font-bold text-white">{data.machines.length === 0 ? 'Nenhuma máquina publicada ainda' : 'Nenhum resultado encontrado'}</h3><p className="text-sm text-gray-400 mt-2">{data.machines.length === 0 ? 'Os equipamentos disponíveis aparecerão aqui quando forem cadastrados.' : 'Tente alterar a busca ou selecionar outra categoria.'}</p></div> :
         <div className="catalog-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {machines.map(m => <article id={'maquina-' + m.id} key={m.id} className="catalog-card rounded-2xl overflow-hidden border border-white/10 bg-[#0E1626] flex flex-col">
-            <div className="h-56 bg-[#0A101C] flex items-center justify-center overflow-hidden">{m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-contain p-3" /> : <Building2 className="w-14 h-14 text-gray-600" />}</div>
+            <div className="relative h-56 bg-[#0A101C] flex items-center justify-center overflow-hidden">
+              {m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-contain p-3" /> : <Building2 className="w-14 h-14 text-gray-600" />}
+              {!!m.image_urls?.length && <button type="button" onClick={() => setGallery({ machine: m, index: 0 })} className="no-print absolute bottom-3 left-3 rounded-full bg-black/80 border border-white/20 text-white px-3 py-2 text-xs font-bold hover:bg-[#0066FF]">Ver {m.image_urls.length + 1} fotos</button>}
+              {m.video_url && <button type="button" onClick={() => setVideoMachine(m)} className="no-print absolute bottom-3 right-3 rounded-full bg-emerald-600 text-white px-3 py-2 text-xs font-bold inline-flex items-center gap-1.5 hover:bg-emerald-500"><span>▶</span> Assistir vídeo</button>}
+            </div>
             <div className="p-5 flex flex-col gap-3 flex-1">
               <div className="flex items-center justify-between gap-2"><span className="text-[10px] font-bold uppercase tracking-wider text-[#00C2FF]">{m.category_name || 'Máquina industrial'}</span><span className="text-[10px] font-semibold rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Disponível</span></div>
               <h3 className="text-lg font-bold text-white leading-snug">{m.name}</h3><p className="text-xs text-gray-400">Modelo: {m.model || 'Sob consulta'}</p>
@@ -111,6 +117,25 @@ export const PublicCatalog: React.FC = () => {
             </div>
           </article>)}
         </div>}
+      {gallery && (() => {
+        const photos = [gallery.machine.image_url, ...(gallery.machine.image_urls || [])].filter(Boolean);
+        const index = Math.min(gallery.index, Math.max(0, photos.length - 1));
+        return <div className="no-print fixed inset-0 z-[80] bg-black/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onClick={() => setGallery(null)} role="dialog" aria-modal="true" aria-label="Galeria de fotos">
+          <div className="w-full max-w-4xl bg-[#0B1120] border border-white/15 rounded-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-white/10"><div><h3 className="font-bold text-white">{gallery.machine.name}</h3><p className="text-xs text-gray-400">{index + 1} de {photos.length} fotos</p></div><button type="button" onClick={() => setGallery(null)} className="text-white text-2xl px-2" aria-label="Fechar galeria">×</button></div>
+            <div className="relative h-[55vh] sm:h-[65vh] bg-black flex items-center justify-center"><img src={photos[index]} alt={gallery.machine.name + ' - foto ' + (index + 1)} className="max-w-full max-h-full object-contain" />
+              {photos.length > 1 && <><button type="button" onClick={() => setGallery({ machine: gallery.machine, index: (index - 1 + photos.length) % photos.length })} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 border border-white/20 text-white text-2xl" aria-label="Foto anterior">‹</button><button type="button" onClick={() => setGallery({ machine: gallery.machine, index: (index + 1) % photos.length })} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/70 border border-white/20 text-white text-2xl" aria-label="Próxima foto">›</button></>}
+            </div>
+            {photos.length > 1 && <div className="flex gap-2 overflow-x-auto p-3">{photos.map((photo, i) => <button key={photo + i} type="button" onClick={() => setGallery({ machine: gallery.machine, index: i })} className={'shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ' + (i === index ? 'border-[#00C2FF]' : 'border-white/10')}><img src={photo} alt={'Miniatura ' + (i + 1)} className="w-full h-full object-cover" /></button>)}</div>}
+          </div>
+        </div>;
+      })()}
+      {videoMachine && videoMachine.video_url && <div className="no-print fixed inset-0 z-[85] bg-black/90 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onClick={() => setVideoMachine(null)} role="dialog" aria-modal="true" aria-label="Vídeo da máquina">
+        <div className="w-full max-w-4xl bg-[#0B1120] border border-white/15 rounded-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between p-4 border-b border-white/10"><h3 className="font-bold text-white">{videoMachine.name} — vídeo</h3><button type="button" onClick={() => setVideoMachine(null)} className="text-white text-2xl px-2" aria-label="Fechar vídeo">×</button></div>
+          <div className="aspect-video bg-black"><video src={videoMachine.video_url} controls autoPlay playsInline className="w-full h-full" /></div>
+        </div>
+      </div>}
       <footer className="mt-12 pt-5 border-t border-white/10 text-center text-xs text-gray-500">Catálogo comercial de {data.tenant.name} · Informações sujeitas à confirmação de disponibilidade.</footer>
     </main>
   </div>;
