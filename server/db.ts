@@ -38,6 +38,7 @@ export interface Machine {
   description: string;
   price: number;
   image_url: string;
+  image_urls?: string[];
   video_url?: string | null;
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
@@ -198,6 +199,11 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
     if (categoryColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN category_id INT NULL AFTER tenant_id');
     }
+    const [imageUrlsColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'image_urls'");
+    if (imageUrlsColumns.length === 0) {
+      await pool.query('ALTER TABLE machines ADD COLUMN image_urls TEXT NULL AFTER image_url');
+    }
+
     const [videoUrlColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'video_url'");
     if (videoUrlColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN video_url VARCHAR(500) NULL AFTER image_url');
@@ -270,7 +276,9 @@ export const tenantsRepo = {
   async findById(id: number): Promise<Tenant | null> {
     if (isMySQLConnected && mysqlPool) {
       const [rows]: any = await mysqlPool.query('SELECT * FROM tenants WHERE id = ?', [id]);
-      return rows[0] || null;
+      if (!rows[0]) return null;
+       try { rows[0].image_urls = rows[0].image_urls ? JSON.parse(rows[0].image_urls) : []; } catch { rows[0].image_urls = []; }
+       return rows[0];
     }
     return memoryTenants.find(t => t.id === id) || null;
   },
@@ -294,7 +302,7 @@ export const categoriesRepo = {
   async list(tenant_id: number): Promise<Category[]> {
     if (isMySQLConnected && mysqlPool) {
       const [rows]: any = await mysqlPool.query('SELECT * FROM categories WHERE tenant_id = ? ORDER BY name ASC', [tenant_id]);
-      return rows;
+      return rows.map((row: any) => { try { row.image_urls = row.image_urls ? JSON.parse(row.image_urls) : []; } catch { row.image_urls = []; } return row; });
     }
     return memoryCategories.filter(c => c.tenant_id === tenant_id).sort((a, b) => a.name.localeCompare(b.name));
   },
@@ -394,8 +402,8 @@ export const machinesRepo = {
   async create(data: Omit<Machine, 'id' | 'created_at'>): Promise<Machine> {
     if (isMySQLConnected && mysqlPool) {
       const [res]: any = await mysqlPool.query(
-        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, video_url, status, origin, warranty, payment_type, seller_contact_name, seller_contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.video_url || null, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista', data.seller_contact_name || null, data.seller_contact_phone || null]
+        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, image_urls, video_url, status, origin, warranty, payment_type, seller_contact_name, seller_contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, JSON.stringify(data.image_urls || []), data.video_url || null, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista', data.seller_contact_name || null, data.seller_contact_phone || null]
       );
       return { id: res.insertId, ...data, created_at: new Date().toISOString() };
     }
@@ -405,8 +413,9 @@ export const machinesRepo = {
   },
   async update(tenant_id: number, id: number, data: Partial<Machine>): Promise<Machine | null> {
     if (isMySQLConnected && mysqlPool) {
-      const fields = Object.keys(data).filter(k => k !== 'id' && k !== 'tenant_id' && k !== 'created_at').map(k => `${k} = ?`);
-      const values = Object.keys(data).filter(k => k !== 'id' && k !== 'tenant_id' && k !== 'created_at').map(k => (data as any)[k]);
+      const updateKeys = Object.keys(data).filter(k => k !== 'id' && k !== 'tenant_id' && k !== 'created_at');
+      const fields = updateKeys.map(k => `${k} = ?`);
+      const values = updateKeys.map(k => k === 'image_urls' ? JSON.stringify((data as any)[k] || []) : (data as any)[k]);
       if (fields.length === 0) return this.findById(tenant_id, id);
       values.push(tenant_id, id);
       await mysqlPool.query(`UPDATE machines SET ${fields.join(', ')} WHERE tenant_id = ? AND id = ?`, values);
