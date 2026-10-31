@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { leadsApi, Lead } from '../services/api';
+import { leadsApi, Lead, settingsApi } from '../services/api';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -24,6 +24,32 @@ export const Navbar: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [followUps, setFollowUps] = useState<Lead[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [brand, setBrand] = useState<{ name: string; logo: string | null }>({
+    name: user?.tenant_name || 'TexMachina',
+    logo: user?.tenant_logo || null,
+  });
+
+  useEffect(() => {
+    let active = true;
+    settingsApi.get().then((tenant) => {
+      if (!active) return;
+      const next = {
+        name: tenant.name || user?.tenant_name || 'TexMachina',
+        logo: tenant.logo_url || user?.tenant_logo || null,
+      };
+      setBrand(next);
+      const saved = localStorage.getItem('texmachina_user');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          parsed.tenant_name = next.name;
+          parsed.tenant_logo = next.logo;
+          localStorage.setItem('texmachina_user', JSON.stringify(parsed));
+        } catch { /* Ignore malformed cached profile. */ }
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [user?.tenant_name, user?.tenant_logo]);
 
   useEffect(() => {
     let active = true;
@@ -70,8 +96,8 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-6">
             <NavLink to="/" className="flex items-center gap-3 group">
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white shadow-[0_0_20px_rgba(0,102,255,0.5)] group-hover:shadow-[0_0_28px_rgba(0,194,255,0.8)] transition-all overflow-hidden">
-                {user?.tenant_logo ? (
-                  <img src={user.tenant_logo} alt="Logo" className="w-full h-full object-contain" />
+                {brand.logo ? (
+                  <img src={brand.logo || undefined} alt={brand.name + " logo"} className="w-full h-full object-contain" />
                 ) : (
                   <span className="material-symbols-outlined text-[20px]">precision_manufacturing</span>
                 )}
@@ -81,7 +107,7 @@ export const Navbar: React.FC = () => {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-display font-black text-lg tracking-tight text-white group-hover:text-[#00C2FF] transition-colors">
-                    TexMachina
+                    {brand.name}
                   </span>
                   <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-[#0066FF]/20 border border-[#00C2FF]/40 text-[#00C2FF] shadow-[0_0_10px_rgba(0,194,255,0.2)]">
                     Enterprise
