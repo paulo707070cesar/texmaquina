@@ -43,7 +43,8 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
       `🛡️ *Garantia:* ${machine.warranty || '6 Meses'}\n` +
       `📄 *Condições:* ${machine.payment_type === 'financiado' ? 'FINAME / BNDES / Financiamento' : 'À Vista / Transferência'}\n\n` +
       `📋 *Especificações Técnicas:*\n${machine.description || 'Equipamento revisado com laudo mecânico e elétrico completo.'}\n\n` +
-      `📸 *Foto do Equipamento:* ${machine.image_url}\n` +
+      `📸 *Foto principal:* ${machine.image_url}\n` +
+      (machine.image_urls?.length ? `🖼️ *Fotos adicionais:*\n${machine.image_urls.join('\n')}\n` : '') +
       (machine.video_url ? `🎥 *Vídeo da máquina:* ${machine.video_url}\n` : '') + `\n` +
       `_Enviado através do TexMachina OS - Sistema B2B de Máquinas Têxteis_`
     );
