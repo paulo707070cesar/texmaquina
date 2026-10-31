@@ -71,6 +71,7 @@ export interface Machine {
   description: string;
   price: number;
   image_url: string;
+  image_urls?: string[];
   video_url?: string | null;
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
