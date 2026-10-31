@@ -232,7 +232,7 @@ export const Machines: React.FC = () => {
       return;
     }
     const whatsappPhone = phone.startsWith('55') ? phone : `55${phone}`;
-    const message = 'Entre em contato tenho comprador para essa maquina';
+    const message = `Entre em contato tenho comprador para essa maquina\n\nMáquina: ${machine.name}\nModelo: ${machine.model}\nFoto/ficha: ${machine.image_url}`;
     window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
