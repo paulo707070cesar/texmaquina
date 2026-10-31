@@ -42,6 +42,8 @@ export interface Machine {
   origin: string;
   warranty: string;
   payment_type: 'a_vista' | 'financiado';
+  seller_contact_name?: string | null;
+  seller_contact_phone?: string | null;
   created_at: string;
 }
 
@@ -184,6 +186,8 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       origin VARCHAR(150) NULL DEFAULT 'Brasil',
       warranty VARCHAR(150) NULL DEFAULT '6 Meses',
       payment_type ENUM('a_vista', 'financiado') NOT NULL DEFAULT 'a_vista',
+      seller_contact_name VARCHAR(150) NULL,
+      seller_contact_phone VARCHAR(40) NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       INDEX (tenant_id)
     ) ENGINE=InnoDB;`);
@@ -192,6 +196,14 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
     const [categoryColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'category_id'");
     if (categoryColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN category_id INT NULL AFTER tenant_id');
+    }
+    const [sellerNameColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'seller_contact_name'");
+    if (sellerNameColumns.length === 0) {
+      await pool.query('ALTER TABLE machines ADD COLUMN seller_contact_name VARCHAR(150) NULL');
+    }
+    const [sellerPhoneColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'seller_contact_phone'");
+    if (sellerPhoneColumns.length === 0) {
+      await pool.query('ALTER TABLE machines ADD COLUMN seller_contact_phone VARCHAR(40) NULL');
     }
 
     await pool.query(`CREATE TABLE IF NOT EXISTS leads (
@@ -371,8 +383,8 @@ export const machinesRepo = {
   async create(data: Omit<Machine, 'id' | 'created_at'>): Promise<Machine> {
     if (isMySQLConnected && mysqlPool) {
       const [res]: any = await mysqlPool.query(
-        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, status, origin, warranty, payment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista']
+        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, status, origin, warranty, payment_type, seller_contact_name, seller_contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista', data.seller_contact_name || null, data.seller_contact_phone || null]
       );
       return { id: res.insertId, ...data, created_at: new Date().toISOString() };
     }
