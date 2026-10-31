@@ -302,7 +302,7 @@ export const categoriesRepo = {
   async list(tenant_id: number): Promise<Category[]> {
     if (isMySQLConnected && mysqlPool) {
       const [rows]: any = await mysqlPool.query('SELECT * FROM categories WHERE tenant_id = ? ORDER BY name ASC', [tenant_id]);
-      return rows.map((row: any) => { try { row.image_urls = row.image_urls ? JSON.parse(row.image_urls) : []; } catch { row.image_urls = []; } return row; });
+      return rows;
     }
     return memoryCategories.filter(c => c.tenant_id === tenant_id).sort((a, b) => a.name.localeCompare(b.name));
   },
