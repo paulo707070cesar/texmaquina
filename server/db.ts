@@ -41,7 +41,7 @@ export interface Machine {
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
   warranty: string;
-  payment_type: 'a_vista' | 'financiado';
+  payment_type: 'a_vista' | 'financiado' | 'conforme_analise';
   seller_contact_name?: string | null;
   seller_contact_phone?: string | null;
   created_at: string;
@@ -185,7 +185,7 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       status ENUM('disponivel', 'vendido', 'manutencao') NOT NULL DEFAULT 'disponivel',
       origin VARCHAR(150) NULL DEFAULT 'Brasil',
       warranty VARCHAR(150) NULL DEFAULT '6 Meses',
-      payment_type ENUM('a_vista', 'financiado') NOT NULL DEFAULT 'a_vista',
+      payment_type ENUM('a_vista', 'financiado', 'conforme_analise') NOT NULL DEFAULT 'a_vista',
       seller_contact_name VARCHAR(150) NULL,
       seller_contact_phone VARCHAR(40) NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -201,6 +201,11 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
     if (sellerNameColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN seller_contact_name VARCHAR(150) NULL');
     }
+    const [paymentTypeColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'payment_type'");
+    if (paymentTypeColumns.length > 0 && !String(paymentTypeColumns[0].Type).includes("'conforme_analise'")) {
+      await pool.query("ALTER TABLE machines MODIFY COLUMN payment_type ENUM('a_vista', 'financiado', 'conforme_analise') NOT NULL DEFAULT 'a_vista'");
+    }
+
     const [sellerPhoneColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'seller_contact_phone'");
     if (sellerPhoneColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN seller_contact_phone VARCHAR(40) NULL');
