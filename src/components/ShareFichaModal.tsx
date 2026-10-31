@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Machine } from '../services/api';
+import { Machine, settingsApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { 
   copyFichaImageToClipboard, 
   downloadFichaCard, 
@@ -30,6 +31,27 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const [copyingImage, setCopyingImage] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
+  const { user } = useAuth();
+  const [companyBranding, setCompanyBranding] = useState<{ logoUrl?: string | null; companyName?: string | null }>({
+    logoUrl: user?.tenant_logo || null,
+    companyName: user?.tenant_name || null,
+  });
+
+  React.useEffect(() => {
+    let active = true;
+    settingsApi.get().then((tenant) => {
+      if (active) setCompanyBranding({
+        logoUrl: tenant.logo_url || user?.tenant_logo || null,
+        companyName: tenant.name || user?.tenant_name || null,
+      });
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [user?.tenant_logo, user?.tenant_name]);
+
+  const getFichaBranding = () => ({
+    ...companyBranding,
+    whatsapp: machine.seller_contact_phone || null,
+  });
 
   const getProposalText = () => {
     const statusLabel =
@@ -80,12 +102,12 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const handleCopyImage = async () => {
     setCopyingImage(true);
     try {
-      const success = await copyFichaImageToClipboard(machine);
+      const success = await copyFichaImageToClipboard(machine, getFichaBranding());
       if (success) {
         onToast('Imagem da Ficha Técnica copiada! Cole no WhatsApp com Ctrl+V.');
       } else {
         // Fallback: download directly if clipboard write is blocked by browser policy
-        await downloadFichaCard(machine);
+        await downloadFichaCard(machine, getFichaBranding());
         onToast('Imagem baixada em PNG para você anexar no WhatsApp!');
       }
     } catch (err) {
