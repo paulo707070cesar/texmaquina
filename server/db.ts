@@ -38,6 +38,7 @@ export interface Machine {
   description: string;
   price: number;
   image_url: string;
+  video_url?: string | null;
   status: 'disponivel' | 'vendido' | 'manutencao';
   origin: string;
   warranty: string;
@@ -197,6 +198,11 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
     if (categoryColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN category_id INT NULL AFTER tenant_id');
     }
+    const [videoUrlColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'video_url'");
+    if (videoUrlColumns.length === 0) {
+      await pool.query('ALTER TABLE machines ADD COLUMN video_url VARCHAR(500) NULL AFTER image_url');
+    }
+
     const [sellerNameColumns]: any = await pool.query("SHOW COLUMNS FROM machines LIKE 'seller_contact_name'");
     if (sellerNameColumns.length === 0) {
       await pool.query('ALTER TABLE machines ADD COLUMN seller_contact_name VARCHAR(150) NULL');
@@ -388,8 +394,8 @@ export const machinesRepo = {
   async create(data: Omit<Machine, 'id' | 'created_at'>): Promise<Machine> {
     if (isMySQLConnected && mysqlPool) {
       const [res]: any = await mysqlPool.query(
-        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, status, origin, warranty, payment_type, seller_contact_name, seller_contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista', data.seller_contact_name || null, data.seller_contact_phone || null]
+        'INSERT INTO machines (tenant_id, category_id, name, model, description, price, image_url, video_url, status, origin, warranty, payment_type, seller_contact_name, seller_contact_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [data.tenant_id, data.category_id || null, data.name, data.model, data.description, data.price, data.image_url, data.video_url || null, data.status, data.origin || 'Brasil', data.warranty || '6 Meses', data.payment_type || 'a_vista', data.seller_contact_name || null, data.seller_contact_phone || null]
       );
       return { id: res.insertId, ...data, created_at: new Date().toISOString() };
     }
