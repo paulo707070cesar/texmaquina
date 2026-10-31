@@ -286,7 +286,7 @@ app.get('/api/public/catalog/:tenantId', async (req: Request, res: Response) => 
       id: machine.id, category_id: machine.category_id,
       category_name: machine.category_id ? categoryNames.get(machine.category_id) || null : null,
       name: machine.name, model: machine.model, description: machine.description,
-      price: Boolean(tenant.catalog_show_prices) ? machine.price : null, image_url: machine.image_url, status: machine.status,
+      price: Boolean(tenant.catalog_show_prices) ? machine.price : null, image_url: machine.image_url, image_urls: machine.image_urls || [], video_url: machine.video_url || null, status: machine.status,
       origin: machine.origin, warranty: machine.warranty, payment_type: machine.payment_type,
     }));
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
