@@ -45,7 +45,7 @@ export const Machines: React.FC = () => {
     status: 'disponivel' as 'disponivel' | 'vendido' | 'manutencao',
     origin: 'Brasil',
     warranty: '6 Meses',
-    payment_type: 'a_vista' as 'a_vista' | 'financiado',
+    payment_type: 'a_vista' as 'a_vista' | 'financiado' | 'conforme_analise',
     seller_contact_name: '',
     seller_contact_phone: '',
   });
@@ -481,7 +481,7 @@ export const Machines: React.FC = () => {
                     <div className="flex items-baseline justify-between mb-3">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">
-                          Investimento: {machine.payment_type === 'financiado' ? 'FINAME / BNDES' : 'À Vista'}
+                          Investimento: {machine.payment_type === 'financiado' ? 'FINAME / BNDES' : machine.payment_type === 'conforme_analise' ? 'Financiamento conforme análise' : 'À Vista'}
                         </span>
                         <span className="font-display font-extrabold text-xl text-white tracking-tight tabular-nums">
                           {formatCurrency(Number(machine.price))}
@@ -670,6 +670,7 @@ export const Machines: React.FC = () => {
                   >
                     <option value="a_vista" className="bg-[#0b1120]">À Vista</option>
                     <option value="financiado" className="bg-[#0b1120]">Financiado (FINAME/BNDES)</option>
+                    <option value="conforme_analise" className="bg-[#0b1120]">Financiamento conforme análise</option>
                   </select>
                 </div>
               </div>
@@ -908,7 +909,7 @@ export const Machines: React.FC = () => {
                   <p className="text-sm font-bold text-[#00C2FF] mt-0.5">
                     {formatCurrency(selectedMachineForSpecs.price)}
                     <span className="block text-[10px] font-normal text-gray-400">
-                      ({selectedMachineForSpecs.payment_type === 'financiado' ? 'FINAME / BNDES' : 'À Vista'})
+                      ({selectedMachineForSpecs.payment_type === 'financiado' ? 'FINAME / BNDES' : selectedMachineForSpecs.payment_type === 'conforme_analise' ? 'Financiamento conforme análise' : 'À Vista'})
                     </span>
                   </p>
                 </div>
