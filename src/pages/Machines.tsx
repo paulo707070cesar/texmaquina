@@ -42,6 +42,7 @@ export const Machines: React.FC = () => {
     description: '',
     price: '',
     image_url: '',
+    video_url: '',
     status: 'disponivel' as 'disponivel' | 'vendido' | 'manutencao',
     origin: 'Brasil',
     warranty: '6 Meses',
@@ -63,6 +64,7 @@ export const Machines: React.FC = () => {
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const videoInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadMachines();
@@ -115,6 +117,7 @@ export const Machines: React.FC = () => {
       description: '',
       price: '',
       image_url: '',
+      video_url: '',
       status: 'disponivel',
       origin: 'Brasil',
       warranty: '6 Meses',
@@ -136,6 +139,7 @@ export const Machines: React.FC = () => {
       description: machine.description,
       price: machine.price.toString(),
       image_url: machine.image_url,
+      video_url: machine.video_url || '',
       status: machine.status,
       origin: machine.origin || 'Brasil',
       warranty: machine.warranty || '6 Meses',
@@ -179,6 +183,7 @@ export const Machines: React.FC = () => {
         price: parseFloat(formData.price),
         // Persist the exact URL returned by the upload endpoint.
         image_url: formData.image_url.trim(),
+        video_url: formData.video_url.trim(),
         status: formData.status,
         origin: formData.origin,
         warranty: formData.warranty,
@@ -835,6 +840,45 @@ export const Machines: React.FC = () => {
                     <p className="text-[11px] leading-relaxed text-gray-400">
                       No WhatsApp, salve ou baixe a foto do vendedor no celular. Depois toque aqui e selecione a imagem na Galeria ou em Arquivos.
                     </p>
+
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                      <label className="block text-xs font-semibold text-gray-200">Vídeo da máquina (opcional)</label>
+                      {formData.video_url && (
+                        <video src={formData.video_url} controls playsInline className="w-full max-h-48 rounded-lg bg-black" />
+                      )}
+                      <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 100 * 1024 * 1024) {
+                            showToast('O vídeo deve ter no máximo 100 MB.');
+                            e.target.value = '';
+                            return;
+                          }
+                          try {
+                            setSubmitting(true);
+                            const { url } = await systemApi.uploadVideo(file);
+                            setFormData(prev => ({ ...prev, video_url: url }));
+                            showToast('Vídeo carregado! Confira a prévia antes de salvar.');
+                          } catch (err: any) {
+                            showToast(err.response?.data?.error || 'Erro ao enviar o vídeo.');
+                          } finally {
+                            setSubmitting(false);
+                            if (videoInputRef.current) videoInputRef.current.value = '';
+                          }
+                        }}
+                      />
+                      <button type="button" onClick={() => videoInputRef.current?.click()} className="w-full min-h-11 px-3 rounded-xl border border-sky-400/30 bg-sky-500/10 text-sky-200 text-xs font-bold flex items-center justify-center gap-2">
+                        <span className="material-symbols-outlined text-base">videocam</span>
+                        {formData.video_url ? 'Trocar vídeo da máquina' : 'Importar vídeo do WhatsApp'}
+                      </button>
+                      <p className="text-[11px] text-gray-400">Salve/baixe o vídeo recebido no WhatsApp e selecione-o aqui. MP4, MOV ou WebM, até 100 MB. O vídeo fica salvo junto com o cadastro.</p>
+                      {formData.video_url && <button type="button" onClick={() => setFormData(prev => ({ ...prev, video_url: '' }))} className="text-xs text-red-300 underline">Remover vídeo</button>}
+                    </div>
 
                   </div>
                 </div>
