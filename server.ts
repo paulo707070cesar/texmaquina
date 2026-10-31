@@ -65,6 +65,17 @@ const upload = multer({
   }
 });
 
+const videoUpload = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = /\\.(mp4|mov|webm)$/i;
+    const allowedMimes = /^(video\\/(mp4|quicktime|webm))$/i;
+    if (allowedExtensions.test(file.originalname) && allowedMimes.test(file.mimetype)) return cb(null, true);
+    cb(new Error('Use um vídeo MP4, MOV ou WebM.'));
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'texmachina_super_secure_jwt_secret_key_2025';
@@ -79,6 +90,15 @@ if (path.resolve(legacyUploadDir) !== path.resolve(uploadDir) && fs.existsSync(l
 }
 
 // ----------------- UPLOAD ROUTE -----------------
+app.post('/api/upload-video', (req, res) => {
+  videoUpload.single('video')(req, res, (err) => {
+    if (err instanceof multer.MulterError) return res.status(400).json({ error: `Erro no vídeo: ${err.message}` });
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'Nenhum vídeo enviado.' });
+    return res.json({ url: `/uploads/${req.file.filename}` });
+  });
+});
+
 app.post('/api/upload', (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
