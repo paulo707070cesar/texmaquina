@@ -63,6 +63,8 @@ export const Machines: React.FC = () => {
   // Ficha Técnica modal
   const [selectedMachineForSpecs, setSelectedMachineForSpecs] = useState<Machine | null>(null);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
+  const [galleryMachine, setGalleryMachine] = useState<Machine | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -465,9 +467,13 @@ export const Machines: React.FC = () => {
                   </div>
 
                   {!!machine.image_urls?.length && (
-                    <div className="absolute bottom-3 left-3 z-10 rounded-full bg-black/75 border border-white/20 px-2.5 py-1 text-[10px] font-bold text-white flex items-center gap-1.5">
-                      <ImageIcon className="w-3 h-3" /> {machine.image_urls.length + 1} fotos
-                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGalleryMachine(machine); setGalleryIndex(0); }}
+                      className="absolute bottom-3 left-3 z-10 rounded-full bg-black/80 border border-white/25 px-3 py-2 text-[11px] font-bold text-white flex items-center gap-1.5 hover:bg-[#0066FF] transition-colors"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" /> Ver {machine.image_urls.length + 1} fotos
+                    </button>
                   )}
 
                   {machine.video_url && (
@@ -1127,6 +1133,29 @@ export const Machines: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Galeria de fotos da máquina */}
+      {galleryMachine && (() => {
+        const photos = [galleryMachine.image_url, ...(galleryMachine.image_urls || [])].filter(Boolean);
+        const safeIndex = Math.min(galleryIndex, Math.max(0, photos.length - 1));
+        return (
+          <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-6" onClick={() => setGalleryMachine(null)} role="dialog" aria-modal="true" aria-label="Galeria de fotos da máquina">
+            <div className="w-full max-w-4xl rounded-2xl overflow-hidden border border-white/15 bg-[#0B1120] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10">
+                <div className="min-w-0"><h3 className="text-white font-bold text-sm truncate">{galleryMachine.name}</h3><p className="text-xs text-gray-400">{safeIndex + 1} de {photos.length} fotos</p></div>
+                <button type="button" onClick={() => setGalleryMachine(null)} className="rounded-lg p-2 text-gray-300 hover:bg-white/10 hover:text-white" aria-label="Fechar galeria"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="relative bg-black h-[55vh] sm:h-[65vh] flex items-center justify-center">
+                <img src={photos[safeIndex]} alt={galleryMachine.name + ' - foto ' + (safeIndex + 1)} className="max-w-full max-h-full object-contain" />
+                {photos.length > 1 && <>
+                  <button type="button" aria-label="Foto anterior" onClick={() => setGalleryIndex((safeIndex - 1 + photos.length) % photos.length)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/70 border border-white/20 text-white w-10 h-10 text-2xl">‹</button>
+                  <button type="button" aria-label="Próxima foto" onClick={() => setGalleryIndex((safeIndex + 1) % photos.length)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/70 border border-white/20 text-white w-10 h-10 text-2xl">›</button>
+                </>}
+              </div>
+              {photos.length > 1 && <div className="flex gap-2 overflow-x-auto p-3">{photos.map((photo, index) => <button type="button" key={photo + index} onClick={() => setGalleryIndex(index)} className={'shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ' + (index === safeIndex ? 'border-[#00C2FF]' : 'border-white/10')}><img src={photo} alt={'Miniatura ' + (index + 1)} className="w-full h-full object-cover" /></button>)}</div>}
+            </div>
+          </div>
+        );
+      })()}
       {/* Reprodutor de vídeo: mantém o usuário no sistema em vez de navegar para o dashboard. */}
       {selectedVideoUrl && (
         <div
