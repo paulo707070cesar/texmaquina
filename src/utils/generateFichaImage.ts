@@ -79,8 +79,8 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.fillStyle = '#FFFFFF';
   drawFittedText(ctx, branding.companyName?.trim() || 'TEXMACHINA • MÁQUINAS TÊXTEIS', 150, 94, 440, 'bold', 28, 20);
   if (branding.whatsapp?.trim()) {
-    ctx.fillStyle = '#10B981'; ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif'; ctx.fillText('WHATSAPP', 610, 82);
-    ctx.fillStyle = '#D1FAE5'; drawFittedText(ctx, branding.whatsapp.trim(), 610, 106, 190, 'bold', 17, 12);
+    ctx.fillStyle = '#10B981'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.fillText('WHATSAPP', 610, 81);
+    ctx.fillStyle = '#D1FAE5'; drawFittedText(ctx, branding.whatsapp.trim(), 610, 109, 190, 'bold', 21, 15);
   }
   ctx.fillStyle = 'rgba(0, 194, 255, 0.15)'; ctx.strokeStyle = 'rgba(0, 194, 255, 0.5)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.roundRect(width - 380, 65, 300, 50, 16); ctx.fill(); ctx.stroke();
@@ -177,11 +177,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   let currentY = 820;
 
   ctx.fillStyle = '#FFFFFF';
-  drawFittedText(ctx, machine.name, 80, currentY, width - 160, '800', 54, 34);
+  drawFittedText(ctx, machine.name, 80, currentY, width - 160, '800', 60, 38);
 
   currentY += 45;
   ctx.fillStyle = '#00C2FF';
-  drawFittedText(ctx, `Modelo: ${machine.model}`, 80, currentY, width - 160, 'bold', 30, 22);
+  drawFittedText(ctx, `Modelo: ${machine.model}`, 80, currentY, width - 160, 'bold', 34, 25);
 
   // 6. Metrics / Telemetry 3-Grid Boxes
   currentY += 40;
@@ -224,7 +224,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
     : machine.payment_type === 'conforme_analise'
       ? 'Sujeito à análise*'
       : 'À vista / transferência';
-  drawFittedText(ctx, paymentLabel, box2X + 25, currentY + 84, colW - 50, 'bold', 23, 17);
+  drawFittedText(ctx, paymentLabel, box2X + 25, currentY + 84, colW - 50, 'bold', 26, 19);
 
   // Box 3: Garantia
   const box3X = box2X + colW + 20;
@@ -258,7 +258,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.fillText('ESPECIFICAÇÕES TÉCNICAS & COMPONENTES', 110, currentY + 45);
 
   ctx.fillStyle = '#CBD5E1';
-  ctx.font = '400 25px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '400 28px "Plus Jakarta Sans", sans-serif';
 
   // Text wrap logic
   const text = machine.description || 'Entre em contato para receber as especificações técnicas deste equipamento.';
@@ -290,7 +290,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.beginPath();
   ctx.roundRect(80, currentY, width - 160, descBoxH, 24);
   ctx.clip();
-  lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 38));
+  lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 40));
   ctx.restore();
 
   // 8. Footer Bar
