@@ -876,9 +876,9 @@ export const Machines: React.FC = () => {
                         onChange={async (e) => {
                           const files = Array.from(e.target.files || []);
                           if (!files.length) return;
-                          const tooLarge = files.find(file => file.size > 10 * 1024 * 1024);
+                          const tooLarge = files.find(file => file.size > 5 * 1024 * 1024);
                           if (tooLarge) {
-                            showToast('Cada foto extra deve ter no máximo 10 MB.');
+                            showToast('Cada foto extra deve ter no máximo 5 MB.');
                             e.target.value = '';
                             return;
                           }
