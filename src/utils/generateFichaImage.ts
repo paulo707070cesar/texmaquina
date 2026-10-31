@@ -33,7 +33,9 @@ function drawFittedText(
 /**
  * Generates an executive visual Ficha Técnica card in PNG format on an HTML5 canvas.
  */
-export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCanvasElement> {
+export interface FichaBranding { logoUrl?: string | null; companyName?: string | null; whatsapp?: string | null; }
+
+export async function generateFichaCardCanvas(machine: Machine, branding: FichaBranding = {}): Promise<HTMLCanvasElement> {
   const canvas = document.createElement('canvas');
   const width = 1200;
   const height = 1500;
@@ -58,33 +60,34 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, width, height);
 
-  // 3. Top Header Bar
-  ctx.fillStyle = '#0066FF';
-  ctx.fillRect(80, 70, 8, 38);
-
-  ctx.fillStyle = '#00C2FF';
-  ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('TEXMACHINA • MÁQUINAS TÊXTEIS', 104, 96);
-
+  // 3. Company branding header
+  const logoX = 80, logoY = 62, logoSize = 54;
+  if (branding.logoUrl) {
+    try {
+      const logo = new Image(); logo.crossOrigin = 'anonymous'; logo.src = branding.logoUrl;
+      await new Promise<void>((resolve, reject) => {
+        if (logo.complete && logo.naturalWidth > 0) resolve();
+        else { logo.onload = () => resolve(); logo.onerror = () => reject(); }
+      });
+      ctx.save(); ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.clip();
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(logoX, logoY, logoSize, logoSize);
+      const scale = Math.min(logoSize / logo.width, logoSize / logo.height);
+      const dw = logo.width * scale, dh = logo.height * scale;
+      ctx.drawImage(logo, logoX + (logoSize - dw) / 2, logoY + (logoSize - dh) / 2, dw, dh); ctx.restore();
+    } catch { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
+  } else { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText('Ficha Comercial do Equipamento', 104, 140);
-
-  // Serial tag
-  ctx.fillStyle = 'rgba(0, 194, 255, 0.15)';
-  ctx.strokeStyle = 'rgba(0, 194, 255, 0.5)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.roundRect(width - 380, 80, 300, 50, 16);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#00C2FF';
-  ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(`REF. #${machine.id}`, width - 230, 112);
-  ctx.textAlign = 'left';
-
+  drawFittedText(ctx, branding.companyName?.trim() || 'TEXMACHINA • MÁQUINAS TÊXTEIS', 150, 94, 440, 'bold', 22, 15);
+  if (branding.whatsapp?.trim()) {
+    ctx.fillStyle = '#10B981'; ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif'; ctx.fillText('WHATSAPP', 610, 82);
+    ctx.fillStyle = '#D1FAE5'; drawFittedText(ctx, branding.whatsapp.trim(), 610, 106, 190, 'bold', 17, 12);
+  }
+  ctx.fillStyle = 'rgba(0, 194, 255, 0.15)'; ctx.strokeStyle = 'rgba(0, 194, 255, 0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(width - 380, 65, 300, 50, 16); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#00C2FF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`REF. #${machine.id}`, width - 230, 96); ctx.textAlign = 'left';
+  ctx.fillStyle = '#00C2FF'; ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
+  ctx.fillText('FICHA COMERCIAL DO EQUIPAMENTO', 80, 145);
   // 4. Draw Machine Photo Frame
   const imgBoxX = 80;
   const imgBoxY = 180;
@@ -317,9 +320,9 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 /**
  * Copies the machine image / visual flyer directly to clipboard as PNG blob.
  */
-export async function copyFichaImageToClipboard(machine: Machine): Promise<boolean> {
+export async function copyFichaImageToClipboard(machine: Machine, branding: FichaBranding = {}): Promise<boolean> {
   try {
-    const canvas = await generateFichaCardCanvas(machine);
+    const canvas = await generateFichaCardCanvas(machine, branding);
     const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
     if (!blob) throw new Error('Falha ao gerar blob da imagem.');
 
@@ -341,7 +344,7 @@ export async function copyFichaImageToClipboard(machine: Machine): Promise<boole
 /**
  * Downloads the visual Ficha card as PNG.
  */
-export async function downloadFichaCard(machine: Machine): Promise<void> {
+export async function downloadFichaCard(machine: Machine, branding: FichaBranding = {}): Promise<void> {
   const canvas = await generateFichaCardCanvas(machine);
   const dataUrl = canvas.toDataURL('image/png');
   const link = document.createElement('a');
