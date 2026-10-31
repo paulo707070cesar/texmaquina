@@ -345,7 +345,7 @@ export async function copyFichaImageToClipboard(machine: Machine, branding: Fich
  * Downloads the visual Ficha card as PNG.
  */
 export async function downloadFichaCard(machine: Machine, branding: FichaBranding = {}): Promise<void> {
-  const canvas = await generateFichaCardCanvas(machine);
+  const canvas = await generateFichaCardCanvas(machine, branding);
   const dataUrl = canvas.toDataURL('image/png');
   const link = document.createElement('a');
   const safeName = machine.name.replace(/[^a-zA-Z0-9]/g, '_');
