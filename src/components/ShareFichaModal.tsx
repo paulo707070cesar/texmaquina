@@ -41,7 +41,7 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
       `🛡️ *Status:* ${machine.status === 'disponivel' ? 'Disponível em Estoque' : machine.status === 'manutencao' ? 'Em Manutenção' : 'Vendido'}\n` +
       `📍 *Origem:* ${machine.origin || 'Brasil'}\n` +
       `🛡️ *Garantia:* ${machine.warranty || '6 Meses'}\n` +
-      `📄 *Condições:* ${machine.payment_type === 'financiado' ? 'FINAME / BNDES / Financiamento' : 'À Vista / Transferência'}\n\n` +
+      `📄 *Condições:* ${machine.payment_type === 'financiado' ? 'FINAME / BNDES' : machine.payment_type === 'conforme_analise' ? 'Financiamento conforme análise de crédito' : 'À Vista / Transferência'}\n\n` +
       `📋 *Especificações Técnicas:*\n${machine.description || 'Equipamento revisado com laudo mecânico e elétrico completo.'}\n\n` +
       `📸 *Foto principal:* ${machine.image_url}\n` +
       (machine.image_urls?.length ? `🖼️ *Fotos adicionais:*\n${machine.image_urls.join('\n')}\n` : '') +
