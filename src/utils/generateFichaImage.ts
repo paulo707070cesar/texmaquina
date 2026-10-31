@@ -8,6 +8,38 @@ export function formatCurrency(val: number): string {
   }).format(val);
 }
 
+function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, baseSize: number, minSize = 16): void {
+  let size = baseSize;
+  while (size > minSize) {
+    ctx.font = ctx.font.replace(/\\d+(?:\\.\\d+)?px/, `${size}px`);
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 2;
+  }
+  ctx.fillText(text, 0, 0);
+}
+
+function drawFittedText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  fontPrefix: string,
+  baseSize: number,
+  minSize = 14
+): void {
+  let size = baseSize;
+  ctx.font = `${fontPrefix} ${size}px "Plus Jakarta Sans", sans-serif`;
+  while (ctx.measureText(text).width > maxWidth && size > minSize) {
+    size -= 2;
+    ctx.font = `${fontPrefix} ${size}px "Plus Jakarta Sans", sans-serif`;
+  }
+  const safeText = ctx.measureText(text).width <= maxWidth
+    ? text
+    : `${text.slice(0, Math.max(3, Math.floor(text.length * maxWidth / ctx.measureText(text).width) - 3))}...`;
+  ctx.fillText(safeText, x, y);
+}
+
 /**
  * Generates an executive visual Ficha Técnica card in PNG format on an HTML5 canvas.
  */
@@ -152,13 +184,11 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   let currentY = 820;
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '800 48px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText(machine.name, 80, currentY);
+  drawFittedText(ctx, machine.name, 80, currentY, width - 160, '800', 48, 28);
 
   currentY += 45;
   ctx.fillStyle = '#00C2FF';
-  ctx.font = 'bold 26px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText(`Modelo: ${machine.model}`, 80, currentY);
+  drawFittedText(ctx, `Modelo: ${machine.model}`, 80, currentY, width - 160, 'bold', 26, 18);
 
   // 6. Metrics / Telemetry 3-Grid Boxes
   currentY += 40;
@@ -196,10 +226,12 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillText('CONDIÇÃO DE PAGAMENTO', box2X + 25, currentY + 40);
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
-  ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
-  const paymentLabel = machine.payment_type === 'financiado' ? 'FINAME / BNDES*' : machine.payment_type === 'conforme_analise' ? 'Sob análise*' : 'À vista / transferência';
-  ctx.fillText(paymentLabel, box2X + 25, currentY + 84);
+  const paymentLabel = machine.payment_type === 'financiado'
+    ? 'FINAME / BNDES*'
+    : machine.payment_type === 'conforme_analise'
+      ? 'Sujeito à análise*'
+      : 'À vista / transferência';
+  drawFittedText(ctx, paymentLabel, box2X + 25, currentY + 84, colW - 50, 'bold', 20, 14);
 
   // Box 3: Garantia
   const box3X = box2X + colW + 20;
@@ -215,9 +247,7 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillText('GARANTIA INFORMADA', box3X + 25, currentY + 40);
 
   ctx.fillStyle = '#10B981';
-  ctx.font = 'bold 24px "Plus Jakarta Sans", sans-serif';
-  ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
-  ctx.fillText(machine.warranty || 'Consulte condições', box3X + 25, currentY + 84);
+  drawFittedText(ctx, machine.warranty || 'Consulte condições', box3X + 25, currentY + 84, colW - 50, 'bold', 20, 14);
 
   // 7. Technical Description Card
   currentY += boxH + 40;
@@ -239,24 +269,30 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
 
   // Text wrap logic
   const text = machine.description || 'Entre em contato para receber as especificações técnicas deste equipamento.';
-  const words = text.split(' ');
+  const words = text.split(/\\s+/);
+  const lines: string[] = [];
   let line = '';
-  let lineY = currentY + 85;
   const maxTextW = width - 220;
+  const maxLines = 4;
 
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxTextW && n > 0) {
-      ctx.fillText(line, 110, lineY);
-      line = words[n] + ' ';
-      lineY += 32;
-      if (lineY > currentY + descBoxH - 30) break;
+  for (const word of words) {
+    const testLine = line ? `${line} ${word}` : word;
+    if (ctx.measureText(testLine).width > maxTextW && line) {
+      lines.push(line);
+      line = word;
+      if (lines.length === maxLines) break;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line, 110, lineY);
+  if (lines.length < maxLines && line) lines.push(line);
+  const hasMoreText = words.join(' ').length > lines.join(' ').length;
+  if (hasMoreText && lines.length) {
+    let last = lines[lines.length - 1];
+    while (ctx.measureText(`${last}...`).width > maxTextW && last.length > 3) last = last.slice(0, -1);
+    lines[lines.length - 1] = `${last.trimEnd()}...`;
+  }
+  lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 32));
 
   // 8. Footer Bar
   currentY = height - 90;
@@ -270,8 +306,14 @@ export async function generateFichaCardCanvas(machine: Machine): Promise<HTMLCan
   ctx.fillStyle = '#00C2FF';
   ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
   ctx.textAlign = 'right';
-  ctx.fillText('Solicite Proposta Comercial via WhatsApp', width - 80, currentY + 15);
+  ctx.fillText('Consulte disponibilidade e condições comerciais', width - 80, currentY + 15);
   ctx.textAlign = 'left';
+
+  if (machine.payment_type !== 'a_vista') {
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '400 13px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('*Sujeito à análise e aprovação da instituição financeira.', 80, height - 35);
+  }
 
   return canvas;
 }
