@@ -256,7 +256,7 @@ export const Machines: React.FC = () => {
     showToast('Dados preenchidos. Confira nome e telefone antes de salvar.');
   };
   const handleContactSeller = (machine: Machine) => {
-    const phone = (machine.seller_contact_phone || '').replace(/\\D/g, '');
+    const phone = (machine.seller_contact_phone || '').replace(/\D/g, '');
     if (!phone) {
       showToast('Cadastre o telefone do vendedor ao editar esta máquina.');
       return;
