@@ -8,16 +8,6 @@ export function formatCurrency(val: number): string {
   }).format(val);
 }
 
-function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, baseSize: number, minSize = 16): void {
-  let size = baseSize;
-  while (size > minSize) {
-    ctx.font = ctx.font.replace(/\\d+(?:\\.\\d+)?px/, `${size}px`);
-    if (ctx.measureText(text).width <= maxWidth) break;
-    size -= 2;
-  }
-  ctx.fillText(text, 0, 0);
-}
-
 function drawFittedText(
   ctx: CanvasRenderingContext2D,
   text: string,
