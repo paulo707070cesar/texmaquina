@@ -824,6 +824,18 @@ export const Machines: React.FC = () => {
                       </div>
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full min-h-11 px-4 rounded-xl border border-emerald-400/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span className="text-xs font-bold">Importar imagem do WhatsApp</span>
+                    </button>
+                    <p className="text-[11px] leading-relaxed text-gray-400">
+                      No WhatsApp, salve ou baixe a foto do vendedor no celular. Depois toque aqui e selecione a imagem na Galeria ou em Arquivos.
+                    </p>
+
                   </div>
                 </div>
 
