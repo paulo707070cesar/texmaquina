@@ -74,17 +74,17 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
       const scale = Math.min(logoSize / logo.width, logoSize / logo.height);
       const dw = logo.width * scale, dh = logo.height * scale;
       ctx.drawImage(logo, logoX + (logoSize - dw) / 2, logoY + (logoSize - dh) / 2, dw, dh); ctx.restore();
-    } catch { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
-  } else { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
+    } catch { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 21px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
+  } else { ctx.fillStyle = '#0066FF'; ctx.beginPath(); ctx.roundRect(logoX, logoY, logoSize, logoSize, 10); ctx.fill(); ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 21px "Plus Jakarta Sans", sans-serif'; ctx.fillText('TM', logoX + 13, logoY + 34); }
   ctx.fillStyle = '#FFFFFF';
-  drawFittedText(ctx, branding.companyName?.trim() || 'TEXMACHINA • MÁQUINAS TÊXTEIS', 150, 94, 440, 'bold', 22, 15);
+  drawFittedText(ctx, branding.companyName?.trim() || 'TEXMACHINA • MÁQUINAS TÊXTEIS', 150, 94, 440, 'bold', 28, 20);
   if (branding.whatsapp?.trim()) {
     ctx.fillStyle = '#10B981'; ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif'; ctx.fillText('WHATSAPP', 610, 82);
     ctx.fillStyle = '#D1FAE5'; drawFittedText(ctx, branding.whatsapp.trim(), 610, 106, 190, 'bold', 17, 12);
   }
   ctx.fillStyle = 'rgba(0, 194, 255, 0.15)'; ctx.strokeStyle = 'rgba(0, 194, 255, 0.5)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.roundRect(width - 380, 65, 300, 50, 16); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = '#00C2FF'; ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#00C2FF'; ctx.font = 'bold 21px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center';
   ctx.fillText(`REF. #${machine.id}`, width - 230, 96); ctx.textAlign = 'left';
   ctx.fillStyle = '#00C2FF'; ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('FICHA COMERCIAL DO EQUIPAMENTO', 80, 145);
@@ -177,11 +177,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   let currentY = 820;
 
   ctx.fillStyle = '#FFFFFF';
-  drawFittedText(ctx, machine.name, 80, currentY, width - 160, '800', 48, 28);
+  drawFittedText(ctx, machine.name, 80, currentY, width - 160, '800', 54, 34);
 
   currentY += 45;
   ctx.fillStyle = '#00C2FF';
-  drawFittedText(ctx, `Modelo: ${machine.model}`, 80, currentY, width - 160, 'bold', 26, 18);
+  drawFittedText(ctx, `Modelo: ${machine.model}`, 80, currentY, width - 160, 'bold', 30, 22);
 
   // 6. Metrics / Telemetry 3-Grid Boxes
   currentY += 40;
@@ -198,11 +198,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.stroke();
 
   ctx.fillStyle = '#94A3B8';
-  ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+  ctx.font = 'bold 19px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('VALOR DE INVESTIMENTO', 105, currentY + 40);
 
   ctx.fillStyle = '#00F0FF';
-  ctx.font = '800 32px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
   ctx.fillText(formatCurrency(machine.price), 105, currentY + 88);
 
   // Box 2: Condições
@@ -215,7 +215,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.stroke();
 
   ctx.fillStyle = '#94A3B8';
-  ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+  ctx.font = 'bold 19px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('CONDIÇÃO DE PAGAMENTO', box2X + 25, currentY + 40);
 
   ctx.fillStyle = '#FFFFFF';
@@ -224,7 +224,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
     : machine.payment_type === 'conforme_analise'
       ? 'Sujeito à análise*'
       : 'À vista / transferência';
-  drawFittedText(ctx, paymentLabel, box2X + 25, currentY + 84, colW - 50, 'bold', 20, 14);
+  drawFittedText(ctx, paymentLabel, box2X + 25, currentY + 84, colW - 50, 'bold', 23, 17);
 
   // Box 3: Garantia
   const box3X = box2X + colW + 20;
@@ -236,11 +236,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.stroke();
 
   ctx.fillStyle = '#94A3B8';
-  ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+  ctx.font = 'bold 19px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('GARANTIA INFORMADA', box3X + 25, currentY + 40);
 
   ctx.fillStyle = '#10B981';
-  drawFittedText(ctx, machine.warranty || 'Consulte condições', box3X + 25, currentY + 84, colW - 50, 'bold', 20, 14);
+  drawFittedText(ctx, machine.warranty || 'Consulte condições', box3X + 25, currentY + 84, colW - 50, 'bold', 23, 17);
 
   // 7. Technical Description Card
   currentY += boxH + 40;
@@ -254,11 +254,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.stroke();
 
   ctx.fillStyle = '#00C2FF';
-  ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif';
+  ctx.font = 'bold 21px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('ESPECIFICAÇÕES TÉCNICAS & COMPONENTES', 110, currentY + 45);
 
   ctx.fillStyle = '#CBD5E1';
-  ctx.font = '400 20px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '400 25px "Plus Jakarta Sans", sans-serif';
 
   // Text wrap logic
   const text = machine.description || 'Entre em contato para receber as especificações técnicas deste equipamento.';
@@ -290,7 +290,7 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.beginPath();
   ctx.roundRect(80, currentY, width - 160, descBoxH, 24);
   ctx.clip();
-  lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 32));
+  lines.forEach((item, index) => ctx.fillText(item, 110, currentY + 85 + index * 38));
   ctx.restore();
 
   // 8. Footer Bar
@@ -299,11 +299,11 @@ export async function generateFichaCardCanvas(machine: Machine, branding: FichaB
   ctx.fillRect(80, currentY - 20, width - 160, 1);
 
   ctx.fillStyle = '#64748B';
-  ctx.font = '500 16px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '500 18px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('TexMachina OS • Gestão & Vendas de Maquinário Têxtil Industrial', 80, currentY + 15);
 
   ctx.fillStyle = '#00C2FF';
-  ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+  ctx.font = 'bold 19px "Plus Jakarta Sans", sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText('Consulte disponibilidade e condições comerciais', width - 80, currentY + 15);
   ctx.textAlign = 'left';
