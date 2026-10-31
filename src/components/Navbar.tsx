@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { leadsApi, Lead } from '../services/api';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -21,6 +22,40 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [followUps, setFollowUps] = useState<Lead[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const loadFollowUps = async () => {
+      try {
+        setNotificationsLoading(true);
+        const leads = await leadsApi.list();
+        if (!active) return;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const due = leads
+          .filter((lead) => lead.status !== 'fechado' && lead.follow_up_date)
+          .filter((lead) => {
+            const date = new Date(String(lead.follow_up_date).slice(0, 10) + 'T00:00:00');
+            return !Number.isNaN(date.getTime()) && date <= today;
+          })
+          .sort((a, b) => (a.follow_up_date || '').localeCompare(b.follow_up_date || ''));
+        setFollowUps(due);
+      } catch (error) {
+        console.error('Não foi possível carregar os follow-ups:', error);
+      } finally {
+        if (active) setNotificationsLoading(false);
+      }
+    };
+    loadFollowUps();
+    return () => { active = false; };
+  }, []);
+
+  const formatFollowUpDate = (value: string) => {
+    const date = new Date(value.slice(0, 10) + 'T00:00:00');
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('pt-BR');
+  };
 
   const handleLogout = () => {
     logout();
@@ -137,46 +172,49 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-3">
             <PWAInstallButton />
 
-            {/* Notification Bell */}
+            {/* Follow-up notifications from real leads */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 rounded-xl text-gray-300 hover:text-white hover:bg-white/[0.06] transition-colors border border-white/5"
-                aria-label="Notificações"
+                aria-label={`Acompanhamentos pendentes: ${followUps.length}`}
+                aria-expanded={showNotifications}
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00C2FF] shadow-[0_0_8px_#00C2FF]" />
+                {followUps.length > 0 && <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-amber-500 text-[#090E1A] text-[9px] font-black flex items-center justify-center">{followUps.length > 99 ? "99+" : followUps.length}</span>}
               </button>
-
               {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-[#0E1626]/95 backdrop-blur-2xl rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10 p-4 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                    <span className="font-display font-bold text-xs text-white">Notificações em Tempo Real</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#0066FF]/20 text-[#00C2FF] font-semibold border border-[#00C2FF]/30">
-                      3 Novas
-                    </span>
+                <div className="absolute right-0 mt-3 w-[min(20rem,calc(100vw-2rem))] bg-[#0E1626]/95 backdrop-blur-2xl rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/10 p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/10">
+                    <span className="font-display font-bold text-xs text-white">Acompanhamentos vencidos</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30">{followUps.length}</span>
                   </div>
-                  <div className="divide-y divide-white/5 text-xs py-1">
-                    <div className="py-2.5">
-                      <p className="font-semibold text-white">Proposta Montex 6500 em revisão</p>
-                      <p className="text-gray-400 text-[11px] mt-0.5">Tinturaria Rio Claro agendou vistoria técnica.</p>
-                      <span className="text-[10px] text-gray-500">Há 15 minutos</span>
+                  {notificationsLoading ? (
+                    <p className="py-5 text-xs text-gray-400 text-center">Carregando acompanhamentos...</p>
+                  ) : followUps.length === 0 ? (
+                    <div className="py-6 text-center">
+                      <Bell className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
+                      <p className="text-xs font-semibold text-white">Tudo em dia!</p>
+                      <p className="text-[11px] text-gray-400 mt-1">Não há follow-ups vencidos ou para hoje.</p>
                     </div>
-                    <div className="py-2.5">
-                      <p className="font-semibold text-white">Lead Novo: Tear Mayer & Cie</p>
-                      <p className="text-gray-400 text-[11px] mt-0.5">Malharia Santa Catarina solicitou tabela técnica.</p>
-                      <span className="text-[10px] text-gray-500">Há 2 horas</span>
+                  ) : (
+                    <div className="divide-y divide-white/5 text-xs py-1 max-h-72 overflow-y-auto">
+                      {followUps.slice(0, 8).map((lead) => {
+                        const dateText = (lead.follow_up_date || "").slice(0, 10);
+                        const isOverdue = dateText < new Date().toISOString().slice(0, 10);
+                        return <div key={lead.id} className="py-3">
+                          <p className="font-semibold text-white truncate">{lead.client_name}</p>
+                          <p className="text-gray-400 text-[11px] mt-0.5 truncate">{lead.machine_name || "Interesse em máquina"} · {lead.client_phone}</p>
+                          <span className={isOverdue ? "text-[10px] font-medium text-red-300" : "text-[10px] font-medium text-amber-300"}>{isOverdue ? "Vencido" : "Para hoje"} · {formatFollowUpDate(dateText)}</span>
+                        </div>;
+                      })}
+                      {followUps.length > 8 && <p className="pt-3 text-center text-[10px] text-gray-400">E mais {followUps.length - 8} acompanhamento(s).</p>}
                     </div>
-                    <div className="py-2.5">
-                      <p className="font-semibold text-[#00C2FF]">Contrato Fechado: Picanol OmniPlus</p>
-                      <p className="text-gray-400 text-[11px] mt-0.5">Coteminas assinou via DocuSign (R$ 510.000).</p>
-                      <span className="text-[10px] text-emerald-400 font-medium">Hoje</span>
-                    </div>
-                  </div>
+                  )}
+                  <button onClick={() => { setShowNotifications(false); navigate("/leads"); }} className="w-full mt-3 py-2.5 rounded-xl bg-[#0066FF]/20 hover:bg-[#0066FF]/30 border border-[#00C2FF]/20 text-[#00C2FF] text-xs font-bold transition-colors">Abrir clientes e leads</button>
                 </div>
               )}
             </div>
-
             {/* User Profile Pill */}
             {user && (
               <div className="flex items-center gap-2 pl-3 border-l border-white/10">
