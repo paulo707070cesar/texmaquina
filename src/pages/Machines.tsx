@@ -15,6 +15,7 @@ import {
   Image as ImageIcon, 
   Sparkles,
   Download,
+  Play,
   Layout,
   Phone
 } from 'lucide-react';
@@ -457,6 +458,18 @@ export const Machines: React.FC = () => {
                       </span>
                     )}
                   </div>
+
+                  {machine.video_url && (
+                    <a
+                      href={machine.video_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 hover:bg-emerald-400 text-white px-3 py-2 text-[11px] font-bold shadow-lg"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" /> Assistir vídeo
+                    </a>
+                  )}
 
                   {/* Serial Number Tag */}
                   <div className="absolute bottom-3 left-3 text-white">
