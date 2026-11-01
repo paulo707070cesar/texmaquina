@@ -50,10 +50,26 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
     return () => { active = false; };
   }, [user?.tenant_logo, user?.tenant_name]);
 
-  const getFichaBranding = () => ({
-    ...companyBranding,
-    whatsapp: machine.seller_contact_phone?.trim() || companyBranding.whatsapp?.trim() || null,
-  });
+  // Read the saved company settings at the moment of export so the card never
+  // depends on whether the modal's background request has finished loading.
+  const getFichaBranding = async () => {
+    let latest = companyBranding;
+    try {
+      const tenant = await settingsApi.get();
+      latest = {
+        logoUrl: tenant.logo_url || companyBranding.logoUrl || user?.tenant_logo || null,
+        companyName: tenant.name || companyBranding.companyName || user?.tenant_name || null,
+        whatsapp: tenant.whatsapp?.trim() || companyBranding.whatsapp?.trim() || null,
+      };
+      setCompanyBranding(latest);
+    } catch {
+      // Keep the latest branding already available in the modal.
+    }
+    return {
+      ...latest,
+      whatsapp: machine.seller_contact_phone?.trim() || latest.whatsapp?.trim() || null,
+    };
+  };
 
   const getProposalText = () => {
     const statusLabel =
@@ -104,12 +120,12 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const handleCopyImage = async () => {
     setCopyingImage(true);
     try {
-      const success = await copyFichaImageToClipboard(machine, getFichaBranding());
+      const success = await copyFichaImageToClipboard(machine, await getFichaBranding());
       if (success) {
         onToast('Imagem da Ficha Técnica copiada! Cole no WhatsApp com Ctrl+V.');
       } else {
         // Fallback: download directly if clipboard write is blocked by browser policy
-        await downloadFichaCard(machine, getFichaBranding());
+        await downloadFichaCard(machine, await getFichaBranding());
         onToast('Imagem baixada em PNG para você anexar no WhatsApp!');
       }
     } catch (err) {
