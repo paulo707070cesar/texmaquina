@@ -52,6 +52,7 @@ export interface Tenant {
   name: string;
   slug?: string | null;
   logo_url?: string | null;
+  whatsapp?: string | null;
   catalog_public_enabled?: boolean | number;
   catalog_show_prices?: boolean | number;
 }
@@ -220,7 +221,7 @@ export const settingsApi = {
     const res = await api.get<Tenant>('/settings');
     return res.data;
   },
-  update: async (data: { name?: string; logo_url?: string | null; catalog_public_enabled?: boolean; catalog_show_prices?: boolean }) => {
+  update: async (data: { name?: string; logo_url?: string | null; whatsapp?: string | null; catalog_public_enabled?: boolean; catalog_show_prices?: boolean }) => {
     const res = await api.put<Tenant>('/settings', data);
     return res.data;
   },
