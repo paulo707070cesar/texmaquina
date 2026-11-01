@@ -135,7 +135,7 @@ export const PublicCatalog: React.FC = () => {
               <h3 className="text-lg font-bold text-white leading-snug">{m.name}</h3><p className="text-xs text-gray-400">Modelo: {m.model || 'Sob consulta'}</p>
               {m.description && <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{m.description}</p>}
               <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">{m.origin && <div><span className="block text-gray-500 mb-1">Origem</span>{m.origin}</div>}{m.warranty && <div><span className="block text-gray-500 mb-1">Garantia</span>{m.warranty}</div>}</div>
-              <div className="mt-auto pt-3 border-t border-white/10"><span className="block text-[10px] uppercase tracking-wider text-gray-500">Investimento</span><strong className="text-base text-white">{data.tenant.catalog_show_prices && m.price !== null ? currency(m.price) : 'Preço sob consulta'}</strong></div>
+              <div className="mt-auto pt-3 border-t border-white/10"><span className="block text-[10px] uppercase tracking-wider text-gray-500">Investimento</span><strong className="text-base text-white">{m.price !== null && m.price !== undefined ? currency(m.price) : 'Preço sob consulta'}</strong></div>
             </div>
           </article>)}
         </div>}
