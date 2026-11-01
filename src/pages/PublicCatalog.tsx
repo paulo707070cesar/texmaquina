@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AlertCircle, Building2, Download, Search, Share2, MessageCircle, LoaderCircle, Facebook, Linkedin, Link as LinkIcon } from 'lucide-react';
 import { catalogApi, PublicCatalogData, PublicCatalogMachine } from '../services/api';
 
 export const PublicCatalog: React.FC = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
+  const navigate = useNavigate();
+  const isPdfPage = window.location.pathname.endsWith('/pdf');
   const [data, setData] = useState<PublicCatalogData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -127,7 +129,8 @@ export const PublicCatalog: React.FC = () => {
           <button onClick={() => shareSocial('linkedin')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Linkedin className="w-4 h-4" /> LinkedIn</button>
           <button onClick={() => shareSocial('x')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5">𝕏</button>
           <button onClick={shareNative} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Share2 className="w-4 h-4" /> Mais opções</button>
-          <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-4 py-3 text-sm font-bold text-white"><Download className="w-4 h-4" /> Gerar PDF / Imprimir</button>
+          {!isPdfPage && <button onClick={() => navigate('/catalogo/' + tenantId + '/pdf')} className="inline-flex items-center gap-2 rounded-xl border border-[#00C2FF]/40 bg-[#00C2FF]/10 px-4 py-3 text-sm font-bold text-[#00C2FF] hover:bg-[#00C2FF]/20"><Download className="w-4 h-4" /> Página para baixar PDF</button>}
+          {isPdfPage && <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-4 py-3 text-sm font-bold text-white"><Download className="w-4 h-4" /> Baixar catálogo em PDF</button>}
         </div>
       </header>
       <section className="no-print mb-7 space-y-4">
