@@ -415,10 +415,11 @@ app.get('/api/settings', authenticateToken, async (req: AuthenticatedRequest, re
 
 app.put('/api/settings', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, logo_url, catalog_public_enabled, catalog_show_prices } = req.body;
-    const updateData: { name?: string; logo_url?: string | null; catalog_public_enabled?: number; catalog_show_prices?: number } = {};
+    const { name, logo_url, whatsapp, catalog_public_enabled, catalog_show_prices } = req.body;
+    const updateData: { name?: string; logo_url?: string | null; whatsapp?: string | null; catalog_public_enabled?: number; catalog_show_prices?: number } = {};
     if (typeof name === 'string' && name.trim()) updateData.name = name.trim();
     if (logo_url === null || typeof logo_url === 'string') updateData.logo_url = logo_url;
+    if (whatsapp === null || typeof whatsapp === 'string') updateData.whatsapp = whatsapp?.trim() || null;
     if (typeof catalog_public_enabled === 'boolean') updateData.catalog_public_enabled = catalog_public_enabled ? 1 : 0;
     if (typeof catalog_show_prices === 'boolean') updateData.catalog_show_prices = catalog_show_prices ? 1 : 0;
     const updated = await tenantsRepo.update(req.user!.tenant_id, updateData);
