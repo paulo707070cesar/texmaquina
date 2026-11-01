@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AlertCircle, Building2, Download, Search, Share2, MessageCircle, LoaderCircle, Facebook, Linkedin, Link as LinkIcon } from 'lucide-react';
 import { catalogApi, PublicCatalogData, PublicCatalogMachine } from '../services/api';
 
 export const PublicCatalog: React.FC = () => {
   const { tenantId } = useParams<{ tenantId: string }>();
   const navigate = useNavigate();
-  const isPdfPage = window.location.pathname.endsWith('/pdf');
+  const location = useLocation();
+  const isPdfPage = location.pathname.replace(/\/+$/, '').endsWith('/pdf');
   const [data, setData] = useState<PublicCatalogData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -123,31 +124,31 @@ export const PublicCatalog: React.FC = () => {
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C2FF]">Catálogo comercial</p><h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">{data.tenant.name}</h1><p className="text-sm text-gray-400 mt-1">Máquinas industriais disponíveis</p></div>
         </div>
         <div className="no-print flex flex-wrap gap-2">
-          <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><LinkIcon className="w-4 h-4" /> Copiar link</button>
-          <button onClick={() => shareText()} className="inline-flex items-center gap-2 rounded-xl bg-[#087F5B] px-4 py-3 text-sm font-bold text-white hover:bg-[#099268]"><MessageCircle className="w-4 h-4" /> WhatsApp</button>
-          <button onClick={() => shareSocial('facebook')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Facebook className="w-4 h-4" /> Facebook</button>
-          <button onClick={() => shareSocial('linkedin')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Linkedin className="w-4 h-4" /> LinkedIn</button>
-          <button onClick={() => shareSocial('x')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5">𝕏</button>
-          <button onClick={shareNative} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Share2 className="w-4 h-4" /> Mais opções</button>
-          {!isPdfPage && <button onClick={() => navigate('/catalogo/' + tenantId + '/pdf')} className="inline-flex items-center gap-2 rounded-xl border border-[#00C2FF]/40 bg-[#00C2FF]/10 px-4 py-3 text-sm font-bold text-[#00C2FF] hover:bg-[#00C2FF]/20"><Download className="w-4 h-4" /> Página para baixar PDF</button>}
-          {isPdfPage && <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-4 py-3 text-sm font-bold text-white"><Download className="w-4 h-4" /> Baixar catálogo em PDF</button>}
+          {!isPdfPage && <>
+            <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><LinkIcon className="w-4 h-4" /> Copiar link</button>
+            <button onClick={() => shareText()} className="inline-flex items-center gap-2 rounded-xl bg-[#087F5B] px-4 py-3 text-sm font-bold text-white hover:bg-[#099268]"><MessageCircle className="w-4 h-4" /> WhatsApp</button>
+            <button onClick={() => shareSocial('facebook')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Facebook className="w-4 h-4" /> Facebook</button>
+            <button onClick={() => shareSocial('linkedin')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Linkedin className="w-4 h-4" /> LinkedIn</button>
+            <button onClick={() => shareSocial('x')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5">𝕏</button>
+            <button onClick={shareNative} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Share2 className="w-4 h-4" /> Mais opções</button>
+          </>}
         </div>
       </header>
       {!isPdfPage && <section className="no-print mb-7 rounded-2xl border border-[#00C2FF]/30 bg-gradient-to-r from-[#063B63] via-[#075985] to-[#0E7490] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-lg shadow-cyan-950/20">
         <div className="flex items-start gap-3">
           <div className="shrink-0 rounded-xl bg-white/10 p-3"><Download className="h-7 w-7 text-white" /></div>
-          <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Baixe nosso catálogo em PDF</h2><p className="mt-1 text-sm text-cyan-50/90">Veja os equipamentos, fotos, descrições e preços em um arquivo pronto para salvar ou compartilhar.</p></div>
+          <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Baixe nosso catálogo em PDF</h2><p className="mt-1 text-sm text-cyan-50/90">Acesse uma página exclusiva com o catálogo pronto para salvar em PDF.</p></div>
         </div>
-        <button onClick={() => navigate('/catalogo/' + tenantId + '/pdf')} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] shadow-md hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-white"><Download className="h-5 w-5" /> Abrir página do PDF</button>
+        <button onClick={() => navigate('/catalogo/' + tenantId + '/pdf')} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] shadow-md hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-white"><Download className="h-5 w-5" /> Ver página do PDF</button>
       </section>}
       {isPdfPage && <section className="no-print mb-7 rounded-2xl border border-[#00C2FF]/30 bg-gradient-to-r from-[#063B63] to-[#0E7490] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Seu catálogo está pronto</h2><p className="mt-1 text-sm text-cyan-50/90">Clique para abrir a impressão e escolha “Salvar como PDF”.</p></div>
-        <button onClick={() => window.print()} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] hover:bg-cyan-50"><Download className="h-5 w-5" /> Baixar catálogo em PDF</button>
+        <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Catálogo pronto para baixar</h2><p className="mt-1 text-sm text-cyan-50/90">Esta é a página exclusiva do catálogo. Clique abaixo e, na janela de impressão, escolha “Salvar como PDF”.</p></div>
+        <button onClick={() => window.print()} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] hover:bg-cyan-50"><Download className="h-5 w-5" /> Baixar PDF</button>
       </section>}
-      <section className="no-print mb-7 space-y-4">
+      {!isPdfPage && <section className="no-print mb-7 space-y-4">
         <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00C2FF]" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por máquina, modelo ou descrição..." className="w-full h-12 pl-11 pr-4 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white outline-none focus:border-[#00C2FF]/60" /></div>
         <div className="flex gap-2 overflow-x-auto pb-1">{categories.map(n => <button key={n} onClick={() => setCategory(n)} className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-colors ' + (category === n ? 'bg-[#0066FF] border-[#00C2FF] text-white' : 'border-white/10 text-gray-400 hover:text-white hover:bg-white/5')}>{n}</button>)}</div>
-      </section>
+      {!isPdfPage && </section>}
       <div className="flex items-center justify-between gap-3 mb-5"><h2 className="text-lg font-bold text-white">Equipamentos</h2><span className="text-xs text-gray-400">{machines.length} {machines.length === 1 ? 'máquina' : 'máquinas'}</span></div>
       {machines.length === 0 ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center"><Building2 className="w-10 h-10 mx-auto text-gray-500 mb-3" /><h3 className="font-bold text-white">{data.machines.length === 0 ? 'Nenhuma máquina publicada ainda' : 'Nenhum resultado encontrado'}</h3><p className="text-sm text-gray-400 mt-2">{data.machines.length === 0 ? 'Os equipamentos disponíveis aparecerão aqui quando forem cadastrados.' : 'Tente alterar a busca ou selecionar outra categoria.'}</p></div> :
         <div className="catalog-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
