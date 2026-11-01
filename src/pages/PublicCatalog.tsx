@@ -91,10 +91,22 @@ export const PublicCatalog: React.FC = () => {
         .catalog-header > div:first-child > div:first-child { width: 64px !important; height: 64px !important; background: #fff !important; }
         .catalog-header img { max-height: 64px !important; max-width: 64px !important; object-fit: contain !important; }
         .catalog-header .no-print { display: none !important; }
-        .catalog-print, .catalog-print * { color: #111827 !important; background-color: transparent !important; box-shadow: none !important; text-shadow: none !important; }
         .catalog-print { max-width: none !important; padding: 0 !important; margin: 0 !important; }
-        .catalog-card { border: 1px solid #d1d5db !important; break-inside: avoid; page-break-inside: avoid; }
-        .catalog-card img { max-height: 55mm !important; object-fit: contain !important; }
+        .catalog-print > .flex.items-center.justify-between { margin-bottom: 5mm !important; padding: 3mm 4mm !important; border-left: 3px solid #00AEEF !important; background: #EAF8FF !important; border-radius: 2mm !important; }
+        .catalog-print > .flex.items-center.justify-between h2 { color: #12304A !important; font-size: 15pt !important; }
+        .catalog-print > .flex.items-center.justify-between span { color: #176B87 !important; font-weight: 700 !important; }
+        .catalog-card { border: 1px solid #C9D9E8 !important; border-radius: 3mm !important; overflow: hidden !important; background: #FFFFFF !important; break-inside: avoid; page-break-inside: avoid; }
+        .catalog-card > div:first-child { height: 72mm !important; min-height: 72mm !important; background: #EAF2F8 !important; border-bottom: 2px solid #00AEEF !important; }
+        .catalog-card img { width: 100% !important; height: 72mm !important; max-height: 72mm !important; object-fit: cover !important; padding: 0 !important; }
+        .catalog-card > div:nth-child(2) { padding: 4mm !important; gap: 2.5mm !important; background: #FFFFFF !important; }
+        .catalog-card > div:nth-child(2) > div:first-child span:first-child { color: #007DA8 !important; }
+        .catalog-card h3 { color: #102A43 !important; font-size: 14pt !important; line-height: 1.2 !important; }
+        .catalog-card p { color: #425466 !important; font-size: 9pt !important; line-height: 1.35 !important; }
+        .catalog-card > div:nth-child(2) > div:first-child span:last-child { color: #087F5B !important; background: #E5F8EF !important; border: 1px solid #A7E4C5 !important; }
+        .catalog-card > div:nth-child(2) > div:last-child { border-top: 1px solid #D7E5EF !important; padding-top: 3mm !important; background: #F0F9FF !important; padding: 3mm !important; border-radius: 2mm !important; }
+        .catalog-card > div:nth-child(2) > div:last-child span { color: #52677A !important; }
+        .catalog-card > div:nth-child(2) > div:last-child strong { color: #0066CC !important; font-size: 14pt !important; }
+        .catalog-print, .catalog-print * { box-shadow: none !important; text-shadow: none !important; }
         .no-print { display: none !important; }
         .catalog-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6mm !important; }
         .catalog-print > .flex.items-center.justify-between { margin-bottom: 4mm !important; }
