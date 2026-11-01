@@ -127,7 +127,7 @@ export const PublicCatalog: React.FC = () => {
         <div className="catalog-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {machines.map(m => <article id={'maquina-' + m.id} key={m.id} className="catalog-card rounded-2xl overflow-hidden border border-white/10 bg-[#0E1626] flex flex-col">
             <div className="relative h-56 bg-[#0A101C] flex items-center justify-center overflow-hidden">
-              {m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-contain p-3" /> : <Building2 className="w-14 h-14 text-gray-600" />}
+              {m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-cover" /> : <Building2 className="w-14 h-14 text-gray-600" />}
 
             </div>
             <div className="p-5 flex flex-col gap-3 flex-1">
