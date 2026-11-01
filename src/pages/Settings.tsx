@@ -22,6 +22,7 @@ export const Settings: React.FC = () => {
   // Settings form
   const [tenantName, setTenantName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [catalogPublicEnabled, setCatalogPublicEnabled] = useState(false);
   const [catalogShowPrices, setCatalogShowPrices] = useState(false);
 
@@ -42,6 +43,7 @@ export const Settings: React.FC = () => {
       setTenant(tData);
       setTenantName(tData.name);
       setLogoUrl(tData.logo_url || '');
+      setWhatsapp(tData.whatsapp || '');
       setCatalogPublicEnabled(Number(tData.catalog_public_enabled) === 1);
       setCatalogShowPrices(Number(tData.catalog_show_prices) === 1);
       setCategories(cData);
@@ -61,7 +63,7 @@ export const Settings: React.FC = () => {
     e.preventDefault();
     setSavingSettings(true);
     try {
-      await settingsApi.update({ name: tenantName, logo_url: logoUrl || null, catalog_public_enabled: catalogPublicEnabled, catalog_show_prices: catalogShowPrices });
+      await settingsApi.update({ name: tenantName, logo_url: logoUrl || null, whatsapp: whatsapp.trim() || null, catalog_public_enabled: catalogPublicEnabled, catalog_show_prices: catalogShowPrices });
       showToast('Configurações salvas com sucesso!');
       // Update local storage name if changed
       const savedUser = localStorage.getItem('texmachina_user');
@@ -213,6 +215,18 @@ export const Settings: React.FC = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase">WhatsApp comercial</label>
+              <input
+                type="tel"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                className="w-full h-11 px-4 glass-input rounded-xl text-sm"
+                placeholder="Ex.: (51) 99999-9999"
+              />
+              <p className="text-[11px] text-gray-500 mt-1">Este número aparecerá no cabeçalho das fichas comerciais quando a máquina não tiver um contato próprio.</p>
             </div>
 
             <button
