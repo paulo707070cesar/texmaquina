@@ -126,7 +126,7 @@ export const PublicCatalog: React.FC = () => {
       {machines.length === 0 ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center"><Building2 className="w-10 h-10 mx-auto text-gray-500 mb-3" /><h3 className="font-bold text-white">{data.machines.length === 0 ? 'Nenhuma máquina publicada ainda' : 'Nenhum resultado encontrado'}</h3><p className="text-sm text-gray-400 mt-2">{data.machines.length === 0 ? 'Os equipamentos disponíveis aparecerão aqui quando forem cadastrados.' : 'Tente alterar a busca ou selecionar outra categoria.'}</p></div> :
         <div className="catalog-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {machines.map(m => <article id={'maquina-' + m.id} key={m.id} className="catalog-card rounded-2xl overflow-hidden border border-white/10 bg-[#0E1626] flex flex-col">
-            <div className="relative h-56 bg-[#0A101C] flex items-center justify-center overflow-hidden">
+            <div className="relative h-64 sm:h-72 bg-[#0A101C] flex items-center justify-center overflow-hidden">
               {m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-cover" /> : <Building2 className="w-14 h-14 text-gray-600" />}
 
             </div>
