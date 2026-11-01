@@ -32,9 +32,10 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
   const [downloading, setDownloading] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
   const { user } = useAuth();
-  const [companyBranding, setCompanyBranding] = useState<{ logoUrl?: string | null; companyName?: string | null }>({
+  const [companyBranding, setCompanyBranding] = useState<{ logoUrl?: string | null; companyName?: string | null; whatsapp?: string | null }>({
     logoUrl: user?.tenant_logo || null,
     companyName: user?.tenant_name || null,
+    whatsapp: null,
   });
 
   React.useEffect(() => {
@@ -43,6 +44,7 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
       if (active) setCompanyBranding({
         logoUrl: tenant.logo_url || user?.tenant_logo || null,
         companyName: tenant.name || user?.tenant_name || null,
+        whatsapp: tenant.whatsapp || null,
       });
     }).catch(() => {});
     return () => { active = false; };
@@ -50,7 +52,7 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
 
   const getFichaBranding = () => ({
     ...companyBranding,
-    whatsapp: machine.seller_contact_phone || null,
+    whatsapp: machine.seller_contact_phone?.trim() || companyBranding.whatsapp?.trim() || null,
   });
 
   const getProposalText = () => {
