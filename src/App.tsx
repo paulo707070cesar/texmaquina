@@ -36,6 +36,7 @@ export default function App() {
         <AppLayout>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/catalogo/:tenantId/pdf" element={<PublicCatalog />} />
             <Route path="/catalogo/:tenantId" element={<PublicCatalog />} />
             
             <Route
