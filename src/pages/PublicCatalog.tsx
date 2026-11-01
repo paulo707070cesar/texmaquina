@@ -145,10 +145,10 @@ export const PublicCatalog: React.FC = () => {
         <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Catálogo pronto para baixar</h2><p className="mt-1 text-sm text-cyan-50/90">Esta é a página exclusiva do catálogo. Clique abaixo e, na janela de impressão, escolha “Salvar como PDF”.</p></div>
         <button onClick={() => window.print()} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] hover:bg-cyan-50"><Download className="h-5 w-5" /> Baixar PDF</button>
       </section>}
-      {!isPdfPage && <section className="no-print mb-7 space-y-4">
+      <section className={isPdfPage ? "hidden" : "no-print mb-7 space-y-4"}>
         <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00C2FF]" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por máquina, modelo ou descrição..." className="w-full h-12 pl-11 pr-4 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white outline-none focus:border-[#00C2FF]/60" /></div>
         <div className="flex gap-2 overflow-x-auto pb-1">{categories.map(n => <button key={n} onClick={() => setCategory(n)} className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-colors ' + (category === n ? 'bg-[#0066FF] border-[#00C2FF] text-white' : 'border-white/10 text-gray-400 hover:text-white hover:bg-white/5')}>{n}</button>)}</div>
-      {!isPdfPage && </section>}
+      </section>
       <div className="flex items-center justify-between gap-3 mb-5"><h2 className="text-lg font-bold text-white">Equipamentos</h2><span className="text-xs text-gray-400">{machines.length} {machines.length === 1 ? 'máquina' : 'máquinas'}</span></div>
       {machines.length === 0 ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center"><Building2 className="w-10 h-10 mx-auto text-gray-500 mb-3" /><h3 className="font-bold text-white">{data.machines.length === 0 ? 'Nenhuma máquina publicada ainda' : 'Nenhum resultado encontrado'}</h3><p className="text-sm text-gray-400 mt-2">{data.machines.length === 0 ? 'Os equipamentos disponíveis aparecerão aqui quando forem cadastrados.' : 'Tente alterar a busca ou selecionar outra categoria.'}</p></div> :
         <div className="catalog-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
