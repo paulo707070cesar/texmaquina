@@ -6,6 +6,7 @@ export interface Tenant {
   name: string;
   slug?: string | null;
   logo_url?: string | null;
+  whatsapp?: string | null;
   catalog_public_enabled?: boolean | number;
   catalog_show_prices?: boolean | number;
   created_at: string;
@@ -141,10 +142,16 @@ async function ensureTablesCreated(pool: mysql.Pool): Promise<void> {
       name VARCHAR(200) NOT NULL,
       slug VARCHAR(100) NULL UNIQUE,
       logo_url VARCHAR(500) NULL,
+      whatsapp VARCHAR(40) NULL,
       catalog_public_enabled TINYINT(1) NOT NULL DEFAULT 0,
       catalog_show_prices TINYINT(1) NOT NULL DEFAULT 0,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;`);
+
+    const [whatsappColumns]: any = await pool.query("SHOW COLUMNS FROM tenants LIKE 'whatsapp'");
+    if (whatsappColumns.length === 0) {
+      await pool.query('ALTER TABLE tenants ADD COLUMN whatsapp VARCHAR(40) NULL AFTER logo_url');
+    }
 
     const [catalogEnabledColumns]: any = await pool.query("SHOW COLUMNS FROM tenants LIKE 'catalog_public_enabled'");
     if (catalogEnabledColumns.length === 0) {
