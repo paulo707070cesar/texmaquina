@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AlertCircle, Building2, Download, Search, Share2, MessageCircle, LoaderCircle } from 'lucide-react';
+import { AlertCircle, Building2, Download, Search, Share2, MessageCircle, LoaderCircle, Facebook, Linkedin, Link as LinkIcon } from 'lucide-react';
 import { catalogApi, PublicCatalogData, PublicCatalogMachine } from '../services/api';
 
 export const PublicCatalog: React.FC = () => {
@@ -55,6 +55,25 @@ export const PublicCatalog: React.FC = () => {
     try { await navigator.clipboard.writeText(window.location.href); alert('Link do catálogo copiado.'); }
     catch { shareText(); }
   };
+  const shareSocial = (network: 'facebook' | 'linkedin' | 'x') => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('Catálogo de máquinas — ' + (data?.tenant.name || 'TexMachina'));
+    const targets = {
+      facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + url,
+      linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + url,
+      x: 'https://twitter.com/intent/tweet?url=' + url + '&text=' + title,
+    };
+    window.open(targets[network], '_blank', 'noopener,noreferrer,width=700,height=600');
+  };
+  const shareNative = async () => {
+    const title = 'Catálogo de máquinas — ' + (data?.tenant.name || 'TexMachina');
+    const text = 'Confira nosso catálogo de máquinas industriais.';
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url: window.location.href }); } catch { /* user cancelled */ }
+    } else {
+      await copyLink();
+    }
+  };
 
   if (loading) return <div className="min-h-[70vh] flex items-center justify-center text-gray-300 gap-3"><LoaderCircle className="animate-spin" /> Carregando catálogo...</div>;
   if (error || !data) return <div className="min-h-[70vh] max-w-xl mx-auto px-5 flex flex-col items-center justify-center text-center gap-4"><AlertCircle className="w-12 h-12 text-[#00C2FF]" /><h1 className="text-2xl font-bold text-white">Catálogo indisponível</h1><p className="text-gray-400">{error || 'Este catálogo não está disponível no momento.'}</p><p className="text-xs text-gray-500">Se você administra esta empresa, entre nas configurações do TexMachina e publique o catálogo.</p></div>;
@@ -90,8 +109,12 @@ export const PublicCatalog: React.FC = () => {
           <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#00C2FF]">Catálogo comercial</p><h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">{data.tenant.name}</h1><p className="text-sm text-gray-400 mt-1">Máquinas industriais disponíveis</p></div>
         </div>
         <div className="no-print flex flex-wrap gap-2">
-          <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Share2 className="w-4 h-4" /> Copiar link</button>
-          <button onClick={() => shareText()} className="inline-flex items-center gap-2 rounded-xl bg-[#087F5B] px-4 py-3 text-sm font-bold text-white hover:bg-[#099268]"><MessageCircle className="w-4 h-4" /> Compartilhar no WhatsApp</button>
+          <button onClick={copyLink} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><LinkIcon className="w-4 h-4" /> Copiar link</button>
+          <button onClick={() => shareText()} className="inline-flex items-center gap-2 rounded-xl bg-[#087F5B] px-4 py-3 text-sm font-bold text-white hover:bg-[#099268]"><MessageCircle className="w-4 h-4" /> WhatsApp</button>
+          <button onClick={() => shareSocial('facebook')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Facebook className="w-4 h-4" /> Facebook</button>
+          <button onClick={() => shareSocial('linkedin')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Linkedin className="w-4 h-4" /> LinkedIn</button>
+          <button onClick={() => shareSocial('x')} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5">𝕏</button>
+          <button onClick={shareNative} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5"><Share2 className="w-4 h-4" /> Mais opções</button>
           <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-4 py-3 text-sm font-bold text-white"><Download className="w-4 h-4" /> Gerar PDF / Imprimir</button>
         </div>
       </header>
@@ -105,15 +128,14 @@ export const PublicCatalog: React.FC = () => {
           {machines.map(m => <article id={'maquina-' + m.id} key={m.id} className="catalog-card rounded-2xl overflow-hidden border border-white/10 bg-[#0E1626] flex flex-col">
             <div className="relative h-56 bg-[#0A101C] flex items-center justify-center overflow-hidden">
               {m.image_url ? <img src={m.image_url} alt={m.name} loading="lazy" className="w-full h-full object-contain p-3" /> : <Building2 className="w-14 h-14 text-gray-600" />}
-              {!!m.image_urls?.length && <button type="button" onClick={() => setGallery({ machine: m, index: 0 })} className="no-print absolute bottom-3 left-3 rounded-full bg-black/80 border border-white/20 text-white px-3 py-2 text-xs font-bold hover:bg-[#0066FF]">Ver {m.image_urls.length + 1} fotos</button>}
-              {m.video_url && <button type="button" onClick={() => setVideoMachine(m)} className="no-print absolute bottom-3 right-3 rounded-full bg-emerald-600 text-white px-3 py-2 text-xs font-bold inline-flex items-center gap-1.5 hover:bg-emerald-500"><span>▶</span> Assistir vídeo</button>}
+
             </div>
             <div className="p-5 flex flex-col gap-3 flex-1">
               <div className="flex items-center justify-between gap-2"><span className="text-[10px] font-bold uppercase tracking-wider text-[#00C2FF]">{m.category_name || 'Máquina industrial'}</span><span className="text-[10px] font-semibold rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Disponível</span></div>
               <h3 className="text-lg font-bold text-white leading-snug">{m.name}</h3><p className="text-xs text-gray-400">Modelo: {m.model || 'Sob consulta'}</p>
               {m.description && <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">{m.description}</p>}
               <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">{m.origin && <div><span className="block text-gray-500 mb-1">Origem</span>{m.origin}</div>}{m.warranty && <div><span className="block text-gray-500 mb-1">Garantia</span>{m.warranty}</div>}</div>
-              <div className="mt-auto pt-3 border-t border-white/10 flex items-center justify-between gap-2"><div><span className="block text-[10px] uppercase tracking-wider text-gray-500">Investimento</span><strong className="text-base text-white">{data.tenant.catalog_show_prices && m.price !== null ? currency(m.price) : 'Preço sob consulta'}</strong></div><button className="no-print inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/5" onClick={() => shareText(m)}><Share2 className="w-3.5 h-3.5" /> Compartilhar</button></div>
+              <div className="mt-auto pt-3 border-t border-white/10"><span className="block text-[10px] uppercase tracking-wider text-gray-500">Investimento</span><strong className="text-base text-white">{data.tenant.catalog_show_prices && m.price !== null ? currency(m.price) : 'Preço sob consulta'}</strong></div>
             </div>
           </article>)}
         </div>}
