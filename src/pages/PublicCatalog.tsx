@@ -133,6 +133,17 @@ export const PublicCatalog: React.FC = () => {
           {isPdfPage && <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-4 py-3 text-sm font-bold text-white"><Download className="w-4 h-4" /> Baixar catálogo em PDF</button>}
         </div>
       </header>
+      {!isPdfPage && <section className="no-print mb-7 rounded-2xl border border-[#00C2FF]/30 bg-gradient-to-r from-[#063B63] via-[#075985] to-[#0E7490] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-lg shadow-cyan-950/20">
+        <div className="flex items-start gap-3">
+          <div className="shrink-0 rounded-xl bg-white/10 p-3"><Download className="h-7 w-7 text-white" /></div>
+          <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Baixe nosso catálogo em PDF</h2><p className="mt-1 text-sm text-cyan-50/90">Veja os equipamentos, fotos, descrições e preços em um arquivo pronto para salvar ou compartilhar.</p></div>
+        </div>
+        <button onClick={() => navigate('/catalogo/' + tenantId + '/pdf')} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] shadow-md hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-white"><Download className="h-5 w-5" /> Abrir página do PDF</button>
+      </section>}
+      {isPdfPage && <section className="no-print mb-7 rounded-2xl border border-[#00C2FF]/30 bg-gradient-to-r from-[#063B63] to-[#0E7490] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div><h2 className="text-lg sm:text-xl font-extrabold text-white">Seu catálogo está pronto</h2><p className="mt-1 text-sm text-cyan-50/90">Clique para abrir a impressão e escolha “Salvar como PDF”.</p></div>
+        <button onClick={() => window.print()} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-extrabold text-[#075985] hover:bg-cyan-50"><Download className="h-5 w-5" /> Baixar catálogo em PDF</button>
+      </section>}
       <section className="no-print mb-7 space-y-4">
         <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#00C2FF]" /><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por máquina, modelo ou descrição..." className="w-full h-12 pl-11 pr-4 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white outline-none focus:border-[#00C2FF]/60" /></div>
         <div className="flex gap-2 overflow-x-auto pb-1">{categories.map(n => <button key={n} onClick={() => setCategory(n)} className={'shrink-0 rounded-full px-4 py-2 text-xs font-bold border transition-colors ' + (category === n ? 'bg-[#0066FF] border-[#00C2FF] text-white' : 'border-white/10 text-gray-400 hover:text-white hover:bg-white/5')}>{n}</button>)}</div>
