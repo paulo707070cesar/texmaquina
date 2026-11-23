@@ -426,7 +426,7 @@ export const Machines: React.FC = () => {
                 className="w-full glass-card glass-card-hover rounded-3xl overflow-hidden flex flex-col group"
               >
                 {/* Image Header with Industrial Tags */}
-                <div className="relative w-full h-64 sm:h-72 bg-[#0c1424] overflow-hidden">
+                <div className="relative w-full h-80 sm:h-96 lg:h-[26rem] bg-[#0c1424] overflow-hidden">
                   <img
                     src={machine.image_url}
                     alt={machine.name}
