@@ -131,7 +131,7 @@
   background-color: #141C2B !important;
   color: #E7EDF7 !important;
 }
-:root[data-theme="dark"] .min-h-screen.bg-\\[\\#080C14\\] {
+:root[data-theme="dark"] [class~="bg-[#080C14]"] {
   background-color: #141C2B !important;
   color: #E7EDF7 !important;
 }
