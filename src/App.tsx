@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Machines } from './pages/Machines';
 import { Pipeline } from './pages/Pipeline';
 import { ClientsList } from './pages/ClientsList';
+import { Agenda } from './pages/Agenda';
 import { Settings } from './pages/Settings';
 import { PublicCatalog } from './pages/PublicCatalog';
 
@@ -69,6 +70,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ClientsList />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/agenda"
+              element={
+                <ProtectedRoute>
+                  <Agenda />
                 </ProtectedRoute>
               }
             />
