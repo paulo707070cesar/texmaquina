@@ -192,25 +192,55 @@ export async function generateFichaCardCanvas(
             // Pure/light neutral white background: transparent. Smoothly fade
             // near-white edge pixels so a white halo does not remain around logo.
             if (r > 242 && g > 242 && b > 242) {
+              // Remove white matte/background.
               data[i + 3] = 0;
             } else if (r > 218 && g > 218 && b > 218) {
               const whiteness = Math.min(r, g, b);
               const fade = (242 - whiteness) / (242 - 218);
               data[i + 3] = Math.round(data[i + 3] * Math.max(0, Math.min(1, fade)));
+            } else {
+              // Turn neutral gray logo elements into white, while preserving
+              // saturated brand colors. Neutral pixels have very low channel spread.
+              const spread = Math.max(r, g, b) - Math.min(r, g, b);
+              const brightness = (r + g + b) / 3;
+              if (spread <= 32 && brightness >= 65 && brightness <= 218) {
+                data[i] = 255;
+                data[i + 1] = 255;
+                data[i + 2] = 255;
+              }
             }
           }
           logoCtx.putImageData(imageData, 0, 0);
-          logoSource = logoCanvas;
+
+          // Trim the lower tagline/text area from the logo artwork.
+          // The settings logo is displayed as its upper brand mark/name only.
+          const croppedHeight = Math.max(1, Math.round(logoCanvas.height * 0.72));
+          const cleanLogoCanvas = document.createElement('canvas');
+          cleanLogoCanvas.width = logoCanvas.width;
+          cleanLogoCanvas.height = croppedHeight;
+          const cleanLogoCtx = cleanLogoCanvas.getContext('2d');
+          if (cleanLogoCtx) {
+            cleanLogoCtx.drawImage(
+              logoCanvas,
+              0, 0, logoCanvas.width, croppedHeight,
+              0, 0, cleanLogoCanvas.width, cleanLogoCanvas.height
+            );
+            logoSource = cleanLogoCanvas;
+          } else {
+            logoSource = logoCanvas;
+          }
         }
       } catch {
         // If canvas pixel access is blocked by cross-origin restrictions,
         // retain and draw the original transparent PNG.
       }
 
+      const logoSourceWidth = logoSource instanceof HTMLCanvasElement ? logoSource.width : logo.naturalWidth;
+      const logoSourceHeight = logoSource instanceof HTMLCanvasElement ? logoSource.height : logo.naturalHeight;
       const maxLogoWidth = 270;
       const maxLogoHeight = 125;
-      const scale = Math.min(maxLogoWidth / logo.naturalWidth, maxLogoHeight / logo.naturalHeight);
-      ctx.drawImage(logoSource, 54, 48, logo.naturalWidth * scale, logo.naturalHeight * scale);
+      const scale = Math.min(maxLogoWidth / logoSourceWidth, maxLogoHeight / logoSourceHeight);
+      ctx.drawImage(logoSource, 54, 48, logoSourceWidth * scale, logoSourceHeight * scale);
     } catch {
       // Logo failure must not prevent sharing the machine image.
     }
