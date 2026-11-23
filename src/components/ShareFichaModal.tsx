@@ -52,24 +52,16 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
 
   // Read the saved company settings at the moment of export so the card never
   // depends on whether the modal's background request has finished loading.
+  // The shared artwork must never receive or render the tenant/company logo.
   const getFichaBranding = async () => {
-    let latest = companyBranding;
+    let whatsapp = companyBranding.whatsapp?.trim() || null;
     try {
       const tenant = await settingsApi.get();
-      latest = {
-        logoUrl: tenant.logo_url || companyBranding.logoUrl || user?.tenant_logo || null,
-        companyName: tenant.name || companyBranding.companyName || user?.tenant_name || null,
-        whatsapp: tenant.whatsapp?.trim() || companyBranding.whatsapp?.trim() || null,
-      };
-      setCompanyBranding(latest);
+      whatsapp = tenant.whatsapp?.trim() || whatsapp;
     } catch {
-      // Keep the latest branding already available in the modal.
+      // Keep the WhatsApp contact already loaded in the modal.
     }
-    return {
-      ...latest,
-      // The share artwork should use the commercial WhatsApp saved in Settings.
-      whatsapp: latest.whatsapp?.trim() || null,
-    };
+    return { whatsapp };
   };
 
   const getProposalText = () => {
