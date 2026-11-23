@@ -21,7 +21,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-[#080C14] text-[#E2E8F0] bg-ambient-grid flex flex-col font-sans">
       {isAuthenticated && !isLoginPage && !isPublicCatalog && <Navbar />}
-      <main className={isPublicCatalog ? "flex-1" : "flex-1 pb-8"}>
+      <main className={isPublicCatalog ? "flex-1" : "flex-1 pb-8 md:ml-64"}>
         {children}
       </main>
     </div>
