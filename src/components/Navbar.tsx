@@ -94,11 +94,11 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[100] bg-[#090E1A]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-[100] bg-[#090E1A]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)] md:fixed md:inset-y-0 md:left-0 md:right-auto md:w-64 md:h-screen md:overflow-y-auto md:border-b-0 md:border-r">
+      <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 md:px-4 md:h-full">
+        <div className="flex items-center justify-between h-16 md:h-full md:flex-col md:items-stretch md:justify-start">
           {/* Brand Logo matching BizNext polygon icon style */}
-          <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
+          <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1 md:flex-col md:items-stretch md:gap-0 md:flex-none">
             <NavLink to="/" className="flex items-center gap-3 group">
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white shadow-[0_0_20px_rgba(0,102,255,0.5)] group-hover:shadow-[0_0_28px_rgba(0,194,255,0.8)] transition-all overflow-hidden">
                 {brand.logo ? (
@@ -125,12 +125,12 @@ export const Navbar: React.FC = () => {
             </NavLink>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-1 pl-4 border-l border-white/10">
+            <nav className="hidden md:flex md:flex-col md:items-stretch gap-1 md:space-x-0 md:pl-0 md:pt-4 md:mt-4 md:border-l-0 md:border-t md:border-white/10">
               <NavLink
                 to="/"
                 end
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                       : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
@@ -144,7 +144,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/machines"
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                       : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
@@ -158,7 +158,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/pipeline"
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                       : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
@@ -172,7 +172,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/leads"
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                       : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
@@ -186,7 +186,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/agenda"
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${isActive
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${isActive
                     ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                     : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'}`
                 }
@@ -198,7 +198,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/settings"
                 className={({ isActive }) =>
-                  `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
                     isActive
                       ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
                       : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
@@ -212,13 +212,13 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action Icons & User Info */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0 md:flex-col md:items-stretch md:gap-3 md:mt-auto md:py-4">
             <button onClick={() => setShowMobileMenu(true)} aria-label="Abrir menu" className="md:hidden p-2 rounded-xl text-[#00C2FF] border border-white/10 hover:bg-white/10"><Menu className="w-5 h-5" /></button>
-            <div className="hidden md:flex items-center gap-3"><ThemeToggle />
+            <div className="hidden md:flex items-center justify-between gap-3 md:rounded-xl md:bg-white/[0.04] md:px-3 md:py-2"><span className="text-xs text-gray-300 md:hidden">Tema</span><ThemeToggle />
             <PWAInstallButton /></div>
 
             {/* Follow-up notifications from real leads */}
-            <div className="relative hidden md:block">
+            <div className="relative hidden md:block md:w-full">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 rounded-xl text-gray-300 hover:text-white hover:bg-white/[0.06] transition-colors border border-white/5"
@@ -262,7 +262,7 @@ export const Navbar: React.FC = () => {
             </div>
             {/* User Profile Pill */}
             {user && (
-              <div className="hidden md:flex items-center gap-2 pl-3 border-l border-white/10">
+              <div className="hidden md:flex items-center gap-2 pl-3 border-l border-white/10 md:border-l-0 md:border-t md:pt-3">
                 <div className="flex flex-col items-end text-right hidden sm:flex">
                   <span className="text-xs font-bold text-white truncate max-w-[140px]">
                     {user.name}
