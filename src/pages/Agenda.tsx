@@ -64,12 +64,47 @@ export const Agenda: React.FC = () => {
       <section className="glass-card border border-white/10 rounded-3xl p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3 pb-4 border-b border-white/10"><div><p className="text-[10px] uppercase tracking-widest text-[#00C2FF] font-bold">Programação do dia</p><h2 className="text-xl font-extrabold text-white mt-1">{formatDate(selectedDate)}</h2><p className="text-xs text-gray-400 mt-1">{selectedEvents.length} compromisso(s)</p></div><button onClick={openNew} className="p-2 rounded-xl bg-[#0066FF]/20 text-[#00C2FF] hover:bg-[#0066FF]/35" aria-label="Adicionar compromisso"><Plus className="w-5 h-5"/></button></div>
         <div className="space-y-3 mt-4 max-h-[540px] overflow-y-auto pr-1">
-          {selectedEvents.length===0?<div className="py-12 text-center"><CalendarCheck className="w-10 h-10 mx-auto text-gray-600 mb-3"/><p className="text-sm font-semibold text-gray-300">Dia livre</p><p className="text-xs text-gray-500 mt-1">Nenhum compromisso agendado.</p><button onClick={openNew} className="mt-4 text-xs text-[#00C2FF] font-bold hover:underline">Agendar neste dia</button></div>:selectedEvents.map((event:any)=><article key={event.id} className={`p-4 rounded-2xl border ${event.done?'border-emerald-500/20 bg-emerald-500/5':'border-white/10 bg-white/5'}`}>
-            <div className="flex gap-3"><div className={`w-1 rounded-full self-stretch ${event.kind==='Follow-up'?'bg-amber-400':'bg-[#00C2FF]'}`}/><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-2"><h3 className={`font-bold text-sm ${event.done?'text-gray-400 line-through':'text-white'}`}>{event.title}</h3>{!event.id.startsWith('lead-')&&<div className="flex gap-1 shrink-0"><button onClick={()=>editItem(event)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400" aria-label="Editar"><Pencil className="w-3.5 h-3.5"/></button><button onClick={()=>remove(event)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-300" aria-label="Excluir"><Trash2 className="w-3.5 h-3.5"/></button></div>}</div>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[11px] text-gray-400"><span className="flex items-center gap-1"><Clock3 className="w-3 h-3 text-[#00C2FF]"/>{event.time||'Sem horário'}</span>{event.client&&<span className="flex items-center gap-1"><UserRound className="w-3 h-3"/>{event.client}</span>}{event.location&&<span className="flex items-center gap-1"><MapPin className="w-3 h-3"/>{event.location}</span>}</div>
-              {event.notes&&<p className="text-xs text-gray-400 mt-2 leading-relaxed">{event.notes}</p>}
-              {event.id.startsWith('lead-')?<span className="inline-block mt-3 text-[10px] px-2 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Follow-up do cadastro de clientes</span>:<button onClick={()=>toggleDone(event)} className={`mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border ${event.done?'text-emerald-300 border-emerald-500/20 bg-emerald-500/10':'text-gray-300 border-white/10 hover:bg-white/5'}`}><CheckCircle2 className="w-3.5 h-3.5"/>{event.done?'Concluído':'Marcar como concluído'}</button>}
-            </div></div></article>)}
+          {selectedEvents.length === 0 ? (
+            <div className="py-12 text-center">
+              <CalendarCheck className="w-10 h-10 mx-auto text-gray-600 mb-3" />
+              <p className="text-sm font-semibold text-gray-300">Dia livre</p>
+              <p className="text-xs text-gray-500 mt-1">Nenhum compromisso agendado.</p>
+              <button onClick={openNew} className="mt-4 text-xs text-[#00C2FF] font-bold hover:underline">Agendar neste dia</button>
+            </div>
+          ) : selectedEvents.map((event: any) => (
+            <article
+              key={event.id}
+              className={`p-4 rounded-2xl border ${event.done ? "border-emerald-500/20 bg-emerald-500/5" : "border-white/10 bg-white/5"}`}
+            >
+              <div className="flex gap-3">
+                <div className={`w-1 rounded-full self-stretch ${event.kind === "Follow-up" ? "bg-amber-400" : "bg-[#00C2FF]"}`} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className={`font-bold text-sm ${event.done ? "text-gray-400 line-through" : "text-white"}`}>{event.title}</h3>
+                    {!event.id.startsWith("lead-") && (
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => editItem(event)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400" aria-label="Editar"><Pencil className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => remove(event)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-300" aria-label="Excluir"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[11px] text-gray-400">
+                    <span className="flex items-center gap-1"><Clock3 className="w-3 h-3 text-[#00C2FF]" />{event.time || "Sem horário"}</span>
+                    {event.client && <span className="flex items-center gap-1"><UserRound className="w-3 h-3" />{event.client}</span>}
+                    {event.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.location}</span>}
+                  </div>
+                  {event.notes && <p className="text-xs text-gray-400 mt-2 leading-relaxed">{event.notes}</p>}
+                  {event.id.startsWith("lead-") ? (
+                    <span className="inline-block mt-3 text-[10px] px-2 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Follow-up do cadastro de clientes</span>
+                  ) : (
+                    <button onClick={() => toggleDone(event)} className={`mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border ${event.done ? "text-emerald-300 border-emerald-500/20 bg-emerald-500/10" : "text-gray-300 border-white/10 hover:bg-white/5"}`}>
+                      <CheckCircle2 className="w-3.5 h-3.5" />{event.done ? "Concluído" : "Marcar como concluído"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </div>
