@@ -68,55 +68,6 @@ function wrapText(
  * white machine details directly over the photo, and no information panels.
  * Company branding/contact details are intentionally omitted from the artwork.
  */
-function drawTexFitasLogo(ctx: CanvasRenderingContext2D): void {
-  // Clean two-color brand mark: compact half-gear close to the wordmark.
-  const blue = '#145A8D';
-  const green = '#20A464';
-  const cx = 146;
-  const cy = 82;
-  const outer = 39;
-  const inner = 31;
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.24)';
-  ctx.shadowBlur = 3;
-  ctx.shadowOffsetY = 1;
-  ctx.fillStyle = blue;
-  ctx.beginPath();
-  // Half gear silhouette, with small angular teeth along its upper arc.
-  for (let i = 0; i <= 36; i++) {
-    const angle = Math.PI - (Math.PI * i / 36);
-    const tooth = i % 3 === 0 || i % 3 === 1 ? outer : inner;
-    const radius = i % 6 === 0 || i % 6 === 1 ? outer + 5 : tooth;
-    const x = cx + Math.cos(angle) * radius;
-    const y = cy - Math.sin(angle) * radius;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.lineTo(cx + outer, cy + 2);
-  ctx.lineTo(cx - outer, cy + 2);
-  ctx.closePath();
-  ctx.fill();
-  ctx.shadowColor = 'transparent';
-
-  // Simple inner arc gives the gear a recognizable textile/industrial mark.
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.arc(cx, cy + 5, 23, Math.PI, 0);
-  ctx.stroke();
-
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-  ctx.font = '800 54px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = blue;
-  ctx.fillText('Tex', 48, 122);
-  const texWidth = ctx.measureText('Tex').width;
-  ctx.fillStyle = green;
-  ctx.fillText('Fitas', 48 + texWidth - 2, 122);
-  ctx.restore();
-}
-
 function drawWhatsAppIcon(ctx: CanvasRenderingContext2D, x: number, y: number): void {
   const size = 42;
   const cx = x + size / 2;
@@ -245,8 +196,6 @@ export async function generateFichaCardCanvas(
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, width, height);
 
-  // Use the approved compact two-color TexFitas logo on every shared card.
-  drawTexFitasLogo(ctx);
 
   const left = 58;
   const maxWidth = width - left * 2;
