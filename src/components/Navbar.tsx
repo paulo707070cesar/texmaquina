@@ -199,7 +199,8 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action Icons & User Info */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button onClick={() => setShowMobileMenu(true)} aria-label="Abrir menu" className="md:hidden p-2 rounded-xl text-[#00C2FF] border border-white/10 hover:bg-white/10"><Menu className="w-5 h-5" /></button>
             <ThemeToggle />
             <PWAInstallButton />
 
