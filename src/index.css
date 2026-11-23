@@ -107,3 +107,21 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #00C2FF;
 }
+
+/* Accessible light theme, selected from the navigation toggle */
+:root[data-theme="light"] body { background: #f4f7fb !important; color: #172033 !important; }
+:root[data-theme="light"] .min-h-screen.bg-\[\#080C14\] { background-color: #f4f7fb !important; color: #172033 !important; }
+:root[data-theme="light"] .bg-ambient-grid {
+  background-image: radial-gradient(at 0% 0%, rgba(0,102,255,.07) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(0,194,255,.08) 0px, transparent 50%) !important;
+}
+:root[data-theme="light"] [class*="bg-[#"] { background-color: #ffffff !important; }
+:root[data-theme="light"] [class*="text-white"], :root[data-theme="light"] [class*="text-gray-"], :root[data-theme="light"] [class*="text-slate-"] { color: #273449 !important; }
+:root[data-theme="light"] [class*="border-white/"] { border-color: rgba(30,55,90,.13) !important; }
+:root[data-theme="light"] .glass-card { background: rgba(255,255,255,.92) !important; border-color: #dce5f0 !important; box-shadow: 0 8px 28px rgba(26,54,93,.08) !important; }
+:root[data-theme="light"] .glass-input { background: #fff !important; color: #172033 !important; border-color: #d2dce9 !important; }
+:root[data-theme="light"] header { background: rgba(255,255,255,.92) !important; border-color: #e0e7f0 !important; box-shadow: 0 4px 24px rgba(26,54,93,.08) !important; }
+:root[data-theme="light"] .btn-electric,
+:root[data-theme="light"] [class*="from-[#0066FF]"] { color: #fff !important; }
+:root[data-theme="light"] .theme-toggle { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+:root[data-theme="light"] ::-webkit-scrollbar-track { background: #edf2f8; }
+:root[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c2cede; }
