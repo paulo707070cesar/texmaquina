@@ -201,11 +201,11 @@ export const Navbar: React.FC = () => {
           {/* Right Action Icons & User Info */}
           <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <button onClick={() => setShowMobileMenu(true)} aria-label="Abrir menu" className="md:hidden p-2 rounded-xl text-[#00C2FF] border border-white/10 hover:bg-white/10"><Menu className="w-5 h-5" /></button>
-            <ThemeToggle />
-            <PWAInstallButton />
+            <div className="hidden md:flex items-center gap-3"><ThemeToggle />
+            <PWAInstallButton /></div>
 
             {/* Follow-up notifications from real leads */}
-            <div className="relative">
+            <div className="relative hidden md:block">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 rounded-xl text-gray-300 hover:text-white hover:bg-white/[0.06] transition-colors border border-white/5"
@@ -249,7 +249,7 @@ export const Navbar: React.FC = () => {
             </div>
             {/* User Profile Pill */}
             {user && (
-              <div className="flex items-center gap-2 pl-3 border-l border-white/10">
+              <div className="hidden md:flex items-center gap-2 pl-3 border-l border-white/10">
                 <div className="flex flex-col items-end text-right hidden sm:flex">
                   <span className="text-xs font-bold text-white truncate max-w-[140px]">
                     {user.name}
@@ -296,7 +296,15 @@ export const Navbar: React.FC = () => {
                 </NavLink>
               ))}
             </nav>
-            <div className="mt-auto pt-4 border-t border-white/10 text-[11px] text-gray-400">Menu lateral adaptado para celular</div>
+            <div className="space-y-2 border-t border-white/10 pt-4">
+              <p className="px-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">Ações e preferências</p>
+              <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5"><span className="text-sm font-semibold text-gray-200">Tema</span><ThemeToggle /></div>
+              <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5"><span className="text-sm font-semibold text-gray-200">Instalar aplicativo</span><PWAInstallButton /></div>
+              <button onClick={() => setShowNotifications(!showNotifications)} className="w-full flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-3 text-sm font-semibold text-gray-200 hover:bg-white/[0.08]"><span className="flex items-center gap-3"><Bell className="w-5 h-5 text-[#00C2FF]"/>Acompanhamentos</span><span className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-black text-[#090E1A]">{followUps.length}</span></button>
+              {showNotifications && <div className="rounded-xl border border-white/10 bg-[#060B14] p-3 max-h-48 overflow-y-auto">{notificationsLoading ? <p className="text-xs text-gray-400">Carregando...</p> : followUps.length === 0 ? <p className="text-xs text-gray-400">Nenhum acompanhamento vencido ou para hoje.</p> : followUps.slice(0,6).map((lead) => <div key={lead.id} className="py-2 border-b border-white/5 last:border-0"><p className="text-xs font-semibold text-white">{lead.client_name}</p><p className="text-[10px] text-gray-400">{lead.follow_up_date ? formatFollowUpDate(lead.follow_up_date) : ''} · {lead.client_phone}</p></div>)}<button onClick={() => {setShowMobileMenu(false); setShowNotifications(false); navigate('/leads');}} className="mt-2 w-full rounded-lg bg-blue-600/20 py-2 text-xs font-bold text-[#00C2FF]">Abrir clientes</button></div>}
+              {user && <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2.5"><div className="min-w-0"><p className="text-sm font-bold text-white truncate">{user.name}</p><p className="text-[10px] text-gray-400 truncate">{user.tenant_name}</p></div><button onClick={() => {setShowMobileMenu(false); handleLogout();}} aria-label="Sair" className="p-2 rounded-lg text-red-300 hover:bg-red-500/10"><LogOut className="w-5 h-5"/></button></div>}
+            </div>
+            <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-gray-500">TexMachina · Menu mobile</div>
           </aside>
         </div>
       )}
