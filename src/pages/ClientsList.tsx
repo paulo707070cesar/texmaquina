@@ -201,8 +201,8 @@ export const ClientsList: React.FC = () => {
               ].map(([label, value]) => <div key={label} className="rounded-xl bg-white/[0.04] border border-white/5 p-3"><p className="text-[10px] uppercase tracking-wide text-gray-400">{label}</p><p className="text-white font-semibold mt-1 break-words">{value}</p></div>)}
               <div className="rounded-xl bg-white/[0.04] border border-white/5 p-3 sm:col-span-2"><p className="text-[10px] uppercase tracking-wide text-gray-400">Anotações / informações cadastradas</p><p className="text-white mt-1 whitespace-pre-wrap break-words">{selectedLead.notes?.trim() || 'Nenhuma anotação cadastrada.'}</p></div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 mt-5">
-              <a href={`https://wa.me/${selectedLead.client_phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold"><MessageSquare className="w-4 h-4" /> WhatsApp</a>
+            <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] gap-3 mt-5 items-stretch">
+              <a href={selectedLead.client_phone ? `https://wa.me/${selectedLead.client_phone.replace(/\D/g, '')}` : undefined} target="_blank" rel="noopener noreferrer" className="w-full min-w-0 h-12 sm:h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold whitespace-nowrap"><MessageSquare className="w-4 h-4" /> WhatsApp</a>
               <button onClick={() => { const id = selectedLead.id; setSelectedLead(null); handleDelete(id); }} className="h-11 px-4 rounded-xl border border-red-500/30 text-red-300 hover:bg-red-500/10 text-sm font-bold"><Trash2 className="w-4 h-4 inline mr-2" />Excluir</button>
             </div>
           </section>
