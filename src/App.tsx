@@ -9,6 +9,7 @@ import { Machines } from './pages/Machines';
 import { Pipeline } from './pages/Pipeline';
 import { ClientsList } from './pages/ClientsList';
 import { Agenda } from './pages/Agenda';
+import { Tasks } from './pages/Tasks';
 import { Settings } from './pages/Settings';
 import { PublicCatalog } from './pages/PublicCatalog';
 
@@ -79,6 +80,24 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Agenda />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/tarefas"
+              element={
+                <ProtectedRoute>
+                  <Tasks />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/tarefas/metas"
+              element={
+                <ProtectedRoute>
+                  <Tasks />
                 </ProtectedRoute>
               }
             />
