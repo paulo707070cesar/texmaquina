@@ -192,11 +192,7 @@ export async function generateFichaCardCanvas(
   y += 52;
 
   const details: string[] = [];
-  details.push(machine.status === 'disponivel'
-    ? 'Disponibilidade: disponível para negociação'
-    : machine.status === 'manutencao'
-      ? 'Disponibilidade: em manutenção'
-      : 'Disponibilidade: vendida');
+  // Availability/status intentionally omitted from the share image.
 
   if (machine.warranty?.trim()) details.push(`Garantia: ${machine.warranty.trim()}`);
   if (machine.origin?.trim()) details.push(`Origem: ${machine.origin.trim()}`);
