@@ -104,7 +104,7 @@ export async function generateFichaCardCanvas(
     });
 
     // Detect and trim solid black letterboxing embedded in uploaded machine photos.
-    // Only crop thick, nearly pure-black horizontal bands; preserve normal dark details.
+    // Crop full-width pure-black letterbox bands, including unusually tall bands; preserve normal dark details.
     let cropTop = 0;
     let cropBottom = img.height;
     try {
@@ -124,9 +124,9 @@ export async function generateFichaCardCanvas(
           return black / scanCanvas.width > 0.96;
         };
         let top = 0;
-        while (top < scanCanvas.height * 0.22 && rowIsBlack(top)) top++;
+        while (top < scanCanvas.height * 0.48 && rowIsBlack(top)) top++;
         let bottom = scanCanvas.height - 1;
-        while (bottom > scanCanvas.height * 0.78 && rowIsBlack(bottom)) bottom--;
+        while (bottom > scanCanvas.height * 0.52 && rowIsBlack(bottom)) bottom--;
         if (top > 8) cropTop = Math.round(top * img.height / scanCanvas.height);
         if (scanCanvas.height - 1 - bottom > 8) {
           cropBottom = Math.round((bottom + 1) * img.height / scanCanvas.height);
