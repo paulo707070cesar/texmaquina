@@ -416,7 +416,7 @@ export const Machines: React.FC = () => {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {machines.map((machine) => {
             const isSold = machine.status === 'vendido';
 
@@ -426,7 +426,7 @@ export const Machines: React.FC = () => {
                 className="w-full glass-card glass-card-hover rounded-3xl overflow-hidden flex flex-col group"
               >
                 {/* Image Header with Industrial Tags */}
-                <div className="relative w-full h-52 bg-[#0c1424] overflow-hidden">
+                <div className="relative w-full h-64 sm:h-72 bg-[#0c1424] overflow-hidden">
                   <img
                     src={machine.image_url}
                     alt={machine.name}
@@ -503,7 +503,7 @@ export const Machines: React.FC = () => {
                 </div>
 
                 {/* Card Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+                <div className="p-4 flex-1 flex flex-col justify-between gap-2.5">
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-bold text-[#00C2FF] uppercase tracking-wider">
@@ -520,8 +520,8 @@ export const Machines: React.FC = () => {
                     </p>
 
                     {/* Telemetry Micro Grid */}
-                    <div className="grid grid-cols-3 gap-2 mt-3.5">
-                      <div className="bg-white/[0.04] border border-white/5 p-2 rounded-xl flex flex-col">
+                    <div className="grid grid-cols-3 gap-1.5 mt-2.5">
+                      <div className="bg-white/[0.04] border border-white/5 p-1.5 sm:p-2 rounded-lg flex flex-col">
                         <span className="text-[9px] text-gray-400 uppercase font-semibold">Status</span>
                         <span className="text-xs font-bold text-white capitalize truncate mt-0.5">
                           {machine.status}
@@ -542,14 +542,14 @@ export const Machines: React.FC = () => {
                     </div>
 
                     {/* Description preview */}
-                    <p className="text-xs text-gray-400 line-clamp-2 mt-3 bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+                    <p className="text-[11px] text-gray-400 line-clamp-2 mt-2 bg-white/[0.02] p-2 rounded-lg border border-white/5">
                       {machine.description || 'Equipamento inspecionado com laudo industrial completo.'}
                     </p>
                   </div>
 
                   {/* Price & Location */}
-                  <div className="pt-3 border-t border-white/10">
-                    <div className="flex items-baseline justify-between mb-3">
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="flex items-baseline justify-between mb-2">
                       <div>
                         <span className="text-[10px] uppercase font-bold text-gray-400 block">
                           Investimento: {machine.payment_type === 'financiado' ? 'FINAME / BNDES' : machine.payment_type === 'conforme_analise' ? 'Financiamento conforme análise' : 'À Vista'}
@@ -564,52 +564,34 @@ export const Machines: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Action Buttons Row */}
-                    <div className="flex flex-col gap-2">
+                    {/* Action buttons arranged horizontally */}
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => handleContactSeller(machine)}
-                        className="w-full h-10 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-colors"
+                        className="min-w-0 h-10 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold transition-colors"
                       >
-                        <Phone className="w-4 h-4" />
-                        <span>Contatar vendedor</span>
+                        <Phone className="w-4 h-4 shrink-0" />
+                        <span className="truncate">Contatar vendedor</span>
                       </button>
-                      <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => setSelectedMachineForSpecs(machine)}
-                        className="flex-1 h-10 btn-electric text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(0,102,255,0.3)]"
+                        className="min-w-0 h-10 px-2 btn-electric text-[11px] sm:text-xs font-bold rounded-xl flex items-center justify-center gap-1.5"
                       >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>Ficha Técnica</span>
+                        <FileText className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">Ficha Técnica</span>
                       </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(machine)}
-                        title="Editar máquina"
-                        className="w-10 h-10 bg-white/[0.05] hover:bg-white/[0.10] text-gray-300 hover:text-white border border-white/10 rounded-xl flex items-center justify-center transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setMachineToDelete(machine)}
-                        title="Excluir máquina"
-                        className="w-10 h-10 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleShare(machine)}
-                        title="Compartilhar Ficha Técnica & Imagem no WhatsApp"
-                        className="w-10 h-10 bg-white/[0.05] hover:bg-[#0066FF]/20 text-[#00C2FF] hover:border-[#00C2FF] border border-[#00C2FF]/30 rounded-xl flex items-center justify-center transition-all shadow-[0_0_10px_rgba(0,194,255,0.15)]"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
+                      <div className="col-span-2 grid grid-cols-3 gap-2">
+                        <button type="button" onClick={() => handleOpenEdit(machine)} title="Editar máquina" aria-label="Editar máquina" className="h-9 bg-white/[0.05] hover:bg-white/[0.10] text-gray-300 hover:text-white border border-white/10 rounded-lg flex items-center justify-center">
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button type="button" onClick={() => setMachineToDelete(machine)} title="Excluir máquina" aria-label="Excluir máquina" className="h-9 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg flex items-center justify-center">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button type="button" onClick={() => handleShare(machine)} title="Compartilhar Ficha Técnica & Imagem no WhatsApp" aria-label="Compartilhar ficha" className="h-9 bg-white/[0.05] hover:bg-[#0066FF]/20 text-[#00C2FF] border border-[#00C2FF]/30 rounded-lg flex items-center justify-center">
+                          <Share2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
