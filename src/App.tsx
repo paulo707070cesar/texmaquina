@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navbar } from './components/Navbar';
-import { BottomNav } from './components/BottomNav';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Machines } from './pages/Machines';
@@ -21,10 +20,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen bg-[#080C14] text-[#E2E8F0] bg-ambient-grid flex flex-col font-sans">
       {isAuthenticated && !isLoginPage && !isPublicCatalog && <Navbar />}
-      <main className={isPublicCatalog ? "flex-1" : "flex-1 pb-20 md:pb-8"}>
+      <main className={isPublicCatalog ? "flex-1" : "flex-1 pb-8"}>
         {children}
       </main>
-      {isAuthenticated && !isLoginPage && !isPublicCatalog && <BottomNav />}
     </div>
   );
 };
