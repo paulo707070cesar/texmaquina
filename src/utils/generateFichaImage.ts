@@ -76,7 +76,7 @@ export interface FichaBranding {
 
 export async function generateFichaCardCanvas(
   machine: Machine,
-  _branding: FichaBranding = {}
+  branding: FichaBranding = {}
 ): Promise<HTMLCanvasElement> {
   const canvas = document.createElement('canvas');
   const width = 1200;
@@ -162,9 +162,31 @@ export async function generateFichaCardCanvas(
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, width, height);
 
+  // Settings logo is a transparent PNG: draw directly, with no plate/background.
+  if (branding.logoUrl?.trim()) {
+    try {
+      const logo = new Image();
+      logo.crossOrigin = 'anonymous';
+      logo.src = branding.logoUrl.trim();
+      await new Promise<void>((resolve, reject) => {
+        if (logo.complete && logo.naturalWidth > 0) resolve();
+        else {
+          logo.onload = () => resolve();
+          logo.onerror = () => reject(new Error('Não foi possível carregar a logo.'));
+        }
+      });
+      const maxLogoWidth = 270;
+      const maxLogoHeight = 125;
+      const scale = Math.min(maxLogoWidth / logo.naturalWidth, maxLogoHeight / logo.naturalHeight);
+      ctx.drawImage(logo, 54, 48, logo.naturalWidth * scale, logo.naturalHeight * scale);
+    } catch {
+      // Logo failure must not prevent sharing the machine image.
+    }
+  }
+
   const left = 58;
   const maxWidth = width - left * 2;
-  let y = height - 420;
+  let y = height - 570;
 
   // Text stays white and directly over the photograph, with a small shadow
   // to remain readable across different machine and warehouse backgrounds.
@@ -223,6 +245,22 @@ export async function generateFichaCardCanvas(
       drawFittedText(ctx, line, left, y, maxWidth, '400', 29, 22);
       y += 41;
     });
+  }
+
+  // WhatsApp contact from the company's Settings, shown under the machine details.
+  if (branding.whatsapp?.trim()) {
+    y += 18;
+    ctx.fillStyle = '#FFFFFF';
+    drawFittedText(
+      ctx,
+      `Entre em contato pelo WhatsApp ${branding.whatsapp.trim()}`,
+      left,
+      y,
+      maxWidth,
+      '700',
+      30,
+      22
+    );
   }
 
   ctx.restore();
