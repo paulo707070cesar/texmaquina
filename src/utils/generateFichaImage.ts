@@ -103,8 +103,6 @@ function drawWhatsAppIcon(ctx: CanvasRenderingContext2D, x: number, y: number): 
 }
 
 export interface FichaBranding {
-  logoUrl?: string | null;
-  companyName?: string | null;
   whatsapp?: string | null;
 }
 
