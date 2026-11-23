@@ -68,6 +68,89 @@ function wrapText(
  * white machine details directly over the photo, and no information panels.
  * Company branding/contact details are intentionally omitted from the artwork.
  */
+function drawTexFitasLogo(ctx: CanvasRenderingContext2D): void {
+  // Clean two-color brand mark: compact half-gear close to the wordmark.
+  const blue = '#145A8D';
+  const green = '#20A464';
+  const cx = 146;
+  const cy = 82;
+  const outer = 39;
+  const inner = 31;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.24)';
+  ctx.shadowBlur = 3;
+  ctx.shadowOffsetY = 1;
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  // Half gear silhouette, with small angular teeth along its upper arc.
+  for (let i = 0; i <= 36; i++) {
+    const angle = Math.PI - (Math.PI * i / 36);
+    const tooth = i % 3 === 0 || i % 3 === 1 ? outer : inner;
+    const radius = i % 6 === 0 || i % 6 === 1 ? outer + 5 : tooth;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy - Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.lineTo(cx + outer, cy + 2);
+  ctx.lineTo(cx - outer, cy + 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+
+  // Simple inner arc gives the gear a recognizable textile/industrial mark.
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy + 5, 23, Math.PI, 0);
+  ctx.stroke();
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '800 54px "Plus Jakarta Sans", sans-serif';
+  ctx.fillStyle = blue;
+  ctx.fillText('Tex', 48, 122);
+  const texWidth = ctx.measureText('Tex').width;
+  ctx.fillStyle = green;
+  ctx.fillText('Fitas', 48 + texWidth - 2, 122);
+  ctx.restore();
+}
+
+function drawWhatsAppIcon(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+  const size = 42;
+  const cx = x + size / 2;
+  const cy = y - size / 2 + 4;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+  ctx.shadowBlur = 5;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = '#25D366';
+  ctx.beginPath();
+  ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  // Simplified white WhatsApp handset inside a speech-bubble contour.
+  ctx.beginPath();
+  ctx.moveTo(cx - 11, cy + 10);
+  ctx.lineTo(cx - 14, cy + 15);
+  ctx.lineTo(cx - 5, cy + 13);
+  ctx.moveTo(cx - 8, cy - 11);
+  ctx.quadraticCurveTo(cx - 13, cy - 5, cx - 7, cy + 2);
+  ctx.quadraticCurveTo(cx + 1, cy + 11, cx + 9, cy + 5);
+  ctx.quadraticCurveTo(cx + 12, cy + 2, cx + 7, cy - 2);
+  ctx.lineTo(cx + 2, cy - 5);
+  ctx.lineTo(cx - 2, cy - 1);
+  ctx.quadraticCurveTo(cx - 6, cy - 4, cx - 4, cy - 8);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+}
+
 export interface FichaBranding {
   logoUrl?: string | null;
   companyName?: string | null;
@@ -162,89 +245,8 @@ export async function generateFichaCardCanvas(
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, width, height);
 
-  // Settings logo is a transparent PNG: draw directly, with no plate/background.
-  if (branding.logoUrl?.trim()) {
-    try {
-      const logo = new Image();
-      logo.crossOrigin = 'anonymous';
-      logo.src = branding.logoUrl.trim();
-      await new Promise<void>((resolve, reject) => {
-        if (logo.complete && logo.naturalWidth > 0) resolve();
-        else {
-          logo.onload = () => resolve();
-          logo.onerror = () => reject(new Error('Não foi possível carregar a logo.'));
-        }
-      });
-      // If the uploaded logo is an opaque PNG/JPG with white pixels, remove
-      // the white matte while preserving colored artwork and soft antialiased edges.
-      let logoSource: CanvasImageSource = logo;
-      try {
-        const logoCanvas = document.createElement('canvas');
-        logoCanvas.width = logo.naturalWidth;
-        logoCanvas.height = logo.naturalHeight;
-        const logoCtx = logoCanvas.getContext('2d', { willReadFrequently: true });
-        if (logoCtx) {
-          logoCtx.drawImage(logo, 0, 0);
-          const imageData = logoCtx.getImageData(0, 0, logoCanvas.width, logoCanvas.height);
-          const data = imageData.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i + 1], b = data[i + 2];
-            // Pure/light neutral white background: transparent. Smoothly fade
-            // near-white edge pixels so a white halo does not remain around logo.
-            if (r > 242 && g > 242 && b > 242) {
-              // Remove white matte/background.
-              data[i + 3] = 0;
-            } else if (r > 218 && g > 218 && b > 218) {
-              const whiteness = Math.min(r, g, b);
-              const fade = (242 - whiteness) / (242 - 218);
-              data[i + 3] = Math.round(data[i + 3] * Math.max(0, Math.min(1, fade)));
-            } else {
-              // Turn neutral gray logo elements into white, while preserving
-              // saturated brand colors. Neutral pixels have very low channel spread.
-              const spread = Math.max(r, g, b) - Math.min(r, g, b);
-              const brightness = (r + g + b) / 3;
-              if (spread <= 32 && brightness >= 65 && brightness <= 218) {
-                data[i] = 255;
-                data[i + 1] = 255;
-                data[i + 2] = 255;
-              }
-            }
-          }
-          logoCtx.putImageData(imageData, 0, 0);
-
-          // Trim the lower tagline/text area from the logo artwork.
-          // The settings logo is displayed as its upper brand mark/name only.
-          const croppedHeight = Math.max(1, Math.round(logoCanvas.height * 0.72));
-          const cleanLogoCanvas = document.createElement('canvas');
-          cleanLogoCanvas.width = logoCanvas.width;
-          cleanLogoCanvas.height = croppedHeight;
-          const cleanLogoCtx = cleanLogoCanvas.getContext('2d');
-          if (cleanLogoCtx) {
-            cleanLogoCtx.drawImage(
-              logoCanvas,
-              0, 0, logoCanvas.width, croppedHeight,
-              0, 0, cleanLogoCanvas.width, cleanLogoCanvas.height
-            );
-            logoSource = cleanLogoCanvas;
-          } else {
-            logoSource = logoCanvas;
-          }
-        }
-      } catch {
-        // If canvas pixel access is blocked by cross-origin restrictions,
-        // retain and draw the original transparent PNG.
-      }
-
-      const logoSourceWidth = logoSource instanceof HTMLCanvasElement ? logoSource.width : logo.naturalWidth;
-      const logoSourceHeight = logoSource instanceof HTMLCanvasElement ? logoSource.height : logo.naturalHeight;
-      const maxLogoWidth = 270;
-      const maxLogoHeight = 125;
-      const scale = Math.min(maxLogoWidth / logoSourceWidth, maxLogoHeight / logoSourceHeight);
-      ctx.drawImage(logoSource, 54, 48, logoSourceWidth * scale, logoSourceHeight * scale);
-    } catch {
-      // Logo failure must not prevent sharing the machine image.
-    }
-  }
+  // Use the approved compact two-color TexFitas logo on every shared card.
+  drawTexFitasLogo(ctx);
 
   const left = 58;
   const maxWidth = width - left * 2;
@@ -309,19 +311,20 @@ export async function generateFichaCardCanvas(
     });
   }
 
-  // WhatsApp contact from the company's Settings, shown under the machine details.
+  // WhatsApp contact and recognizable green icon on the shared photo.
   if (branding.whatsapp?.trim()) {
     y += 18;
+    drawWhatsAppIcon(ctx, left, y - 4);
     ctx.fillStyle = '#FFFFFF';
     drawFittedText(
       ctx,
       `Entre em contato pelo WhatsApp ${branding.whatsapp.trim()}`,
-      left,
+      left + 54,
       y,
-      maxWidth,
+      maxWidth - 54,
       '700',
       30,
-      22
+      20
     );
   }
 
