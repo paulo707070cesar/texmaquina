@@ -16,7 +16,8 @@ export const Tasks: React.FC = () => {
   const tenant = String(user?.tenant_id || user?.tenant_name || user?.id || 'local');
   const location = useLocation();
   const goalsPage = location.pathname.endsWith('/metas');
-  const [tasks,setTasks] = useState<DailyTask[]>([]);\n  const [loadedTenant,setLoadedTenant] = useState<string|null>(null);
+  const [tasks,setTasks] = useState<DailyTask[]>([]);
+  const [loadedTenant,setLoadedTenant] = useState<string|null>(null);
   const [goals,setGoals] = useState<Goal[]>([]);
   const [taskTitle,setTaskTitle] = useState('');
   const [taskDay,setTaskDay] = useState(todayWeekday);
