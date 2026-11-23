@@ -67,7 +67,8 @@ export const ShareFichaModal: React.FC<ShareFichaModalProps> = ({ machine, onClo
     }
     return {
       ...latest,
-      whatsapp: machine.seller_contact_phone?.trim() || latest.whatsapp?.trim() || null,
+      // The share artwork should use the commercial WhatsApp saved in Settings.
+      whatsapp: latest.whatsapp?.trim() || null,
     };
   };
 
