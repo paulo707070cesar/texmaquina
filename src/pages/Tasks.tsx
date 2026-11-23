@@ -16,7 +16,7 @@ export const Tasks: React.FC = () => {
   const tenant = String(user?.tenant_id || user?.tenant_name || user?.id || 'local');
   const location = useLocation();
   const goalsPage = location.pathname.endsWith('/metas');
-  const [tasks,setTasks] = useState<DailyTask[]>([]);\n  const [storageLoaded,setStorageLoaded] = useState(false);
+  const [tasks,setTasks] = useState<DailyTask[]>([]);\n  const [loadedTenant,setLoadedTenant] = useState<string|null>(null);
   const [goals,setGoals] = useState<Goal[]>([]);
   const [taskTitle,setTaskTitle] = useState('');
   const [taskDay,setTaskDay] = useState(todayWeekday);
@@ -27,9 +27,9 @@ export const Tasks: React.FC = () => {
   const [goalNotes,setGoalNotes] = useState('');
   const [editingGoal,setEditingGoal] = useState<string|null>(null);
 
-  useEffect(()=>{try{setTasks(JSON.parse(localStorage.getItem(taskKey(tenant))||'[]'));}catch{setTasks([])};try{setGoals(JSON.parse(localStorage.getItem(goalKey(tenant))||'[]'));}catch{setGoals([])}setStorageLoaded(true);},[tenant]);
-  useEffect(()=>{if(storageLoaded)localStorage.setItem(taskKey(tenant),JSON.stringify(tasks));},[tasks,tenant,storageLoaded]);
-  useEffect(()=>{if(storageLoaded)localStorage.setItem(goalKey(tenant),JSON.stringify(goals));},[goals,tenant,storageLoaded]);
+  useEffect(()=>{try{setTasks(JSON.parse(localStorage.getItem(taskKey(tenant))||'[]'));}catch{setTasks([])};try{setGoals(JSON.parse(localStorage.getItem(goalKey(tenant))||'[]'));}catch{setGoals([])}setLoadedTenant(tenant);},[tenant]);
+  useEffect(()=>{if(loadedTenant===tenant)localStorage.setItem(taskKey(tenant),JSON.stringify(tasks));},[tasks,tenant,loadedTenant]);
+  useEffect(()=>{if(loadedTenant===tenant)localStorage.setItem(goalKey(tenant),JSON.stringify(goals));},[goals,tenant,loadedTenant]);
 
   const dayTasks=useMemo(()=>tasks.filter(t=>t.weekday===taskDay).sort((a,b)=>a.time.localeCompare(b.time)),[tasks,taskDay]);
   const completed=tasks.filter(t=>t.done).length;
