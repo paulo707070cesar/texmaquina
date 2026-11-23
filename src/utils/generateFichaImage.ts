@@ -103,10 +103,48 @@ export async function generateFichaCardCanvas(
       }
     });
 
-    const ratio = Math.max(width / img.width, height / img.height);
+    // Detect and trim solid black letterboxing embedded in uploaded machine photos.
+    // Only crop thick, nearly pure-black horizontal bands; preserve normal dark details.
+    let cropTop = 0;
+    let cropBottom = img.height;
+    try {
+      const scanCanvas = document.createElement('canvas');
+      scanCanvas.width = Math.min(img.width, 360);
+      scanCanvas.height = Math.min(img.height, 900);
+      const scanCtx = scanCanvas.getContext('2d', { willReadFrequently: true });
+      if (scanCtx) {
+        scanCtx.drawImage(img, 0, 0, scanCanvas.width, scanCanvas.height);
+        const pixels = scanCtx.getImageData(0, 0, scanCanvas.width, scanCanvas.height).data;
+        const rowIsBlack = (row: number) => {
+          let black = 0;
+          for (let x = 0; x < scanCanvas.width; x++) {
+            const i = (row * scanCanvas.width + x) * 4;
+            if (pixels[i] < 18 && pixels[i + 1] < 18 && pixels[i + 2] < 18) black++;
+          }
+          return black / scanCanvas.width > 0.96;
+        };
+        let top = 0;
+        while (top < scanCanvas.height * 0.22 && rowIsBlack(top)) top++;
+        let bottom = scanCanvas.height - 1;
+        while (bottom > scanCanvas.height * 0.78 && rowIsBlack(bottom)) bottom--;
+        if (top > 8) cropTop = Math.round(top * img.height / scanCanvas.height);
+        if (scanCanvas.height - 1 - bottom > 8) {
+          cropBottom = Math.round((bottom + 1) * img.height / scanCanvas.height);
+        }
+      }
+    } catch {
+      // If cross-origin image pixels cannot be inspected, render the original photo normally.
+    }
+
+    const sourceHeight = Math.max(1, cropBottom - cropTop);
+    const ratio = Math.max(width / img.width, height / sourceHeight);
     const drawWidth = img.width * ratio;
-    const drawHeight = img.height * ratio;
-    ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+    const drawHeight = sourceHeight * ratio;
+    ctx.drawImage(
+      img,
+      0, cropTop, img.width, sourceHeight,
+      (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight
+    );
   } catch {
     // Keep a neutral fallback if the image URL cannot be loaded.
     ctx.fillStyle = '#17202b';
