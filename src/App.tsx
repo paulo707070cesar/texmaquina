@@ -10,6 +10,7 @@ import { Pipeline } from './pages/Pipeline';
 import { ClientsList } from './pages/ClientsList';
 import { Agenda } from './pages/Agenda';
 import { Tasks } from './pages/Tasks';
+import { BibleDevotional } from './pages/BibleDevotional';
 import { Settings } from './pages/Settings';
 import { PublicCatalog } from './pages/PublicCatalog';
 
@@ -98,6 +99,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Tasks />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/biblia"
+              element={
+                <ProtectedRoute>
+                  <BibleDevotional />
                 </ProtectedRoute>
               }
             />
