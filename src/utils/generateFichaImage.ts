@@ -175,10 +175,42 @@ export async function generateFichaCardCanvas(
           logo.onerror = () => reject(new Error('Não foi possível carregar a logo.'));
         }
       });
+      // If the uploaded logo is an opaque PNG/JPG with white pixels, remove
+      // the white matte while preserving colored artwork and soft antialiased edges.
+      let logoSource: CanvasImageSource = logo;
+      try {
+        const logoCanvas = document.createElement('canvas');
+        logoCanvas.width = logo.naturalWidth;
+        logoCanvas.height = logo.naturalHeight;
+        const logoCtx = logoCanvas.getContext('2d', { willReadFrequently: true });
+        if (logoCtx) {
+          logoCtx.drawImage(logo, 0, 0);
+          const imageData = logoCtx.getImageData(0, 0, logoCanvas.width, logoCanvas.height);
+          const data = imageData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            // Pure/light neutral white background: transparent. Smoothly fade
+            // near-white edge pixels so a white halo does not remain around logo.
+            if (r > 242 && g > 242 && b > 242) {
+              data[i + 3] = 0;
+            } else if (r > 218 && g > 218 && b > 218) {
+              const whiteness = Math.min(r, g, b);
+              const fade = (242 - whiteness) / (242 - 218);
+              data[i + 3] = Math.round(data[i + 3] * Math.max(0, Math.min(1, fade)));
+            }
+          }
+          logoCtx.putImageData(imageData, 0, 0);
+          logoSource = logoCanvas;
+        }
+      } catch {
+        // If canvas pixel access is blocked by cross-origin restrictions,
+        // retain and draw the original transparent PNG.
+      }
+
       const maxLogoWidth = 270;
       const maxLogoHeight = 125;
       const scale = Math.min(maxLogoWidth / logo.naturalWidth, maxLogoHeight / logo.naturalHeight);
-      ctx.drawImage(logo, 54, 48, logo.naturalWidth * scale, logo.naturalHeight * scale);
+      ctx.drawImage(logoSource, 54, 48, logo.naturalWidth * scale, logo.naturalHeight * scale);
     } catch {
       // Logo failure must not prevent sharing the machine image.
     }
