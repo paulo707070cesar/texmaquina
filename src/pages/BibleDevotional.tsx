@@ -41,14 +41,14 @@ export const BibleDevotional: React.FC = () => {
   <header className="flex flex-col gap-3"><div className="flex items-center gap-3"><div className="rounded-2xl bg-amber-400/15 p-3 text-amber-300"><BookOpen className="w-7 h-7"/></div><div><p className="text-xs uppercase tracking-[.22em] text-amber-300 font-bold">Palavra e fé</p><h1 className="text-3xl md:text-4xl font-black text-white">Bíblia & Devocional</h1></div></div><p className="text-slate-400 max-w-2xl">Um momento diário para ler a Palavra, compreender sua mensagem e levar a fé para as atitudes de hoje.</p></header>
   <section className="rounded-3xl border border-amber-300/20 bg-gradient-to-br from-[#182238] via-[#111b2e] to-[#17182b] p-6 md:p-9">
    <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-widest"><Sparkles className="w-4 h-4"/>Devocional de hoje · {today.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
-   <h2 className="mt-4 text-2xl md:text-3xl font-extrabold text-white">{devotional.title}</h2>
-   <p className="mt-3 text-amber-100/90 font-semibold">{devotional.ref}</p>
-   <blockquote className="mt-5 border-l-2 border-amber-300 pl-4 text-lg md:text-xl text-white leading-relaxed">“{devotional.verse}”</blockquote>
-   <h3 className="mt-7 text-sm font-bold uppercase tracking-wider text-amber-200">Entenda o devocional</h3><p className="mt-2 leading-7 text-slate-200">{devotional.explanation}</p>
-   <h3 className="mt-5 text-sm font-bold uppercase tracking-wider text-amber-200">Pratique hoje</h3><p className="mt-2 leading-7 text-slate-200">{devotional.practice}</p>
-   <div className="mt-5 rounded-2xl bg-black/20 p-4"><p className="text-xs font-bold uppercase tracking-wider text-amber-200">Oração</p><p className="mt-2 italic leading-7 text-slate-100">{devotional.prayer}</p></div>
+   <h2 style={{color:"#FFFFFF"}} className="mt-4 text-2xl md:text-3xl font-extrabold">{devotional.title}</h2>
+   <p style={{color:"#FFE7A3"}} className="mt-3 font-semibold">{devotional.ref}</p>
+   <blockquote style={{color:"#FFFFFF"}} className="mt-5 border-l-2 border-amber-300 pl-4 text-lg md:text-xl leading-relaxed">“{devotional.verse}”</blockquote>
+   <h3 style={{color:"#FFE082"}} className="mt-7 text-sm font-bold uppercase tracking-wider">Entenda o devocional</h3><p style={{color:"#F1F5F9"}} className="mt-2 leading-7">{devotional.explanation}</p>
+   <h3 style={{color:"#FFE082"}} className="mt-5 text-sm font-bold uppercase tracking-wider">Pratique hoje</h3><p style={{color:"#F1F5F9"}} className="mt-2 leading-7">{devotional.practice}</p>
+   <div className="mt-5 rounded-2xl bg-black/20 p-4"><p style={{color:"#FFE082"}} className="text-xs font-bold uppercase tracking-wider">Oração</p><p style={{color:"#FFFFFF"}} className="mt-2 italic leading-7">{devotional.prayer}</p></div>
    <div className="mt-6 flex flex-wrap gap-3"><button onClick={goToRef} className="rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-amber-200">Ler passagem na Bíblia</button><button onClick={markDone} className="rounded-xl border border-white/15 px-4 py-3 text-sm font-bold text-white hover:bg-white/10 flex items-center gap-2">{completed.includes(dateKey)?<CheckCircle2 className="w-4 h-4 text-emerald-300"/>:<Heart className="w-4 h-4"/>}{completed.includes(dateKey)?'Devocional concluído':'Marcar como concluído'}</button></div>
-   <p className="mt-4 text-xs text-slate-400">A reflexão é um conteúdo de apoio ao estudo; leia também o contexto do capítulo.</p>
+   <p style={{color:"#CBD5E1"}} className="mt-4 text-xs">A reflexão é um conteúdo de apoio ao estudo; leia também o contexto do capítulo.</p>
   </section>
   <section id="bible-reader" className="rounded-3xl border border-white/10 bg-[#0d1524] p-5 md:p-7">
    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"><div><div className="flex items-center gap-2 text-cyan-300 text-xs font-bold uppercase tracking-widest"><BookOpen className="w-4 h-4"/>Leitor bíblico</div><h2 className="mt-2 text-2xl font-extrabold text-white">Leia a Bíblia</h2></div>
