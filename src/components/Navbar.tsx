@@ -329,7 +329,8 @@ export const Navbar: React.FC = () => {
                 {to:"/pipeline",label:"Funil (Kanban)",Icon:Kanban},
                 {to:"/leads",label:"Clientes & Leads",Icon:Users},
                 {to:"/agenda",label:"Agenda",Icon:CalendarDays},
-                {to:"/tarefas",label:"Tarefas & Metas",Icon:ListTodo},\n                {to:"/biblia",label:"Bíblia & Devocional",Icon:BookOpen},
+                {to:"/tarefas",label:"Tarefas & Metas",Icon:ListTodo},
+                {to:"/biblia",label:"Bíblia & Devocional",Icon:BookOpen},
                 {to:"/settings",label:"Configurações",Icon:Settings},
               ].map(({to,label,Icon}) => (
                 <NavLink key={to} to={to} end={to==="/"} onClick={() => setShowMobileMenu(false)} className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${isActive ? "bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white" : "text-gray-300 hover:bg-white/[0.06]"}`}>
