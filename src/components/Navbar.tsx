@@ -93,11 +93,11 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#090E1A]/85 backdrop-blur-2xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+    <header className="sticky top-0 z-[100] bg-[#090E1A]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo matching BizNext polygon icon style */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
             <NavLink to="/" className="flex items-center gap-3 group">
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white shadow-[0_0_20px_rgba(0,102,255,0.5)] group-hover:shadow-[0_0_28px_rgba(0,194,255,0.8)] transition-all overflow-hidden">
                 {brand.logo ? (
@@ -110,14 +110,14 @@ export const Navbar: React.FC = () => {
 
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-lg tracking-tight text-white group-hover:text-[#00C2FF] transition-colors">
+                  <span className="font-display font-black text-base sm:text-lg tracking-tight text-white group-hover:text-[#00C2FF] transition-colors truncate max-w-[38vw] sm:max-w-none">
                     {brand.name}
                   </span>
-                  <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-[#0066FF]/20 border border-[#00C2FF]/40 text-[#00C2FF] shadow-[0_0_10px_rgba(0,194,255,0.2)]">
+                  <span className="hidden sm:inline-flex text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-[#0066FF]/20 border border-[#00C2FF]/40 text-[#00C2FF] shadow-[0_0_10px_rgba(0,194,255,0.2)]">
                     Enterprise
                   </span>
                 </div>
-                <span className="text-[10px] font-semibold text-gray-400 tracking-wider uppercase">
+                <span className="hidden sm:block text-[10px] font-semibold text-gray-400 tracking-wider uppercase">
                   Textile Machinery OS
                 </span>
               </div>
@@ -199,7 +199,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action Icons & User Info */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <button onClick={() => setShowMobileMenu(true)} aria-label="Abrir menu" className="md:hidden p-2 rounded-xl text-[#00C2FF] border border-white/10 hover:bg-white/10"><Menu className="w-5 h-5" /></button>
             <ThemeToggle />
             <PWAInstallButton />
@@ -277,8 +277,8 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
       {showMobileMenu && (
-        <div className="md:hidden fixed inset-0 z-[90] bg-black/65 backdrop-blur-sm" onClick={() => setShowMobileMenu(false)}>
-          <aside className="absolute left-0 top-0 bottom-0 w-[min(19rem,85vw)] bg-[#0B1322] border-r border-white/10 shadow-2xl p-5 flex flex-col" onClick={(event) => event.stopPropagation()}>
+        <div className="md:hidden fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm" onClick={() => setShowMobileMenu(false)}>
+          <aside className="absolute left-0 top-0 bottom-0 h-[100dvh] w-[min(19rem,85vw)] overflow-y-auto bg-[#0B1322] border-r border-white/10 shadow-2xl p-5 flex flex-col" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between pb-5 border-b border-white/10">
               <div className="font-display font-extrabold text-white text-lg">{brand.name}<p className="text-[10px] text-gray-400 tracking-wider uppercase mt-1">Menu principal</p></div>
               <button onClick={() => setShowMobileMenu(false)} aria-label="Fechar menu" className="p-2 rounded-xl text-gray-300 hover:bg-white/10"><X className="w-5 h-5" /></button>
