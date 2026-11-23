@@ -180,10 +180,10 @@ export async function generateFichaCardCanvas(
   y += 58;
 
   if (machine.model?.trim()) {
-    ctx.font = '600 32px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '600 36px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#FFFFFF';
-    drawFittedText(ctx, `Modelo: ${machine.model.trim()}`, left, y, maxWidth, '600', 32, 22);
-    y += 48;
+    drawFittedText(ctx, `Modelo: ${machine.model.trim()}`, left, y, maxWidth, '600', 36, 25);
+    y += 52;
   }
 
   ctx.fillStyle = '#FFFFFF';
@@ -198,32 +198,24 @@ export async function generateFichaCardCanvas(
       ? 'Disponibilidade: em manutenção'
       : 'Disponibilidade: vendida');
 
-  if (machine.payment_type === 'financiado') {
-    details.push('Pagamento: possibilidade de FINAME / BNDES, sujeito à confirmação');
-  } else if (machine.payment_type === 'conforme_analise') {
-    details.push('Pagamento: financiamento sujeito à análise de crédito');
-  } else {
-    details.push('Pagamento: à vista ou transferência');
-  }
-
   if (machine.warranty?.trim()) details.push(`Garantia: ${machine.warranty.trim()}`);
   if (machine.origin?.trim()) details.push(`Origem: ${machine.origin.trim()}`);
 
-  ctx.font = '500 25px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '500 30px "Plus Jakarta Sans", sans-serif';
   ctx.fillStyle = '#FFFFFF';
   for (const detail of details) {
-    drawFittedText(ctx, detail, left, y, maxWidth, '500', 25, 18);
-    y += 38;
+    drawFittedText(ctx, detail, left, y, maxWidth, '500', 30, 22);
+    y += 43;
   }
 
   const description = machine.description?.trim();
   if (description) {
     y += 10;
-    ctx.font = '400 23px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '400 27px "Plus Jakarta Sans", sans-serif';
     const lines = wrapText(ctx, description, maxWidth, 3);
     lines.forEach((line) => {
-      drawFittedText(ctx, line, left, y, maxWidth, '400', 23, 18);
-      y += 33;
+      drawFittedText(ctx, line, left, y, maxWidth, '400', 27, 21);
+      y += 38;
     });
   }
 
