@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 
 import { PWAInstallButton } from './PWAInstallButton';
+import { ThemeToggle } from './ThemeToggle';
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -196,6 +197,7 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & User Info */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <PWAInstallButton />
 
             {/* Follow-up notifications from real leads */}
