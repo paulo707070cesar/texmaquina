@@ -6,6 +6,7 @@ import {
   LayoutDashboard, 
   CalendarDays,
   ListTodo,
+  BookOpen,
   Layers, 
   Kanban, 
   Users, 
@@ -209,6 +210,18 @@ export const Navbar: React.FC = () => {
               </NavLink>
 
               <NavLink
+                to="/biblia"
+                className={({ isActive }) =>
+                  `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${isActive
+                    ? 'bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white shadow-[0_0_15px_rgba(0,102,255,0.4)]'
+                    : 'text-gray-300 hover:text-white hover:bg-white/[0.06]'}`
+                }
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Bíblia & Devocional</span>
+              </NavLink>
+
+              <NavLink
                 to="/settings"
                 className={({ isActive }) =>
                   `w-full px-3.5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 text-left ${
@@ -316,7 +329,7 @@ export const Navbar: React.FC = () => {
                 {to:"/pipeline",label:"Funil (Kanban)",Icon:Kanban},
                 {to:"/leads",label:"Clientes & Leads",Icon:Users},
                 {to:"/agenda",label:"Agenda",Icon:CalendarDays},
-                {to:"/tarefas",label:"Tarefas & Metas",Icon:ListTodo},
+                {to:"/tarefas",label:"Tarefas & Metas",Icon:ListTodo},\n                {to:"/biblia",label:"Bíblia & Devocional",Icon:BookOpen},
                 {to:"/settings",label:"Configurações",Icon:Settings},
               ].map(({to,label,Icon}) => (
                 <NavLink key={to} to={to} end={to==="/"} onClick={() => setShowMobileMenu(false)} className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${isActive ? "bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white" : "text-gray-300 hover:bg-white/[0.06]"}`}>
