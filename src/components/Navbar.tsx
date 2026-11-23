@@ -300,7 +300,8 @@ export const Navbar: React.FC = () => {
                 {to:"/",label:"Dashboard",Icon:LayoutDashboard},
                 {to:"/machines",label:"Estoque",Icon:Layers},
                 {to:"/pipeline",label:"Funil (Kanban)",Icon:Kanban},
-                {to:"/leads",label:"Clientes & Leads",Icon:Users},\n                {to:"/agenda",label:"Agenda",Icon:CalendarDays},
+                {to:"/leads",label:"Clientes & Leads",Icon:Users},
+                {to:"/agenda",label:"Agenda",Icon:CalendarDays},
                 {to:"/settings",label:"Configurações",Icon:Settings},
               ].map(({to,label,Icon}) => (
                 <NavLink key={to} to={to} end={to==="/"} onClick={() => setShowMobileMenu(false)} className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${isActive ? "bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white" : "text-gray-300 hover:bg-white/[0.06]"}`}>
