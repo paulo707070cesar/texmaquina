@@ -12,7 +12,9 @@ import {
   Check, 
   Plus,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  Eye,
+  X
 } from 'lucide-react';
 
 export const ClientsList: React.FC = () => {
@@ -21,6 +23,7 @@ export const ClientsList: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     loadLeads();
@@ -165,126 +168,46 @@ export const ClientsList: React.FC = () => {
         </div>
       </div>
 
-      {/* Table view in dark glass */}
-      <div className="glass-card rounded-3xl border border-white/10 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-white/[0.04] text-[#00C2FF] uppercase font-bold text-[10px] tracking-wider border-b border-white/10">
-                <th className="py-3.5 px-4">Cliente / Contato</th>
-                <th className="py-3.5 px-4">Telefone</th>
-                <th className="py-3.5 px-4">Máquina Vinculada</th>
-                <th className="py-3.5 px-4">Valor Estimado</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Follow-up</th>
-                <th className="py-3.5 px-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-gray-500">
-                    Carregando lista de clientes...
-                  </td>
-                </tr>
-              ) : filteredLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-gray-500">
-                    Nenhum cliente encontrado com os filtros aplicados.
-                  </td>
-                </tr>
-              ) : (
-                filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4">
-                      <span className="font-bold text-white block text-sm">
-                        {lead.client_name}
-                      </span>
-                      {lead.notes && (
-                        <span className="text-[11px] text-gray-400 line-clamp-1 mt-0.5">
-                          {lead.notes}
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap text-gray-300">
-                      <span className="font-medium">{lead.client_phone}</span>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      {lead.machine_name ? (
-                        <div>
-                          <span className="font-semibold text-[#00C2FF] block truncate max-w-[200px]">
-                            {lead.machine_name}
-                          </span>
-                          <span className="text-[10px] text-gray-400 block truncate max-w-[200px]">
-                            {lead.machine_model}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-500 italic">Interesse Geral</span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-bold text-white tabular-nums whitespace-nowrap">
-                      {formatCurrency(lead.machine_price)}
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span
-                        className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                          lead.status === 'fechado'
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                            : lead.status === 'negociacao'
-                            ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-                            : lead.status === 'orcamento'
-                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                            : 'bg-[#0066FF]/20 text-[#38BDF8] border-[#00C2FF]/30'
-                        }`}
-                      >
-                        {lead.status}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap text-gray-400">
-                      {lead.follow_up_date ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                          <Calendar className="w-3 h-3" />
-                          <span>{lead.follow_up_date}</span>
-                        </span>
-                      ) : (
-                        <span className="text-gray-500">Sem agendamento</span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2">
-                        <a
-                          href={`https://wa.me/${lead.client_phone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="h-8 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all"
-                        >
-                          <span className="material-symbols-outlined text-[14px]">chat</span>
-                          <span>WhatsApp</span>
-                        </a>
-
-                        <button
-                          onClick={() => handleDelete(lead.id)}
-                          className="p-1.5 text-gray-500 hover:text-red-400 rounded-lg hover:bg-white/[0.05]"
-                          title="Excluir"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Mobile-friendly client list: name and details button only */}
+      <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <div className="divide-y divide-white/5">
+          {loading ? <div className="py-12 text-center text-gray-400 text-sm">Carregando clientes...</div>
+          : filteredLeads.length === 0 ? <div className="py-12 text-center text-gray-400 text-sm">Nenhum cliente encontrado.</div>
+          : filteredLeads.map((lead) => (
+            <div key={lead.id} className="flex items-center justify-between gap-3 px-4 py-4 hover:bg-white/[0.03]">
+              <p className="font-bold text-white text-sm min-w-0 truncate">{lead.client_name}</p>
+              <button onClick={() => setSelectedLead(lead)} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0066FF]/20 border border-[#00C2FF]/30 text-[#00C2FF] text-xs font-bold"><Eye className="w-4 h-4" /> Ver informações</button>
+            </div>
+          ))}
         </div>
       </div>
+
+      {selectedLead && (
+        <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setSelectedLead(null)}>
+          <section role="dialog" aria-modal="true" aria-labelledby="lead-detail-title" className="w-full sm:max-w-xl max-h-[90dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#0E1626] border border-white/10 shadow-2xl p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
+            <header className="flex items-start justify-between gap-3 mb-5">
+              <div className="min-w-0"><p className="text-[10px] uppercase tracking-widest font-bold text-[#00C2FF]">Ficha do cliente</p><h2 id="lead-detail-title" className="text-xl font-extrabold text-white mt-1 break-words">{selectedLead.client_name}</h2></div>
+              <button onClick={() => setSelectedLead(null)} aria-label="Fechar" className="p-2 rounded-xl text-gray-300 hover:bg-white/10"><X className="w-5 h-5" /></button>
+            </header>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {[
+                ['Telefone', selectedLead.client_phone || 'Não informado'],
+                ['Status', selectedLead.status || 'Não informado'],
+                ['Máquina vinculada', selectedLead.machine_name || 'Interesse geral'],
+                ['Modelo', selectedLead.machine_model || 'Não informado'],
+                ['Valor estimado', formatCurrency(selectedLead.machine_price)],
+                ['Follow-up', selectedLead.follow_up_date || 'Sem agendamento'],
+                ['Data de cadastro', selectedLead.created_at ? new Date(selectedLead.created_at).toLocaleString('pt-BR') : 'Não disponível'],
+              ].map(([label, value]) => <div key={label} className="rounded-xl bg-white/[0.04] border border-white/5 p-3"><p className="text-[10px] uppercase tracking-wide text-gray-400">{label}</p><p className="text-white font-semibold mt-1 break-words">{value}</p></div>)}
+              <div className="rounded-xl bg-white/[0.04] border border-white/5 p-3 sm:col-span-2"><p className="text-[10px] uppercase tracking-wide text-gray-400">Anotações / informações cadastradas</p><p className="text-white mt-1 whitespace-pre-wrap break-words">{selectedLead.notes?.trim() || 'Nenhuma anotação cadastrada.'}</p></div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mt-5">
+              <a href={`https://wa.me/${selectedLead.client_phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold"><MessageSquare className="w-4 h-4" /> WhatsApp</a>
+              <button onClick={() => { const id = selectedLead.id; setSelectedLead(null); handleDelete(id); }} className="h-11 px-4 rounded-xl border border-red-500/30 text-red-300 hover:bg-red-500/10 text-sm font-bold"><Trash2 className="w-4 h-4 inline mr-2" />Excluir</button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
