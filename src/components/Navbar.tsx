@@ -13,7 +13,9 @@ import {
   UserCheck,
   Sparkles,
   ArrowRight,
-  Settings
+  Settings,
+  Menu,
+  X
 } from 'lucide-react';
 
 import { PWAInstallButton } from './PWAInstallButton';
@@ -23,6 +25,7 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [followUps, setFollowUps] = useState<Lead[]>([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [brand, setBrand] = useState<{ name: string; logo: string | null }>({
@@ -272,6 +275,30 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       </div>
+      {showMobileMenu && (
+        <div className="md:hidden fixed inset-0 z-[90] bg-black/65 backdrop-blur-sm" onClick={() => setShowMobileMenu(false)}>
+          <aside className="absolute left-0 top-0 bottom-0 w-[min(19rem,85vw)] bg-[#0B1322] border-r border-white/10 shadow-2xl p-5 flex flex-col" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between pb-5 border-b border-white/10">
+              <div className="font-display font-extrabold text-white text-lg">{brand.name}<p className="text-[10px] text-gray-400 tracking-wider uppercase mt-1">Menu principal</p></div>
+              <button onClick={() => setShowMobileMenu(false)} aria-label="Fechar menu" className="p-2 rounded-xl text-gray-300 hover:bg-white/10"><X className="w-5 h-5" /></button>
+            </div>
+            <nav className="flex flex-col gap-2 py-5">
+              {[
+                {to:"/",label:"Dashboard",Icon:LayoutDashboard},
+                {to:"/machines",label:"Estoque",Icon:Layers},
+                {to:"/pipeline",label:"Funil (Kanban)",Icon:Kanban},
+                {to:"/leads",label:"Clientes & Leads",Icon:Users},
+                {to:"/settings",label:"Configurações",Icon:Settings},
+              ].map(({to,label,Icon}) => (
+                <NavLink key={to} to={to} end={to==="/"} onClick={() => setShowMobileMenu(false)} className={({isActive}) => `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${isActive ? "bg-gradient-to-r from-[#0066FF] to-[#00C2FF] text-white" : "text-gray-300 hover:bg-white/[0.06]"}`}>
+                  <Icon className="w-5 h-5" />{label}
+                </NavLink>
+              ))}
+            </nav>
+            <div className="mt-auto pt-4 border-t border-white/10 text-[11px] text-gray-400">Menu lateral adaptado para celular</div>
+          </aside>
+        </div>
+      )}
     </header>
   );
 };
