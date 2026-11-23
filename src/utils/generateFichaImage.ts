@@ -179,17 +179,27 @@ export async function generateFichaCardCanvas(
   drawFittedText(ctx, machine.name || 'Máquina têxtil', left, y, maxWidth, '800', 58, 34);
   y += 58;
 
+  // Reference-inspired layout: white typography and a yellow vertical accent.
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 1;
+  ctx.shadowOffsetY = 2;
+  ctx.fillStyle = '#FACC15';
+  ctx.fillRect(left - 18, y - 34, 7, 132);
+  ctx.restore();
+
   if (machine.model?.trim()) {
-    ctx.font = '600 36px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '600 38px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#FFFFFF';
-    drawFittedText(ctx, `Modelo: ${machine.model.trim()}`, left, y, maxWidth, '600', 36, 25);
-    y += 52;
+    drawFittedText(ctx, `Modelo: ${machine.model.trim()}`, left, y, maxWidth, '600', 38, 26);
+    y += 54;
   }
 
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '800 48px "Plus Jakarta Sans", sans-serif';
-  drawFittedText(ctx, formatCurrency(machine.price), left, y, maxWidth, '800', 48, 30);
-  y += 52;
+  ctx.font = '800 58px "Plus Jakarta Sans", sans-serif';
+  drawFittedText(ctx, formatCurrency(machine.price), left, y, maxWidth, '800', 58, 34);
+  y += 64;
 
   const details: string[] = [];
   // Availability/status intentionally omitted from the share image.
@@ -197,21 +207,21 @@ export async function generateFichaCardCanvas(
   if (machine.warranty?.trim()) details.push(`Garantia: ${machine.warranty.trim()}`);
   if (machine.origin?.trim()) details.push(`Origem: ${machine.origin.trim()}`);
 
-  ctx.font = '500 30px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '500 32px "Plus Jakarta Sans", sans-serif';
   ctx.fillStyle = '#FFFFFF';
   for (const detail of details) {
-    drawFittedText(ctx, detail, left, y, maxWidth, '500', 30, 22);
-    y += 43;
+    drawFittedText(ctx, detail, left, y, maxWidth, '500', 32, 23);
+    y += 46;
   }
 
   const description = machine.description?.trim();
   if (description) {
     y += 10;
-    ctx.font = '400 27px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '400 29px "Plus Jakarta Sans", sans-serif';
     const lines = wrapText(ctx, description, maxWidth, 3);
     lines.forEach((line) => {
-      drawFittedText(ctx, line, left, y, maxWidth, '400', 27, 21);
-      y += 38;
+      drawFittedText(ctx, line, left, y, maxWidth, '400', 29, 22);
+      y += 41;
     });
   }
 
